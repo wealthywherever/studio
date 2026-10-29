@@ -48,3 +48,11 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 ## Software
 
 - Wherever Frames (the Editor's timeline) runs HyperFrames by HeyGen (https://github.com/heygen-com/hyperframes), licensed under the Apache License 2.0 (https://www.apache.org/licenses/LICENSE-2.0). HyperFrames is installed from npm on the buyer's computer and is not modified; Edit Wherever applies its own colour theme and logo when it shows the HyperFrames Studio. HyperFrames is a trademark of its owner; Edit Wherever is not affiliated with or endorsed by HeyGen.
+
+## Offline models (downloaded by setup from their publishers' hosts, not modified, run on the buyer's computer)
+
+- onnxruntime-node 1.21.1 by Microsoft (https://github.com/microsoft/onnxruntime), MIT License, installed from npm.
+- MODNet (person cutouts) by Zhanghan Ke et al. (https://github.com/ZHKKKe/MODNet), Apache License 2.0; ONNX export from https://huggingface.co/Xenova/modnet.
+- BiRefNet lite (subject cutouts) by Peng Zheng et al. (https://github.com/ZhengPeng7/BiRefNet), MIT License (Copyright (c) 2024 ZhengPeng); ONNX export from https://huggingface.co/onnx-community/BiRefNet_lite-ONNX.
+- Depth Anything V2 Small (depth maps) by Lihe Yang et al. (https://github.com/DepthAnything/Depth-Anything-V2), Apache License 2.0 (the Small model only; Base and Large are not used); ONNX export from https://huggingface.co/onnx-community/depth-anything-v2-small.
+- YuNet face detector (https://github.com/opencv/opencv_zoo), MIT License (Copyright (c) 2020 Shiqi Yu); from https://huggingface.co/opencv/face_detection_yunet.

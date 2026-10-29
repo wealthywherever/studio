@@ -1,12 +1,23 @@
 [
   {
+    "version": "0.1.20",
+    "date": "2026-10-29",
+    "title": "Review, export and cutouts",
+    "items": [
+      "Get your video scored out of 10, part by part, with one tap to fix each one",
+      "Make Instagram, TikTok and YouTube Shorts versions, a cover and a caption from any finished video",
+      "Cut a long video into short reels, or make a reel with no filming from an idea or a voice memo",
+      "New cutout moves: Break the Frame, Creed Reveal and Depth Reveal",
+      "Smoother on phones and with a keyboard, and sideways phone clips now come out the right way up"
+    ]
+  },
+  {
     "version": "0.1.19",
     "date": "2026-10-29",
-    "title": "Publish trial reels",
+    "title": "Trials, clearer",
     "items": [
-      "Trials page ready for one-click Instagram trial reel publishing (switches on once Instagram approves our app)",
-      "Views can come back from Instagram on their own to pick the winner",
-      "Claude now points you to the Publish button and never posts from the chat"
+      "Each trial version shows its hook, caption and results side by side",
+      "Copy each caption in one tap when you post the versions yourself"
     ]
   },
   {
@@ -14,50 +25,30 @@
     "date": "2026-10-29",
     "title": "My Styles and Trials",
     "items": [
-      "Save any edit or recreated style to My Styles and reuse it on new clips with one click",
-      "Trials: make 3 hook versions of a video for Instagram trial reels, enter the results, and the studio picks the winner",
-      "New videos lead with the hook type that wins for you"
+      "Love an edit? Save it to My Styles and use it on your next clip with one tap",
+      "Trials: get 3 versions of a video, each with a different hook, to post as Instagram trial reels",
+      "Type in each version's views and the studio suggests the winner"
     ]
   },
   {
     "version": "0.1.17",
     "date": "2026-10-29",
-    "title": "Make this, Learn tab, smoother edits",
+    "title": "One click to Claude",
     "items": [
-      "Make this: one click opens Claude with your Move ready, just press Enter",
-      "New Learn tab with short lessons and Do it now buttons",
+      "Make this opens Claude with your move typed in. Just press Enter",
+      "A Learn page with short guides and Do it now buttons",
       "Library previews start on their best moment",
-      "Sharper edits: better length fitting, clearer captions placement, safer sound levels",
-      "Sound mixer stops with a clear message if a sound file is missing",
-      "Faster, sturdier license server"
-    ]
-  },
-  {
-    "version": "0.1.16",
-    "date": "2026-10-29",
-    "title": "Safer loudness",
-    "items": [
-      "Mixes now leave a little extra room under the peak limit, so uploads never clip",
-      "Risers build into each new section"
+      "Captions sit where people can read them, and sound levels stay safe"
     ]
   },
   {
     "version": "0.1.15",
     "date": "2026-10-29",
-    "title": "Launch-film sound",
+    "title": "Better sound",
     "items": [
-      "Faceless and voiceless videos now get their own sound set, made for each video and tuned to your music's key",
-      "New mixer: every video lands at streaming loudness with no clipped clicks",
-      "Faster pace now means more cuts at the same length",
-      "Animated videos render a quick draft first, then a smooth 60 fps final"
-    ]
-  },
-  {
-    "version": "0.1.14",
-    "date": "2026-10-29",
-    "title": "Updates that find you",
-    "items": [
-      "If automatic updates are off, Claude offers to turn them on (at most once a week)"
+      "Videos without a voice get their own sound set, tuned to your music",
+      "Every video lands at the right loudness for Reels, TikTok and Shorts, with no clipping",
+      "Animated videos come out smooth at 60 fps"
     ]
   },
   {
@@ -65,39 +56,21 @@
     "date": "2026-10-29",
     "title": "A calmer, clearer studio",
     "items": [
-      "Your first video is now one clear step at a time on Home",
-      "Library cards fill their frame and show length, shape and level at a glance",
-      "Show more adds cards without restarting the ones playing",
+      "Your first video is one clear step at a time on Home",
+      "Library cards show length, shape and level at a glance",
       "Brand kit has a save bar and a live preview that stays in view on your phone",
-      "The dashboard opens instantly, then checks your key in the background"
-    ]
-  },
-  {
-    "version": "0.1.12",
-    "date": "2026-10-29",
-    "title": "Example clips load from your key",
-    "items": [
-      "Credited example clips now download once with your key and play from your own computer"
-    ]
-  },
-  {
-    "version": "0.1.11",
-    "date": "2026-10-29",
-    "title": "Example clips load from your key",
-    "items": [
-      "Credited example clips now download once with your key and play from your own computer"
+      "The studio opens instantly"
     ]
   },
   {
     "version": "0.1.10",
     "date": "2026-10-29",
-    "title": "Smoother setup and a sharper library",
+    "title": "Smoother setup",
     "items": [
-      "Hearts on library cards now save with one tap, and your Saved count stays in sync",
-      "Setup checks for Node.js 22, tells you how long it takes, and says when a restart is all you need",
-      "On a phone, filters fold away and every button is big enough to tap",
-      "Search the style picker, and see a plain summary before the full prompt",
-      "If the internet drops, the Studio offers Try again instead of a blank page"
+      "Save moves with one tap on the heart",
+      "Setup tells you how long it takes, and when a restart is all you need",
+      "On a phone, filters fold away and buttons are easy to tap",
+      "If the internet drops, the studio offers Try again instead of a blank page"
     ]
   },
   {
@@ -105,18 +78,17 @@
     "date": "2026-10-29",
     "title": "Livelier library",
     "items": [
-      "The library opens on moving previews: 3D worlds, kinetic type, characters and motion design first",
-      "Previews play only while you can see them, so the page stays fast",
-      "Moves without a preview yet sit below the ones you can watch"
+      "The library opens on moving previews",
+      "Previews play only while you can see them, so the page stays fast"
     ]
   },
   {
     "version": "0.1.8",
     "date": "2026-10-29",
-    "title": "Reel sound pack",
+    "title": "Reels sound pack",
     "items": [
-      "New Reels sound pack: camera shutter, pop, whoosh, riser, impact, glitch, cash and more (33 sounds, free for commercial use)",
-      "Sound effects now follow the example's cuts"
+      "A Reels sound pack: shutter, pop, whoosh, riser, impact, glitch, cash and more, free for commercial use",
+      "Sound effects land on the cuts"
     ]
   },
   {
@@ -124,20 +96,18 @@
     "date": "2026-10-29",
     "title": "Trending reel styles",
     "items": [
-      "14 new moves from top trending Instagram reels: vlog montages, viral reveals and creator looks, each with its real example"
+      "14 new moves from trending Instagram reels: vlog montages, viral reveals and creator looks, each with its real example"
     ]
   },
   {
     "version": "0.1.6",
     "date": "2026-10-29",
-    "title": "Smarter builds",
+    "title": "Smarter edits",
     "items": [
-      "Fills in any blanks in a move from your brand kit, or asks you",
+      "Any blanks in a move are filled from your brand kit, or Claude asks you",
       "Your voiceover sets the length and timing",
-      "Never fetches footage or music you didn't give it",
-      "Cleans up screen recordings and other people's marks on library clips",
-      "Quality check now catches empty frames and accepts planned exits",
-      "You can set a bigger minimum text size and your own loudness target"
+      "Only uses footage and music you gave it",
+      "You can ask for bigger text or a different loudness"
     ]
   },
   {
@@ -145,9 +115,7 @@
     "date": "2026-10-29",
     "title": "Real creator styles",
     "items": [
-      "Creator Styles rebuilt from top Instagram editors: Adrian Per, Jessi Jean, Jessica Carter, Meg Kilgore, Sam Kolder, Peter McKinnon and Karen X",
-      "Every style was checked frame by frame; caption-only edits were left out",
-      "Old TikTok examples removed from Viral Formats, Vlog Edits and Creator Styles"
+      "Creator Styles rebuilt from top Instagram editors, each checked frame by frame"
     ]
   },
   {
@@ -155,7 +123,7 @@
     "date": "2026-10-28",
     "title": "Real logos",
     "items": [
-      "Videos about a real app or website now show its real logo, taken from the real page, never redrawn"
+      "Videos about a real app or website show its real logo"
     ]
   },
   {
@@ -163,10 +131,9 @@
     "date": "2026-10-28",
     "title": "Closer to the original",
     "items": [
-      "Studies the example in more detail: more frames, motion around each cut, and what it says",
-      "Keeps the example's shape (landscape, square or tall) and handles several clips at once",
-      "iPhone HDR clips no longer look washed out; silent clips are kept as b-roll",
-      "Uses real apps, websites and names, never made-up ones"
+      "Recreate studies the example in more detail, so your version comes out closer",
+      "Keeps the example's shape (tall, square or wide) and works with several clips at once",
+      "iPhone HDR clips no longer look washed out"
     ]
   },
   {
@@ -175,8 +142,7 @@
     "title": "Updates that find you",
     "items": [
       "An Update ready card on Home when there's a new version",
-      "Say 'update Edit Wherever' and Claude updates it in the same chat",
-      "Setup now offers to turn on automatic updates"
+      "Say \"update Edit Wherever\" and Claude updates it in the same chat"
     ]
   },
   {
@@ -184,10 +150,10 @@
     "date": "2026-10-28",
     "title": "Studio opening",
     "items": [
-      "Personal setup + brand kit",
-      "Edit Wherever moves library with live previews",
-      "Edit, Create and Repurpose engines",
-      "7 videos in 7 days challenge"
+      "Your own setup and brand kit",
+      "A library of moves with live previews",
+      "Edit your footage, create from one sentence, or repurpose a long video",
+      "The 7 videos in 7 days challenge"
     ]
   }
 ]

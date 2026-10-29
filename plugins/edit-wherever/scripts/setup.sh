@@ -3,7 +3,7 @@
 # Safe to run again: it skips what is already installed. Prints one plain line per step.
 HOME2="${EDIT_WHEREVER_HOME:-$HOME/Edit Wherever}"; TOOLS="$HOME2/.studio/tools"; LOG="$HOME2/.studio/setup-log.txt"
 mkdir -p "$TOOLS/bin" "$HOME2/Inbox" "$HOME2/Projects" "$HOME2/Brand"; export PATH="$TOOLS/bin:$TOOLS/node/bin:$PATH"
-say() { echo "[$1/6] $2"; echo "$(date -u +%FT%T) $2" >> "$LOG"; }
+say() { echo "[$1/7] $2"; echo "$(date -u +%FT%T) $2" >> "$LOG"; }
 has() { command -v "$1" >/dev/null 2>&1; }
 HF="hyperframes@0.8.206"   # every flag the studio uses was checked on this version
 INSTALLED=""              # anything new on PATH needs a Claude restart before Claude can see it
@@ -22,17 +22,18 @@ fi
 say 1 "Node.js $(node --version) ready."
 
 say 2 "Checking ffmpeg (cuts, sound, export)..."
-if ! has ffmpeg; then INSTALLED=1
+if ! has ffmpeg || ! has ffprobe; then INSTALLED=1
   if has brew; then brew install ffmpeg >> "$LOG" 2>&1
   else npm install --prefix "$TOOLS" ffmpeg-static ffprobe-static --no-fund --no-audit >> "$LOG" 2>&1
        ln -sf "$TOOLS/node_modules/ffmpeg-static/ffmpeg" "$TOOLS/bin/ffmpeg"
        ln -sf "$(find "$TOOLS/node_modules/ffprobe-static/bin/darwin" -name ffprobe | grep "$NARCH" | head -1)" "$TOOLS/bin/ffprobe"; fi
 fi
-has ffmpeg || { say 2 "FAILED: could not install ffmpeg."; exit 1; }
+{ has ffmpeg && has ffprobe; } || { say 2 "FAILED: could not install ffmpeg."; exit 1; }
 say 2 "ffmpeg ready."
 
 say 3 "Installing HyperFrames (the motion-graphics engine)..."
-has hyperframes || { INSTALLED=1; npm install -g "$HF" --prefix "$TOOLS/node" --no-fund --no-audit >> "$LOG" 2>&1 || npm install -g "$HF" --no-fund --no-audit >> "$LOG" 2>&1; }
+{ has hyperframes && [ "$(hyperframes --version 2>/dev/null | tail -1)" = "${HF#*@}" ]; } || { INSTALLED=1;   # re-run puts back the pinned version
+  npm install -g "$HF" --prefix "$TOOLS/node" --no-fund --no-audit >> "$LOG" 2>&1 || npm install -g "$HF" --no-fund --no-audit >> "$LOG" 2>&1; }
 has hyperframes || { say 3 "FAILED: HyperFrames did not install. See $LOG"; exit 1; }
 say 3 "HyperFrames ready."
 
@@ -43,16 +44,21 @@ say 5 "Downloading the caption model (one time, ~600 MB, runs offline)..."; hype
 hyperframes models list --json 2>/dev/null | grep -q '"engine":"parakeet"[^}]*"installed":true' || { say 5 "FAILED: the caption model did not download. Check your internet and run setup again."; exit 1; }
 say 5 "Caption model ready."
 
+say 6 "Downloading the cutout, depth and face models (one time, ~350 MB, runs offline)..."
+# not fatal: without them only the cutout / depth / face Moves are off, and "fix my studio" retries
+if node "$(dirname "$0")/onnx.mjs" install >> "$LOG" 2>&1; then say 6 "Cutout and depth models ready."; else say 6 "Cutout models skipped (download failed). Everything else works; say fix my studio later to retry."; fi
+
 # optional: lets the studio study the full original of an example post (with sound). Not fatal if it fails.
-if ! has yt-dlp; then INSTALLED=1
+if ! has yt-dlp; then
   if has brew; then brew install yt-dlp >> "$LOG" 2>&1
   else curl -fsSL -o "$TOOLS/bin/yt-dlp" https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp_macos >> "$LOG" 2>&1 && chmod +x "$TOOLS/bin/yt-dlp"; fi
+  has yt-dlp && INSTALLED=1   # only a real install needs the restart
 fi
 has yt-dlp && echo "yt-dlp ready" >> "$LOG" || echo "yt-dlp not installed: examples will use the studio's short clips" >> "$LOG"
 
-say 6 "Testing a 2-second render..."
+say 7 "Testing a 2-second render..."
 # the test video stays in .studio, so it never counts as the buyer's first video; deleted first so an old one can't fake a pass
 OUT="$HOME2/.studio/setup-test.mp4"; rm -f "$OUT"
 T=$(mktemp -d)/ws-test; hyperframes init "$T" --non-interactive --skip-skills >> "$LOG" 2>&1 && (cd "$T" && hyperframes render -o "$OUT" >> "$LOG" 2>&1)
-[ -s "$OUT" ] && { rm -f "$OUT"; say 6 "All set. Your studio can render videos."; } || { if [ -n "$INSTALLED" ]; then echo "RESTART NEEDED: new tools were installed. Quit Claude fully and reopen it, then run setup once more to finish the test."; exit 0; fi; say 6 "Render test did not finish. Reply to your purchase email with the file $LOG attached."; exit 1; }
+[ -s "$OUT" ] && { rm -f "$OUT"; say 7 "All set. Your studio can render videos."; } || { if [ -n "$INSTALLED" ]; then echo "RESTART NEEDED: new tools were installed. Quit Claude fully and reopen it, then run setup once more to finish the test."; exit 0; fi; say 7 "Render test did not finish. Reply to your purchase email with the file $LOG attached."; exit 1; }
 if [ -n "$INSTALLED" ]; then echo "RESTART NEEDED: new tools were installed. Quit Claude fully and reopen it before making a video."; fi

@@ -4,7 +4,7 @@ $ErrorActionPreference = "Continue"
 $Home2 = if ($env:EDIT_WHEREVER_HOME) { $env:EDIT_WHEREVER_HOME } else { Join-Path $env:USERPROFILE "Edit Wherever" }
 $Log = Join-Path $Home2 ".studio\setup-log.txt"
 New-Item -ItemType Directory -Force (Split-Path $Log), (Join-Path $Home2 "Inbox"), (Join-Path $Home2 "Projects"), (Join-Path $Home2 "Brand") | Out-Null
-function Say($n, $t) { Write-Output "[$n/6] $t" ; Add-Content $Log "$(Get-Date -Format s) $t" }
+function Say($n, $t) { Write-Output "[$n/7] $t" ; Add-Content $Log "$(Get-Date -Format s) $t" }
 function Has($c) { [bool](Get-Command $c -ErrorAction SilentlyContinue) }
 function RefreshPath { $env:Path = [Environment]::GetEnvironmentVariable("Path", "Machine") + ";" + [Environment]::GetEnvironmentVariable("Path", "User") }
 $haveWinget = Has winget
@@ -27,7 +27,7 @@ if (-not (Has ffmpeg)) {
 Say 2 "ffmpeg ready."
 
 Say 3 "Installing HyperFrames (the motion-graphics engine)..."
-if (-not (Has hyperframes)) { npm install -g $HF --no-fund --no-audit 2>&1 | Add-Content $Log; RefreshPath; $Installed = $true }
+if (-not (Has hyperframes) -or ((hyperframes --version 2>$null | Select-Object -Last 1) -ne $HF.Split("@")[1])) { npm install -g $HF --no-fund --no-audit 2>&1 | Add-Content $Log; RefreshPath; $Installed = $true }   # re-run puts back the pinned version
 if (-not (Has hyperframes)) { Say 3 "FAILED: HyperFrames did not install. See $Log"; exit 1 }
 Say 3 "HyperFrames ready."
 
@@ -41,16 +41,21 @@ hyperframes models install parakeet 2>&1 | Add-Content $Log
 if ((hyperframes models list --json 2>$null | Out-String) -notmatch '"engine":"parakeet"[^}]*"installed":true') { Say 5 "FAILED: the caption model did not download. Check your internet and run setup again."; exit 1 }
 Say 5 "Caption model ready."
 
+Say 6 "Downloading the cutout, depth and face models (one time, ~350 MB, runs offline)..."
+# not fatal: without them only the cutout / depth / face Moves are off, and "fix my studio" retries
+node (Join-Path $PSScriptRoot "onnx.mjs") install 2>&1 | Add-Content $Log
+if ($LASTEXITCODE -eq 0) { Say 6 "Cutout and depth models ready." } else { Say 6 "Cutout models skipped (download failed). Everything else works; say fix my studio later to retry." }
+
 # optional: lets the studio study the full original of an example post (with sound). Not fatal if it fails.
-if (-not (Has yt-dlp)) { if ($haveWinget) { winget install -e --id yt-dlp.yt-dlp --accept-source-agreements --accept-package-agreements --silent | Out-Null; RefreshPath; $Installed = $true } }
+if (-not (Has yt-dlp)) { if ($haveWinget) { winget install -e --id yt-dlp.yt-dlp --accept-source-agreements --accept-package-agreements --silent | Out-Null; RefreshPath; if (Has yt-dlp) { $Installed = $true } } }   # only a real install needs the restart
 if (Has yt-dlp) { Add-Content $Log "yt-dlp ready" } else { Add-Content $Log "yt-dlp not installed: examples will use the studio's short clips" }
 
-Say 6 "Testing a 2-second render..."
+Say 7 "Testing a 2-second render..."
 # the test video stays in .studio, so it never counts as the buyer's first video; deleted first so an old one can't fake a pass
 $t = Join-Path $env:TEMP "ws-setup-test"; $out = Join-Path $Home2 ".studio\setup-test.mp4"
 Remove-Item -Recurse -Force $t, $out -ErrorAction SilentlyContinue
 hyperframes init $t --non-interactive --skip-skills 2>&1 | Add-Content $Log
 Push-Location $t; hyperframes render -o $out 2>&1 | Add-Content $Log; Pop-Location
-if ((Test-Path $out) -and (Get-Item $out).Length -gt 0) { Remove-Item -Force $out; Say 6 "All set. Your studio can render videos." } elseif ($Installed) { Write-Output "RESTART NEEDED: new tools were installed. Quit Claude fully and reopen it, then run setup once more to finish the test."; exit 0 }   # a fresh install usually just needs the restart
-else { Say 6 "Render test did not finish. Reply to your purchase email with the file $Log attached." ; exit 1 }
+if ((Test-Path $out) -and (Get-Item $out).Length -gt 0) { Remove-Item -Force $out; Say 7 "All set. Your studio can render videos." } elseif ($Installed) { Write-Output "RESTART NEEDED: new tools were installed. Quit Claude fully and reopen it, then run setup once more to finish the test."; exit 0 }   # a fresh install usually just needs the restart
+else { Say 7 "Render test did not finish. Reply to your purchase email with the file $Log attached." ; exit 1 }
 if ($Installed) { Write-Output "RESTART NEEDED: new tools were installed. Quit Claude fully and reopen it before making a video." }
