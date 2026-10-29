@@ -206,7 +206,7 @@ kbd{white-space:nowrap;font:700 12px var(--f-m);padding:2px 7px;border:1px solid
 @media(max-width:480px){#dprev,#dnext{display:none}}
 @media(max-width:760px){.drawer{top:auto;left:0;width:100%;max-height:90vh;border-radius:24px 24px 0 0;transform:translateY(102%);border-left:0}}
 .lft{display:none}
-@media (pointer:coarse),(max-width:860px){.btn,.chip,.seg button,.day,.tchip,.drawer .x,summary,.input,.rvrow{min-height:44px}.btn.sm,.chip{min-width:44px}.seg button{min-width:44px}.fav,.lgrid.sz-xs .fav{width:44px;height:44px}input[type=color]{min-height:44px;min-width:48px}.days{gap:4px}details.more summary{min-height:44px;display:flex;align-items:center}}
+@media (pointer:coarse),(max-width:860px){.btn,.chip,.seg button,.day,.tchip,.drawer .x,summary,.input,.rvrow{min-height:44px}.btn.sm,.chip{min-width:44px}.seg button{min-width:44px}.fav,.lgrid.sz-xs .fav{width:44px;height:44px}input[type=color]{min-height:44px;min-width:48px}.days{gap:4px}.days .day{aspect-ratio:auto;min-width:0}details.more summary{min-height:44px;display:flex;align-items:center}}
 @media(max-width:600px){.lft{display:inline-flex}.ltools{display:none}.ltools.open{display:flex}.lcount{width:auto;margin-left:auto}.lcats{flex-wrap:nowrap!important;overflow-x:auto;scrollbar-width:none;margin-right:-16px!important;padding-right:16px}.lcats .chip{flex:none}}
 #cprev .pv{aspect-ratio:1/1}
 /* toast */
@@ -786,7 +786,7 @@ VIEWS.home = () => {
      <div style="display:flex;gap:10px;margin-top:14px;flex-wrap:wrap"><button class="btn" data-open="inbox">${I.folder} Inbox · ${S.inbox.length}</button><button class="btn" data-open="projects">${I.folder} Projects · ${S.projects.length}</button><button class="btn" data-phone>${I.phone} Add from phone</button>${S.inbox.length > 1 ? `<button class="btn" data-go="batch">${I.make} Edit all my clips</button>` : ""}</div></div></section>
    ${S.projects.length || dnaOK() ? `<section>${dnaCard()}</section>` : ""}
    ${S.licensed ? `<section id="wall" hidden></section>` : ""}
-   <section>${shareCard()}</section>`;
+   ${S.state.first_video ? `<section>${shareCard()}</section>` : ""}`;   // day one is about the first video, not sharing
 };
 VIEWS.home_after = () => { bindShare(); drawWall(); };
 // "Made with Edit Wherever": approved reels from other buyers, muted, loaded only when scrolled into view
@@ -799,7 +799,9 @@ async function drawWall() {
   box.querySelectorAll("video").forEach(v => { io.observe(v); v.onclick = () => v.paused ? v.play().catch(() => {}) : v.pause(); });
 }
 function pickForYou(n) {
-  const b = S.brand || {}, faceless = b.face === "faceless", want = faceless ? ["Studio Templates", "Viral Formats", "Faceless", "Explainers", "Kinetic Type", "UI Motion"] : ["Viral Formats", "Yap Edits", "Vlog Edits", "Studio Templates", "Explainers", "Kinetic Type"];
+  const b = S.brand || {}, faceless = b.face === "faceless", want = faceless ? ["Studio Templates", "Viral Formats", "Faceless", "Explainers", "Kinetic Type", "UI Motion"]
+    : b.face === "face" ? ["Yap Edits", "Vlog Edits", "Viral Formats", "Captions", "Creator Styles"]   // on camera: moves that edit their own clips
+    : ["Viral Formats", "Yap Edits", "Vlog Edits", "Studio Templates", "Explainers", "Kinetic Type"];
   const niche = (b.niche || "").toLowerCase();
   const score = m => (want.indexOf(m.category) >= 0 ? 10 - want.indexOf(m.category) : 0) + ((m.best_for || []).join(" ").toLowerCase().includes(niche.split(" ")[0]) ? 4 : 0) + (m.level === "Beginner" ? 2 : 0) + (m.ref_clip || m.poster || m.clip ? 20 : 0);
   const seen = new Set(), out = [];
@@ -929,8 +931,8 @@ function composer(k) {
 
 // ---------- FIRST VIDEO walkthrough (live: each step ticks itself as the studio sees it happen)
 function starterMoves() {
-  const fit = m => ["Yap Edits", "Captions"].includes(m.category) && ["Beginner", "Easy"].includes(m.level) && showcase(m);
-  return S.moves.filter(fit).slice(0, 3);
+  const fit = m => ["Yap Edits", "Captions"].includes(m.category) && ["Beginner", "Easy"].includes(m.level) && showcase(m) && !/screen/i.test(m.tagline || "");   // step 1 asks for a talking clip, not a screen recording
+  return S.moves.filter(fit).sort((a, b) => (b.category === "Captions") - (a.category === "Captions") || ((b.example || {}).views || 0) - ((a.example || {}).views || 0)).slice(0, 3);
 }
 VIEWS.first = () => {
   const job = (S.jobs || [])[0], made = S.projects.length > 0, copied = (S.state.recent || []).length > 0;
@@ -1043,7 +1045,9 @@ function featuredRank(moves) {
   for (const list of Object.values(byCat)) list.sort((a, b) => quality(b) - quality(a)).forEach((m, i) => rank.set(m.id, i));
   const ci = c => { const i = DYN.indexOf(c); return i < 0 ? DYN.length : i; };
   const fit = m => (["Beginner", "Easy"].includes(m.level) ? 0 : 1) + ((m.aspect || "9:16") === "9:16" ? 0 : 1);   // the first screen is what a beginner can make for Reels
-  return (a, b) => visTier(b) - visTier(a) || fit(a) - fit(b) || (ci(a.category) < DYN.length ? 0 : 1) - (ci(b.category) < DYN.length ? 0 : 1) || rank.get(a.id) - rank.get(b.id) || ci(a.category) - ci(b.category);
+  const cam = (S.brand || {}).face === "face", FOOT = ["Yap Edits", "Vlog Edits", "Viral Formats", "Captions", "Creator Styles"];
+  const own = m => cam && FOOT.includes(m.category) ? 0 : 1, dyn = m => own(m) ? (ci(m.category) < DYN.length ? 0 : 1) : 0;   // on camera: moves for their own clips lead, still taking turns
+  return (a, b) => visTier(b) - visTier(a) || fit(a) - fit(b) || own(a) - own(b) || dyn(a) - dyn(b) || rank.get(a.id) - rank.get(b.id) || ci(a.category) - ci(b.category);
 }
 VIEWS.library = () => {
   const mine = (S.styles || []).length, cats = [...(mine ? ["My Styles"] : []), "All", ...[...new Set(S.moves.map(m => m.category))], ...(mine ? [] : ["My Styles"])];   // your own styles lead once you have any
@@ -1140,7 +1144,7 @@ function openMove(id) {
     <div class="k" style="margin-top:6px">3 · Press Make this: Claude opens with it ready</div></div>
    <details class="more"><summary>See the full prompt</summary><div class="pre" id="dpre"></div></details>
    <div class="dbar" style="display:flex;gap:10px;flex-wrap:wrap"><button class="btn grad" id="dcopy">${I.play} Make this</button><button class="btn" id="dcopy2" aria-label="Copy the prompt instead">${I.copy} Copy</button><button class="btn" id="dprev" aria-label="Previous move">‹</button><button class="btn" id="dnext" aria-label="Next move">›</button><button class="btn" id="dfav" aria-pressed="${isFav(m.id)}">${I.heart} ${isFav(m.id) ? "Saved" : "Save"}</button></div>
-   <h4 style="margin:22px 0 4px">How to use it</h4><ol class="steps">${(m.steps || []).map(s => `<li>${esc(s)}</li>`).join("")}</ol>
+   <h4 style="margin:22px 0 4px">How to use it</h4><ol class="steps">${(m.steps || []).filter(s => !/^Drop (your clip|the clips) in (the|your) Studio inbox/i.test(s)).map(s => `<li>${esc(s)}</li>`).join("")}</ol>
    <h4 style="margin:22px 0 4px">After you press Make this</h4>${pasteGuideHTML()}<div class="k" style="margin-top:12px">Quick replies for the preview (paste in the same chat)</div><div class="tws">${tweakList()}</div>
    <h4 style="margin:26px 0 4px;padding-top:18px;border-top:1px solid var(--line-soft)">Tweaks made for this move <span style="font-weight:500;color:var(--muted);font-size:13px">paste after your preview</span></h4>
    ${(m.tweaks || []).map((t, i) => `<div class="tw"><span>${esc(t)}</span><button class="btn sm" data-tweak="${i}">${I.copy} Copy</button></div>`).join("")}</div>`;
@@ -1553,7 +1557,7 @@ const OSTEPS = [
    <div class="field"><label>Your main goal right now</label><div class="opts" style="margin:0">${["Grow followers", "Get leads", "Sell my offer", "Build a habit of posting"].map(g => `<button class="chip" data-o-goal="${g}" aria-pressed="${OD.goal === g}">${g}</button>`).join("")}</div></div>`,
  () => `<div class="k">${UNLOCK_ONLY ? "Unlock" : "7 of 7 · Unlock"}</div><h1>Enter your <em>key</em>.</h1><p class="lead">It came in your purchase email. It unlocks the full library and every new drop.</p>
    <div class="field"><label for="o-key">Your key</label><input class="input" id="o-key" value="${esc(OD.key || "")}" placeholder="EW-XXXX-XXXX" style="font-family:var(--f-m);letter-spacing:.08em;text-transform:uppercase"></div><p id="o-keymsg" style="font-size:13px;color:var(--muted)"></p>
-   ${S.licensed ? "" : `<button class="btn sm" id="o-demo">Use preview key</button>`}<p style="font-size:13px;color:var(--muted);margin-top:14px">Can't find it? Search your email for "Edit Wherever key". It starts with EW-.</p>`,
+   ${S.licensed ? "" : `<button class="btn sm" id="o-demo">Use preview key</button>`}<p style="font-size:13px;color:var(--muted);margin-top:14px">Can't find it? Search your email for "Edit Wherever key". It starts with EW-. Still stuck? Reply to that email.</p>`,
  () => `<div class="k">All set</div><h1>Welcome to your studio, ${esc(OD.name || "creator")}.</h1><p class="lead">Your brand kit is saved and every move in the library now uses it. Let's get your first video done.</p>`];
 let UNLOCK_ONLY = false;
 function unlockScreen(msg) {   // library locked (no key, revoked, device limit, offline too long): straight to the key step
@@ -1630,7 +1634,7 @@ function drawJob() {
     : j.status === "done" && (j.kind ? j.kind === "video" : VIDEO_FILE.test(j.file || "")) ? `<span class="ok">✓</span><div><b>Your video is ready</b><span>${esc(nm(j.file || j.title))}</span></div><a class="btn sm grad" href="#/projects">Watch it</a><button class="btn sm" data-seen="${esc(j.id)}" aria-label="Hide this">✕</button>`
     : j.status === "done" ? `<span class="ok">✓</span><div><b>${esc(j.note || "Claude is done")}</b><span>${esc(nm(j.title))}</span></div><a class="btn sm grad" href="#/projects">Open Projects</a><button class="btn sm" data-seen="${esc(j.id)}" aria-label="Hide this">✕</button>`
     : j.status === "stalled" ? `<span class="warn">!</span><div><b>Claude went quiet</b><span>Check the Claude window. It may be waiting for your answer.</span></div><button class="btn sm" data-seen="${esc(j.id)}">✕</button>`
-    : `<span class="warn">!</span><div><b>Something went wrong</b><span>${esc(j.step)}</span></div><a class="btn sm" href="#/help">Get help</a><button class="btn sm" data-seen="${esc(j.id)}">✕</button>`;
+    : `<span class="warn">!</span><div><b>Your video didn't finish</b><span>${esc(nm(j.title))} · ${esc(j.step)}</span></div><button class="btn sm grad" data-claude="${esc(`Fix my studio. My video "${j.title}" stopped with: ${j.step}. Check my Edit Wherever setup, repair anything that's broken, then tell me in one sentence what you fixed and how to try that video again.`)}">Fix it</button><button class="btn sm" data-seen="${esc(j.id)}" aria-label="Hide this">✕</button>`;
   bar.querySelectorAll("[data-seen]").forEach(b => b.onclick = async () => { await saveState({ seen_job: b.dataset.seen }); bar.hidden = true; });
 }
 async function poll() {

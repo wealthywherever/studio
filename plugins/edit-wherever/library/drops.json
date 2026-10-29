@@ -1,5 +1,16 @@
 [
   {
+    "version": "0.1.22",
+    "date": "2026-10-29",
+    "title": "Smarter edits, easier start",
+    "items": [
+      "Claude now plans every video like a creative director and checks it before you see it",
+      "Edit Wherever runs on Claude Opus 5.5 or newer, and tells you how to switch if you're on another model",
+      "The Library and your first video now start with moves that edit your own clips",
+      "When a video doesn't finish, a Fix it button sends it straight back to Claude"
+    ]
+  },
+  {
     "version": "0.1.21",
     "date": "2026-10-29",
     "title": "First build, polished",

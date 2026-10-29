@@ -15,7 +15,7 @@ Talk like a friendly helper. Never ask the user to open a terminal or type comma
 3. On success, quietly run `hyperframes skills update` once (it refreshes HyperFrames' own build guides; if it fails, skip it and don't mention it). Then run the `studio` skill to open their dashboard. Exception: if the installer printed `RESTART NEEDED`, this Claude session can't see the new tools yet, so don't open the studio or make a video here. Tell the user plainly: "One last step: quit Claude completely (not just this window) and open it again. Then start a new chat and say *open my studio*."
 4. Last, turn on automatic updates (one time, takes 20 seconds) so fixes and new features arrive by themselves. Walk the user through it one step at a time: type `/plugin`, open the **Marketplaces** tab, pick **wealthywherever**, choose **Enable auto-update**. If they skip it, that's fine: their studio shows an "Update ready" card when there's a new version.
 
-Requirements to mention only if asked: Windows 10/11 or macOS 13+, about 4 GB free, a paid Claude plan with Claude Code.
+Requirements to mention only if asked: Windows 10/11 or macOS 13+, about 4 GB free, a paid Claude plan with Claude Code, using Claude Opus 5.5 or newer.
 
 ## License terms (apply in every session that uses this plugin)
 
