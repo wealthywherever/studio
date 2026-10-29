@@ -1,0 +1,46 @@
+<!-- Wherever Frames: our skin over the open-source HyperFrames Studio (Apache-2.0, see library/THIRD_PARTY_LICENSES.md).
+     The studio server injects this at the top of the editor's <head>. Theme tokens only; the editor's own code is untouched. -->
+<script>try { const k = "hf-studio-ui-preferences", p = JSON.parse(localStorage.getItem(k) || "{}"); p.theme = "dark"; localStorage.setItem(k, JSON.stringify(p)); } catch (e) {}</script>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='15' fill='%23ff5c4d'/%3E%3Cpath d='M32 12c-8.3 0-15 6.5-15 14.6C17 37.5 32 52 32 52s15-14.5 15-25.4C47 18.5 40.3 12 32 12Z' fill='%23fff'/%3E%3Cpath d='M28 20.5v12l10-6z' fill='%23ff5c4d'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@700;800&family=Fraunces:ital,wght@1,600&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap">
+<style>
+:root, :host {
+  color-scheme: dark;
+  --color-bg-0: #111216; --color-bg-1: #111216; --color-bg-2: #1b1c21;
+  --color-surface: #1b1c21; --color-surface-alt: #202127; --color-surface-hover: rgba(244, 241, 236, .06);
+  --color-panel-bg: #15161a; --color-panel-bg-inset: #1b1c21; --color-panel-surface: #1b1c21; --color-panel-bg-soft: #1b1c21; --color-panel-bg-2: #1b1c21;
+  --color-panel-input: #202127; --color-panel-hover: rgba(244, 241, 236, .06);
+  --color-border: rgba(244, 241, 236, .08); --color-border-strong: rgba(244, 241, 236, .14); --color-border-input: rgba(244, 241, 236, .14);
+  --color-panel-border: rgba(244, 241, 236, .08); --color-panel-border-input: rgba(244, 241, 236, .14); --color-panel-hairline: rgba(244, 241, 236, .08);
+  --color-text-0: #f4f1ec; --color-text-1: #f4f1ec; --color-text-body: #f4f1ec; --color-text-2: #d9d4cc; --color-text-3: #d9d4cc;
+  --color-text-muted: #a8a29a; --color-text-4: #a8a29a; --color-text-5: #a8a29a; --color-text-off: #85807a;
+  --color-panel-text-0: #f4f1ec; --color-panel-text-1: #f4f1ec; --color-panel-text-2: #d9d4cc; --color-panel-text-3: #d9d4cc; --color-panel-text-4: #a8a29a; --color-panel-text-5: #a8a29a;
+  --color-accent: #ff6b5c; --color-accent-hover: #ff8172; --color-accent-ink: #ff8172; --color-ring: #ff8172; --color-panel-accent: #ff6b5c;
+  --color-selection: #f2b85a; --color-playhead: #ff6b5c; --color-framey: #ff6b5c; --color-framey-ink: #111216;
+  --color-brand-gradient-from: #ff6b5c; --color-brand-gradient-to: #f2b85a;
+}
+html, body { font-family: "Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif; }
+.wf-logo { display: inline-flex; align-items: center; gap: 8px; height: 28px; color: #f4f1ec; text-decoration: none; white-space: nowrap; }
+.wf-logo svg { width: 22px; height: 22px; flex: none; }
+.wf-logo b { font: 800 15px/1 "Bricolage Grotesque", ui-sans-serif, system-ui, sans-serif; letter-spacing: -.01em; }
+.wf-logo i { font: italic 600 16px/1 Fraunces, Georgia, serif; background: linear-gradient(90deg, #ff6b5c, #f2b85a); -webkit-background-clip: text; background-clip: text; color: transparent; }
+[data-wf-hidden], button:has(> .hf-guide-swap), button:has(.hf-guide-swap) { display: none !important; }   /* "Install the desktop app" */
+</style>
+<script>
+(() => {
+  const LOGO = '<span class="wf-logo" aria-label="Wherever Frames"><svg viewBox="0 0 64 64" aria-hidden="true"><rect width="64" height="64" rx="15" fill="#ff5c4d"/><path d="M32 12c-8.3 0-15 6.5-15 14.6C17 37.5 32 52 32 52s15-14.5 15-25.4C47 18.5 40.3 12 32 12Z" fill="#fff"/><path d="M28 20.5v12l10-6z" fill="#ff5c4d"/></svg><b>Wherever</b><i>Frames</i></span>';
+  const NAME = /HeyGen\s*|Hyper\s?[Ff]rames(\s+Studio)?/g, swap = s => s.replace(NAME, m => /HeyGen/.test(m) ? "" : "Wherever Frames");
+  const skip = el => el && el.closest && el.closest(".cm-editor, [contenteditable], textarea, pre, code, input");   // never touch the user's code or text
+  function brand(root) {
+    if (!root || root.nodeType !== 1) return;
+    root.querySelectorAll('svg[aria-label="Hyperframes"], svg[aria-label="HyperFrames"]').forEach(s => { const t = document.createElement("template"); t.innerHTML = LOGO; s.replaceWith(t.content.firstChild); });
+    [root.closest("button, a"), ...root.querySelectorAll("button, a")].forEach(b => { if (b && /desktop app/i.test(b.textContent)) b.setAttribute("data-wf-hidden", ""); });   // its label animates in after insert
+    root.querySelectorAll("[title], [aria-label]").forEach(el => { for (const a of ["title", "aria-label"]) { const v = el.getAttribute(a); if (v && NAME.test(v)) el.setAttribute(a, swap(v)); NAME.lastIndex = 0; } });
+    const tw = document.createTreeWalker(root, NodeFilter.SHOW_TEXT); let n;
+    while ((n = tw.nextNode())) if (NAME.test(n.nodeValue) && !skip(n.parentElement)) n.nodeValue = swap(n.nodeValue); NAME.lastIndex = 0;
+  }
+  new MutationObserver(ms => { for (const m of ms) { m.addedNodes.forEach(x => brand(x.nodeType === 1 ? x : x.parentElement)); if (m.type === "characterData") brand(m.target.parentElement); } })
+    .observe(document.documentElement, { childList: true, subtree: true, characterData: true });
+  new MutationObserver(() => { if (document.title !== "Wherever Frames") document.title = "Wherever Frames"; }).observe(document.querySelector("title") || document.head, { childList: true, subtree: true, characterData: true });
+})();
+</script>

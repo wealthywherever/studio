@@ -1,0 +1,14 @@
+{
+  "name": "wealthywherever",
+  "owner": {
+    "name": "Wealthy Wherever"
+  },
+  "plugins": [
+    {
+      "name": "edit-wherever",
+      "source": "./plugins/edit-wherever",
+      "description": "Your video studio, wherever you are. Edit your footage, make explainers from one sentence, repurpose everything - in your brand."
+    }
+  ],
+  "description": "Edit Wherever by Wealthy Wherever: a personal video studio inside Claude Code."
+}

@@ -1,0 +1,9 @@
+{
+  "name": "edit-wherever",
+  "version": "0.1.12",
+  "description": "A personal video studio inside Claude: guided setup, brand kit, 1,000+ Edit Wherever moves matched to real examples, and a local dashboard.",
+  "author": {
+    "name": "Wealthy Wherever"
+  },
+  "license": "LicenseRef-EditWherever-Commercial"
+}

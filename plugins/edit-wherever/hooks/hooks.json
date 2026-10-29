@@ -1,0 +1,16 @@
+{
+  "hooks": {
+    "SessionStart": [
+      {
+        "matcher": "startup|resume|clear",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"${CLAUDE_PLUGIN_ROOT}/scripts/session-start.mjs\" || echo \"Edit Wherever is installed but its tools are not set up yet. Run /edit-wherever:setup.\"",
+            "timeout": 20
+          }
+        ]
+      }
+    ]
+  }
+}

@@ -1,0 +1,120 @@
+[
+  {
+    "version": "0.1.12",
+    "date": "2026-10-29",
+    "title": "Example clips load from your key",
+    "items": [
+      "Credited example clips now download once with your key and play from your own computer"
+    ]
+  },
+  {
+    "version": "0.1.11",
+    "date": "2026-10-29",
+    "title": "Example clips load from your key",
+    "items": [
+      "Credited example clips now download once with your key and play from your own computer"
+    ]
+  },
+  {
+    "version": "0.1.10",
+    "date": "2026-10-29",
+    "title": "Smoother setup and a sharper library",
+    "items": [
+      "Hearts on library cards now save with one tap, and your Saved count stays in sync",
+      "Setup checks for Node.js 22, tells you how long it takes, and says when a restart is all you need",
+      "On a phone, filters fold away and every button is big enough to tap",
+      "Search the style picker, and see a plain summary before the full prompt",
+      "If the internet drops, the Studio offers Try again instead of a blank page"
+    ]
+  },
+  {
+    "version": "0.1.9",
+    "date": "2026-10-29",
+    "title": "Livelier library",
+    "items": [
+      "The library opens on moving previews: 3D worlds, kinetic type, characters and motion design first",
+      "Previews play only while you can see them, so the page stays fast",
+      "Moves without a preview yet sit below the ones you can watch"
+    ]
+  },
+  {
+    "version": "0.1.8",
+    "date": "2026-10-29",
+    "title": "Reel sound pack",
+    "items": [
+      "New Reels sound pack: camera shutter, pop, whoosh, riser, impact, glitch, cash and more (33 sounds, free for commercial use)",
+      "Sound effects now follow the example's cuts"
+    ]
+  },
+  {
+    "version": "0.1.7",
+    "date": "2026-10-29",
+    "title": "Trending reel styles",
+    "items": [
+      "14 new moves from top trending Instagram reels: vlog montages, viral reveals and creator looks, each with its real example"
+    ]
+  },
+  {
+    "version": "0.1.6",
+    "date": "2026-10-29",
+    "title": "Smarter builds",
+    "items": [
+      "Fills in any blanks in a move from your brand kit, or asks you",
+      "Your voiceover sets the length and timing",
+      "Never fetches footage or music you didn't give it",
+      "Cleans up screen recordings and other people's marks on library clips",
+      "Quality check now catches empty frames and accepts planned exits",
+      "You can set a bigger minimum text size and your own loudness target"
+    ]
+  },
+  {
+    "version": "0.1.5",
+    "date": "2026-10-29",
+    "title": "Real creator styles",
+    "items": [
+      "Creator Styles rebuilt from top Instagram editors: Adrian Per, Jessi Jean, Jessica Carter, Meg Kilgore, Sam Kolder, Peter McKinnon and Karen X",
+      "Every style was checked frame by frame; caption-only edits were left out",
+      "Old TikTok examples removed from Viral Formats, Vlog Edits and Creator Styles"
+    ]
+  },
+  {
+    "version": "0.1.4",
+    "date": "2026-10-28",
+    "title": "Real logos",
+    "items": [
+      "Videos about a real app or website now show its real logo, taken from the real page, never redrawn"
+    ]
+  },
+  {
+    "version": "0.1.3",
+    "date": "2026-10-28",
+    "title": "Closer to the original",
+    "items": [
+      "Studies the example in more detail: more frames, motion around each cut, and what it says",
+      "Keeps the example's shape (landscape, square or tall) and handles several clips at once",
+      "iPhone HDR clips no longer look washed out; silent clips are kept as b-roll",
+      "Uses real apps, websites and names, never made-up ones"
+    ]
+  },
+  {
+    "version": "0.1.2",
+    "date": "2026-10-28",
+    "title": "Updates that find you",
+    "items": [
+      "An Update ready card on Home when there's a new version",
+      "Say 'update Edit Wherever' and Claude updates it in the same chat",
+      "Setup now offers to turn on automatic updates"
+    ]
+  },
+  {
+    "version": "0.1.0",
+    "date": "2026-10-28",
+    "title": "Studio opening",
+    "items": [
+      "Personal setup + brand kit",
+      "Edit Wherever moves library with live previews",
+      "Edit, Create and Repurpose engines",
+      "7 videos in 7 days challenge"
+    ]
+  }
+]
