@@ -1,5 +1,15 @@
 [
   {
+    "version": "0.1.19",
+    "date": "2026-10-29",
+    "title": "Publish trial reels",
+    "items": [
+      "Trials page ready for one-click Instagram trial reel publishing (switches on once Instagram approves our app)",
+      "Views can come back from Instagram on their own to pick the winner",
+      "Claude now points you to the Publish button and never posts from the chat"
+    ]
+  },
+  {
     "version": "0.1.18",
     "date": "2026-10-29",
     "title": "My Styles and Trials",

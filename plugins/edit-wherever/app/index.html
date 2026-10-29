@@ -228,6 +228,22 @@ kbd{font:700 12px var(--f-m);padding:2px 7px;border:1px solid var(--line);border
 .tact{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:14px;padding-top:14px;border-top:1px solid var(--line-soft)}.tact .lab{font-size:13.5px;color:var(--text-2)}
 .wtip{display:flex;gap:12px;align-items:flex-start;margin-top:14px;padding:14px 16px;border-radius:16px;background:var(--good-soft)}.wtip .ok{width:28px;height:28px;border-radius:50%;flex:none;display:grid;place-items:center;background:var(--good);color:#fff;font-weight:800}.wtip b{display:block}.wtip span{font-size:13.5px;color:var(--text-2)}
 .hwr{display:grid;grid-template-columns:minmax(0,130px) minmax(0,1fr) auto;gap:10px;align-items:center;font-size:13.5px;margin-top:10px}.hwr span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;text-transform:capitalize}.hwr i{display:block;height:8px;border-radius:8px;background:linear-gradient(90deg,var(--brand-a),var(--brand-c))}.hwr em{font:700 12px var(--f-m);font-style:normal;color:var(--muted)}
+/* instagram: connect card, publish bar, per-version status, confirm sheet */
+.igc{padding:20px}.igc details.more{margin:14px 0 0;padding-top:10px;border-top:1px solid var(--line-soft)}
+.igme{display:flex;align-items:center;gap:12px;margin-top:12px}.igme div{min-width:0}.igme b{display:block;overflow-wrap:anywhere}.igme div span{font-size:13.5px;color:var(--text-2)}
+.igwait{display:flex;gap:10px;align-items:center;margin-top:12px;font-size:13.5px;color:var(--text-2)}
+.tpub{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:0 0 14px}.tpub .lab{font-size:13px;color:var(--muted)}.tpub .spin,.igs .spin,.igwait .spin{width:14px;height:14px;border-width:2px}
+.igs{display:inline-flex;align-items:center;gap:6px;align-self:flex-start;font-size:12.5px;font-weight:700;padding:4px 10px;border-radius:99px;background:var(--line-soft);color:var(--text-2);text-decoration:none}
+.igs.live{background:var(--good-soft);color:var(--good)}.igl{display:flex;flex-wrap:wrap;align-items:center;gap:4px 10px}.igl a{font-size:12.5px;font-weight:700;color:var(--text-2)}.igl a:hover{color:var(--text)}.igs.bad{background:rgba(229,72,58,.12);color:var(--bad)}
+.igerr{display:flex;flex-direction:column;gap:6px;font-size:12.5px;color:var(--text-2);overflow-wrap:anywhere}.igerr .btn{align-self:flex-start}
+.tsrc{font-size:11.5px;color:var(--muted);margin-top:-2px}
+.cfl{list-style:none;padding:0;margin:16px 0;display:grid;gap:8px}.cfl li{display:grid;grid-template-columns:30px minmax(0,1fr);gap:10px;align-items:start;padding:10px 12px;border:1px solid var(--line-soft);border-radius:14px;background:var(--raised)}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}.cfl .ltr{width:30px;height:30px;border-radius:50%;background:var(--text);color:var(--bg);display:grid;place-items:center;font:800 13px var(--f-h)}.cfl q{font-weight:700;font-size:14px;overflow-wrap:anywhere}
+.cfl p{margin:2px 0 0;font-size:13px;color:var(--muted);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;overflow-wrap:anywhere}
+.cho{display:grid;gap:8px;border:0;padding:0;margin:0;min-width:0}.cho legend{padding:0;margin-bottom:8px}
+.cho label{display:flex;gap:10px;align-items:flex-start;padding:12px 14px;border:1.5px solid var(--line);border-radius:14px;cursor:pointer;transition:border-color .2s,box-shadow .2s}
+.cho label:has(input:checked){border-color:var(--brand-b);box-shadow:0 0 0 3px rgba(217,58,44,.12)}.cho input{accent-color:var(--brand-b);margin:3px 0 0;flex:none;width:16px;height:16px}
+.cho b{display:block;font-size:14.5px}.cho small{display:block;font-size:13px;color:var(--muted);margin-top:2px}
 @media(max-width:640px){.tvg{grid-template-columns:none;grid-auto-flow:column;grid-auto-columns:68%;overflow-x:auto;scroll-snap-type:x mandatory;margin-right:-16px;padding-right:16px;scrollbar-width:none}.tv{scroll-snap-align:start}}
 /* brand */
 .bk{display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:22px}@media(max-width:900px){.bk{grid-template-columns:minmax(0,1fr)}}
@@ -964,14 +980,51 @@ const STATS = [["views", "Views", 1], ["avg_watch_s", "Avg watch (s)", 0.1], ["s
 const leader = t => t.versions.filter(v => v.stats).sort((a, b) => b.stats.views - a.stats.views || b.stats.avg_watch_s - a.stats.avg_watch_s)[0];   // most views; tie -> longer average watch
 const hookWins = () => { const c = {}; for (const w of (S.brand || {}).hook_wins || []) if (w.type) c[w.type] = (c[w.type] || 0) + 1; return Object.entries(c).sort((a, b) => b[1] - a[1]); };
 let TPICK = {};   // trial name -> letter the buyer picked (defaults to the leader)
+// ---- Instagram (scripts/instagram.mjs): post every version as a trial reel, then the views fill in by themselves.
+// Shown only when our server offers it (S.instagram.available); until then the page keeps the "post them yourself" guide
+const IGS = () => S.instagram || {};
+const since = t => { const m = Math.round((Date.now() - Date.parse(t)) / 60000); return !(m >= 1) ? "just now" : m < 60 ? `${m} min ago` : m < 1440 ? `${Math.round(m / 60)} h ago` : `${Math.round(m / 1440)} day${m < 2880 ? "" : "s"} ago`; };
+const stuck = (t, p) => p.status === "posting" && !t.publishing && Date.now() - Date.parse(p.at) > 30 * 60e3;   // a post the studio lost track of (it was closed mid-way): retryable, same rule as the server
+const onIG = (t, v) => v.posted && (["live", "processing"].includes(v.posted.status) || (v.posted.status === "posting" && !stuck(t, v.posted)));
+const igLive = v => v.posted && v.posted.id && ["live", "processing"].includes(v.posted.status);
+let IGWAIT = false;   // sent to Instagram to approve, waiting for the studio to see it
+function igChip(t, v) {
+  const p = v.posted; if (!p) return "";
+  if (p.status === "posting" && !stuck(t, p)) return `<span class="igs" role="status"><i class="spin"></i> Posting…</span>`;
+  if (p.status === "processing") return `<span class="igs" role="status"><i class="spin"></i> Instagram is finishing it</span>`;
+  if (p.status === "live") return `<div class="igl"><span class="igs live">● Live</span>${/^https:\/\//.test(p.url || "") ? `<a href="${esc(p.url)}" target="_blank" rel="noopener">Open on Instagram</a>` : ""}</div>`;
+  return `<div class="igerr"><span class="igs bad">Didn't post</span>${p.error || stuck(t, p) ? `<span>${esc(p.error || "It didn't finish posting.")}</span>` : ""}<button class="btn sm" data-tretry="${esc(v.letter)}">Retry</button></div>`;
+}
+function igCard() {
+  const g = IGS(), guide = `<ol class="pg"><li><div><b>Send the versions to your phone.</b> <span>They're in your Trials folder.</span></div></li>
+     <li><div><b>In the Instagram app, start a new Reel</b> and pick version A.</div></li>
+     <li><div><b>Before you share, turn on Trial</b>, paste its caption, then tap Share.</div></li>
+     <li><div><b>Post each version the same way.</b></div></li>
+     <li><div><b>Come back after about 24 hours</b> and enter what Instagram shows for each one.</div></li></ol>
+    <p class="muted" style="font-size:12.5px;margin:0">Don't see Trial? Instagram doesn't offer it on every account yet.</p>`;
+  const yourself = `<details class="more"><summary>Post them yourself instead</summary>${guide}</details>`;
+  if (!g.available && !g.connected) return `<div class="card" style="padding:20px"><div class="k">How to post them</div><h2 style="margin-top:4px">Post them as trial reels</h2>${guide}</div>`;
+  if (g.connected) return `<div class="card igc" id="igc"><div class="k">Instagram</div><h2 style="margin-top:4px">Connected</h2>
+    <div class="igme"><span class="av" aria-hidden="true">${esc((g.username || "I")[0].toUpperCase())}</span><div><b>@${esc(g.username || "your account")}</b><span>Publish a trial below and every version goes up as a trial reel. Trial reels are shown to people who don't follow you first.</span></div></div>
+    <button class="btn sm lite" data-igoff style="margin:10px 0 0 -12px">Disconnect @${esc(g.username || "your account")}</button>${yourself}</div>`;
+  return `<div class="card igc" id="igc"><div class="k">Instagram</div><h2 style="margin-top:4px">${g.reconnect ? "Reconnect your Instagram" : "Post trials in one tap"}</h2>
+    <p class="lead" style="font-size:14px">${g.reconnect ? "Instagram signed you out. Reconnect to keep posting and to keep your views coming in." : "Connect your Instagram once. Then publish every version as a trial reel straight from here, and the views fill in by themselves."}</p>
+    ${IGWAIT ? `<div class="igwait" role="status"><i class="spin"></i>Approve on Instagram, then come back here.</div>` : ""}
+    <div style="margin-top:14px"><button class="btn grad" data-igew>${IGWAIT ? "Open Instagram again" : g.reconnect ? "Reconnect Instagram" : "Connect Instagram"}</button></div>${yourself}</div>`;
+}
 function trialCard(t) {
   const lead = leader(t), tie = lead && t.versions.filter(v => v.stats && v.stats.views === lead.stats.views).length > 1, pick =TPICK[t.name] || t.winner || (lead || {}).letter, w = t.versions.find(v => v.letter === t.winner), u = encodeURIComponent(t.name);
-  const status = t.winner ? `Winner: version ${esc(t.winner)}` : !t.versions.length ? "Claude is making the versions" : lead ? "Results in" : "Posted? Add the results after about 24 hours";
+  const g = IGS(), todo = t.versions.filter(v => !onIG(t, v)), live = t.versions.some(igLive), n = todo.length;
+  const status = t.winner ? `Winner: version ${esc(t.winner)}` : !t.versions.length ? "Claude is making the versions" : lead ? "Results in" : t.publishing ? "Posting to Instagram" : live ? "On Instagram. Views come in over the next day" : g.connected ? "Ready to post" : "Posted? Add the results after about 24 hours";
+  const pub = (g.available || g.connected) && t.versions.length && (n || live) ? `<div class="tpub">${n ? `<button class="btn grad" data-tpub ${t.publishing ? "disabled" : ""}>${t.publishing ? `<i class="spin"></i> Posting…` : `${I.trial} Publish ${n} trial reel${n === 1 ? "" : "s"}`}</button>` : ""}
+     ${live ? `<button class="btn" data-trefresh ${t.publishing ? "disabled" : ""}>Refresh stats</button>` : ""}
+     <span class="lab">${t.insights && t.insights.text ? esc(t.insights.text) : t.insights ? `Views from Instagram · updated ${since(t.insights.at)}` : n && !live ? "Shown to people who don't follow you first." : ""}</span></div>` : "";
   return `<section class="card trial" data-trial="${esc(t.name)}"><div class="sh"><div><div class="k">${status}</div><h2>${esc(t.source)}</h2></div><span class="lcount">${t.versions.length} version${t.versions.length === 1 ? "" : "s"}</span></div>
-   ${t.versions.length ? `<div class="tvg">${t.versions.map(v => `<div class="tv ${t.winner === v.letter ? "win" : ""}"><div class="vc"><video src="/media/trials/${u}/${v.letter}.mp4" poster="/media/trials/${u}/${v.letter}.jpg" muted loop playsinline preload="none" aria-label="Version ${v.letter}"></video><span class="pl"></span><span class="tl" aria-hidden="true">${v.letter}</span>${t.winner === v.letter ? `<span class="newb">Winner</span>` : ""}</div>
-     <q>${esc(v.hook)}</q><span class="tag">${esc(v.type)}</span>
-     ${v.caption ? `<button class="btn sm" data-copy="${esc(v.caption)}" data-msg="Caption ${v.letter} copied. Paste it when you post.">${I.copy} Copy caption</button>` : ""}
-     <div class="ts">${STATS.map(([k, l, st]) => `<label><span>${l}</span><input class="input" type="number" min="0" step="${st}" inputmode="${st < 1 ? "decimal" : "numeric"}" data-stat="${k}" data-l="${v.letter}" value="${v.stats ? esc(v.stats[k]) : ""}" aria-label="Version ${v.letter} ${l.toLowerCase()}"></label>`).join("")}</div></div>`).join("")}</div>
+   ${t.versions.length ? `${pub}<div class="tvg">${t.versions.map(v => `<div class="tv ${t.winner === v.letter ? "win" : ""}"><div class="vc"><video src="/media/trials/${u}/${v.letter}.mp4" poster="/media/trials/${u}/${v.letter}.jpg" muted loop playsinline preload="none" aria-label="Version ${v.letter}"></video><span class="pl"></span><span class="tl" aria-hidden="true">${v.letter}</span>${t.winner === v.letter ? `<span class="newb">Winner</span>` : ""}</div>
+     <q>${esc(v.hook)}</q><span class="tag">${esc(v.type)}</span>${igChip(t, v)}
+     ${v.caption && !igLive(v) ? `<button class="btn sm" data-copy="${esc(v.caption)}" data-msg="Caption ${v.letter} copied. Paste it when you post.">${I.copy} Copy caption</button>` : ""}
+     <div class="ts">${STATS.map(([k, l, st]) => `<label><span>${l}</span><input class="input" type="number" min="0" step="${st}" inputmode="${st < 1 ? "decimal" : "numeric"}" data-stat="${k}" data-l="${v.letter}" value="${v.stats ? esc(v.stats[k]) : ""}" aria-label="Version ${v.letter} ${l.toLowerCase()}"></label>`).join("")}</div>
+     ${v.stats && v.stats.source === "instagram" ? `<span class="tsrc">from Instagram · updated ${since(v.stats.updated)}</span>` : ""}</div>`).join("")}</div>
    <div class="tact"><button class="btn" data-tsave>Save results</button>${lead ? `<span class="lab" id="tl-${u}">Pick the winner${t.winner ? "" : `, suggested <b>${esc(lead.letter)}</b> (${tie ? "same views, longer watch" : "most views"})`}:</span>
      <div class="seg" role="group" aria-labelledby="tl-${u}">${t.versions.map(v => `<button data-tpick="${v.letter}" aria-pressed="${v.letter === pick}">${v.letter}</button>`).join("")}</div>
      <button class="btn grad" data-twin>${t.winner && pick === t.winner ? "Winner saved ✓" : `Pick ${esc(pick)} as the winner`}</button>` : `<span class="lab">Enter the views for each version, then save. The studio suggests the winner.</span>`}</div>
@@ -987,13 +1040,7 @@ VIEWS.trials = () => {
      ${wins.map(([ty, n]) => `<div class="hwr"><span>${esc(ty)}</span><i style="width:${Math.max(8, Math.round(100 * n / top))}%"></i><em>${n} win${n === 1 ? "" : "s"}</em></div>`).join("")}
      <p class="muted" style="font-size:13px;margin:14px 0 0">New videos lead with your best hook type: <b>${esc(wins[0][0])}</b>.</p>`
      : `<h2 style="margin-top:4px">Nothing to learn from yet</h2><p class="lead" style="font-size:14px">Pick a winner on a trial and your studio starts keeping score. New videos then lead with your best hook type.</p>`}</div>
-   <div class="card" style="padding:20px"><div class="k">How to post them</div><h2 style="margin-top:4px">Post them as trial reels</h2>
-    <ol class="pg"><li><div><b>Send the versions to your phone.</b> <span>They're in your Trials folder.</span></div></li>
-     <li><div><b>In the Instagram app, start a new Reel</b> and pick version A.</div></li>
-     <li><div><b>Before you share, turn on Trial</b>, paste its caption, then tap Share.</div></li>
-     <li><div><b>Post each version the same way.</b></div></li>
-     <li><div><b>Come back after about 24 hours</b> and enter what Instagram shows for each one.</div></li></ol>
-    <p class="muted" style="font-size:12.5px;margin:0">Don't see Trial? Instagram doesn't offer it on every account yet.</p></div></section>
+   ${igCard()}</section>
   ${T.length ? T.map(trialCard).join("") : `<section><div class="empty">No trials yet. Open <a href="#/projects">Projects</a>, pick a finished video and tap <b>Make 3 trial versions</b>. Claude makes 3 versions with different hooks and captions, ready to post as trial reels. Then come back here with the results and pick the winner.</div></section>`}`;
 };
 VIEWS.trials_after = () => {
@@ -1014,8 +1061,48 @@ VIEWS.trials_after = () => {
       if (!(await save())) return;
       const r = await api("/api/trials/winner", { name, letter }).catch(() => ({})); if (!r.ok) return toast(r.error || "Couldn't save the winner.");
       Object.assign(S, await api("/api/state")); delete TPICK[name]; redraw(); confetti(); toast(`Version ${letter} wins. Post it to all your followers.`); };
+    const needIG = () => { toast("Connect your Instagram first"); const c = $("#igc"); if (c) { c.scrollIntoView({ behavior: "smooth", block: "center" }); (c.querySelector("input,[data-igew]") || c).focus({ preventScroll: true }); } };
+    const pb = card.querySelector("[data-tpub]"); if (pb) pb.onclick = () => IGS().connected ? igConfirm(t, t.versions.filter(v => !onIG(t, v)).map(v => v.letter), pb) : needIG();
+    card.querySelectorAll("[data-tretry]").forEach(b => b.onclick = () => IGS().connected ? igConfirm(t, [b.dataset.tretry], b) : needIG());
+    const rb = card.querySelector("[data-trefresh]"); if (rb) rb.onclick = async () => {
+      rb.disabled = true; rb.innerHTML = `<i class="spin"></i> Refreshing…`;
+      const r = await api("/api/trials/refresh", { name }).catch(() => ({}));
+      Object.assign(S, await api("/api/state").catch(() => ({}))); redraw();
+      toast(!r.ok ? r.error || "Couldn't refresh. Is your studio still running?" : r.text || (r.updated ? "Stats updated from Instagram" : "No new numbers yet")); };
   });
+  const igRedraw = async () => { Object.assign(S, await api("/api/state").catch(() => ({}))); const y = scrollY; route(); scrollTo(0, y); };
+  document.querySelectorAll("[data-igew]").forEach(b => b.onclick = async () => {
+    const w = open("", "_blank");   // opened inside the click, so pop-up blockers allow it; filled once our server answers
+    const r = await api("/api/instagram/connect", {}).catch(() => ({}));
+    if (!r.ok) { if (w) w.close(); return toast(r.message || "Couldn't start connecting. Try again."); }
+    if (w) { w.opener = null; w.location.href = r.authUrl; } else location.assign(r.authUrl);
+    IGWAIT = true; igRedraw(); });
+  const ob = $("[data-igoff]"); if (ob) ob.onclick = async () => {
+    if (!confirm("Disconnect Instagram from your studio? Your trials and their numbers stay.")) return;
+    const r = await api("/api/instagram/disconnect", {}).catch(() => ({})); if (!r.ok) return toast(r.message || "Couldn't disconnect. Try again.");
+    IGWAIT = false; await igRedraw(); toast("Instagram disconnected"); };
 };
+// the confirm step is required: this posts publicly to the buyer's account
+function igConfirm(t, letters, from) {
+  const g = IGS(), vs = t.versions.filter(v => letters.includes(v.letter)), n = vs.length, s = n === 1 ? "" : "s", auto = vs.some(v => v.posted && v.posted.strategy === "auto");
+  if (!n) return;
+  $("#pgc").innerHTML = `<div class="k">Post to Instagram</div><h2 id="pgt">Post ${n} trial reel${s} to @${esc(g.username || "your account")}?</h2>
+   <p class="muted" style="margin:8px 0 0;font-size:14px">${n === 1 ? "It goes" : "They go"} live on your account right away, as ${n === 1 ? "a trial reel" : "trial reels"}. Trial reels are shown to people who don't follow you first.</p>
+   <ul class="cfl">${vs.map(v => `<li><span class="ltr" aria-hidden="true">${esc(v.letter)}</span><div><span class="sr">Version ${esc(v.letter)}: </span><q>${esc(v.hook)}</q><p>${v.caption ? esc(v.caption) : "No caption"}</p></div></li>`).join("")}</ul>
+   <fieldset class="cho"><legend class="k">When the trial is done</legend>
+    <label><input type="radio" name="igst" value="manual" ${auto ? "" : "checked"}><span><b>I'll share the winner myself</b><small>Pick the winner here, then post it to all your followers.</small></span></label>
+    <label><input type="radio" name="igst" value="auto" ${auto ? "checked" : ""}><span><b>Let Instagram share it if it does well</b><small>Instagram decides whether your followers see it too.</small></span></label></fieldset>
+   <div style="margin-top:18px;display:flex;gap:10px;flex-wrap:wrap"><button class="btn grad" id="pgok">Post ${n} trial reel${s}</button><button class="btn" id="pgno">Cancel</button></div>`;
+  const m = $("#pgm"), close = () => { m.classList.remove("on"); m.onkeydown = null; if (from && from.isConnected) from.focus(); };
+  m.classList.add("on"); $("#pgc").scrollTop = 0; $("#pgok").focus({ preventScroll: true });
+  $("#pgno").onclick = close; m.onclick = e => { if (e.target.id === "pgm") close(); }; m.onkeydown = e => { if (e.key === "Escape") close(); };
+  $("#pgok").onclick = async () => {
+    const ok = $("#pgok"); ok.disabled = true; ok.innerHTML = `<i class="spin"></i> Starting…`;
+    const r = await api("/api/trials/publish", { name: t.name, letters, strategy: (document.querySelector("[name=igst]:checked") || {}).value }).catch(() => ({}));
+    if (!r.ok) { ok.disabled = false; ok.textContent = `Post ${n} trial reel${s}`; return toast(r.error || "Couldn't start posting. Is your studio still running?"); }
+    m.classList.remove("on"); m.onkeydown = null; Object.assign(S, await api("/api/state").catch(() => ({}))); const y = scrollY; route(); scrollTo(0, y);
+    toast(`Posting ${r.count} trial reel${r.count === 1 ? "" : "s"}. This takes a minute or two.`); };
+}
 
 // ---------- LEARN / NEW / HELP
 const LESSONS = [
@@ -1206,8 +1293,10 @@ async function poll() {
   if (document.hidden) return;
   const st = await api("/api/state").catch(() => null); $("#offline").hidden = !!st; if (!st) return;
   if (!BOOTED) return location.reload();   // studio came back after a failed boot
-  const shape = () => JSON.stringify([S.inbox.map(v => v.name), S.projects.map(v => v.name), S.jobs, (S.trials || []).map(t => t.name + t.versions.map(v => v.letter + v.added).join())]), before = shape();
-  Object.assign(S, { inbox: st.inbox, projects: st.projects, jobs: st.jobs, styles: st.styles, trials: st.trials });
+  const shape = () => JSON.stringify([S.inbox.map(v => v.name), S.projects.map(v => v.name), S.jobs, S.instagram,   // Instagram status, posts and numbers redraw Trials too
+    (S.trials || []).map(t => [t.name, t.publishing, t.insights, t.versions.map(v => [v.letter, v.added, v.posted, v.stats && (v.stats.updated || v.stats.entered)])])]), before = shape(), wasIG = IGS().connected;
+  Object.assign(S, { inbox: st.inbox, projects: st.projects, jobs: st.jobs, styles: st.styles, trials: st.trials, instagram: st.instagram });
+  if (IGWAIT && !wasIG && IGS().connected) { IGWAIT = false; toast(`Instagram connected${IGS().username ? ` as @${IGS().username}` : ""}`); }
   if (LASTP !== null && S.projects.length > LASTP) { toast("Your video is ready 🎉 It's in Projects."); confetti(); }
   LASTP = S.projects.length; drawJob(); milestone();
   const typing = /INPUT|TEXTAREA|SELECT/.test((document.activeElement || {}).tagName || "");
