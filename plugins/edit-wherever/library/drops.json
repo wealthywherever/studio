@@ -1,5 +1,17 @@
 [
   {
+    "version": "0.1.26",
+    "date": "2026-10-29",
+    "title": "Talking heads at the 10/10 bar",
+    "items": [
+      "Talking-head edits now build to the approved benchmark: a new graphic every 1-2 s, a framing change on every cut, a hit every 0.5-1 s",
+      "Sound under a voice is hits only; tonal chimes, mallets and swells are refused, and the voice gets a polish chain",
+      "Effects level themselves to about 4 dB under the voice",
+      "Natural grade now locks face colour shot to shot from the cut list and checks it",
+      "QC lists every moment that fails and the bands that stay clear of the head"
+    ]
+  },
+  {
     "version": "0.1.25",
     "date": "2026-10-29",
     "title": "Edit like your favourite creators",
