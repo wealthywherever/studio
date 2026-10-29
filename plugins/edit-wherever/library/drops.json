@@ -1,5 +1,14 @@
 [
   {
+    "version": "0.1.16",
+    "date": "2026-10-29",
+    "title": "Safer loudness",
+    "items": [
+      "Mixes now leave a little extra room under the peak limit, so uploads never clip",
+      "Risers build into each new section"
+    ]
+  },
+  {
     "version": "0.1.15",
     "date": "2026-10-29",
     "title": "Launch-film sound",
