@@ -1,5 +1,16 @@
 [
   {
+    "version": "0.1.21",
+    "date": "2026-10-29",
+    "title": "First build, polished",
+    "items": [
+      "Every move gets a polish check before you see the preview, so the first version is the good one",
+      "Match the original now copies the example's colours and fonts without mixing in yours",
+      "Your video's length and what your clip is for go straight into the prompt",
+      "Sharper quality checks: fonts, hidden text, still moments and late words"
+    ]
+  },
+  {
     "version": "0.1.20",
     "date": "2026-10-29",
     "title": "Review, export and cutouts",

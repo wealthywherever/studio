@@ -457,11 +457,14 @@ function applyBrand(b) {
   r.setProperty("--u-primary", b.palette.primary); r.setProperty("--u-accent", b.palette.accent); r.setProperty("--u-bg", b.palette.bg);
   r.setProperty("--u-head", `"${b.heading_font}"`); r.setProperty("--u-body", `"${b.body_font}"`);
 }
-function fill(prompt, topic) {
-  const b = S.brand || {}, cap = (CAPS.find(c => c.id === b.caption_style) || CAPS[0]).name;
-  const map = { "{{topic}}": topic || "the topic I talk about in my clip", "{{niche}}": b.niche || "my niche", "{{audience}}": b.audience || "my audience", "{{cta}}": b.cta || "FOLLOW",
-    "{{brand.primary}}": b.palette?.primary || "#15131A", "{{brand.accent}}": b.palette?.accent || "#FF6A55", "{{brand.bg}}": b.palette?.bg || "#F3EEE6",
-    "{{brand.heading_font}}": b.heading_font || "Inter Tight", "{{brand.body_font}}": b.body_font || "Inter", "{{caption_style}}": cap,
+// match: the move copies an example, so colours and fonts name the example's roles, not brand values the Look line would discard
+// spoken: a clip is picked, so the CTA they say in it wins over the brand kit's
+function fill(prompt, topic, { match = false, spoken = false } = {}) {
+  const b = S.brand || {}, cap = (CAPS.find(c => c.id === b.caption_style) || CAPS[0]).name, cta = b.cta || "FOLLOW";
+  const map = { "{{topic}}": topic || "the topic I talk about in my clip", "{{niche}}": b.niche || "my niche", "{{audience}}": b.audience || "my audience",
+    "{{cta}}": spoken ? `the call to action I say in my clip (${cta} if I don't say one)` : cta,
+    "{{brand.primary}}": match ? "the example's main colour" : b.palette?.primary || "#15131A", "{{brand.accent}}": match ? "the example's accent colour" : b.palette?.accent || "#FF6A55", "{{brand.bg}}": match ? "the example's background colour" : b.palette?.bg || "#F3EEE6",
+    "{{brand.heading_font}}": match ? "the example's headline font" : b.heading_font || "Inter Tight", "{{brand.body_font}}": match ? "the example's body font" : b.body_font || "Inter", "{{caption_style}}": match ? "the example's caption style" : cap,
     "{{sound_style}}": b.sound_style === "none" ? "no sound effects, voice and music only" : `${(SOUNDS.find(s => s.id === b.sound_style) || SOUNDS[0]).name} sound pack, ${b.sfx_density || "medium"} density` };
   return Object.entries(map).reduce((s, [k, v]) => s.split(k).join(v), prompt);
 }
@@ -478,11 +481,14 @@ const MYCLIP = /\bmy (own )?(clips?|footage|talking[- ]head|inbox clip)\b|\b(foo
 const needsClip = m => (FOOTAGE_CATS.includes(m.category) || MYCLIP.test(m.prompt || "")) && !NOFOOT.test(m.prompt || "");
 const multiClip = m => m.category === "Vlog Edits" || /\b(\d{1,2}|several|multiple|all (the|my)) (short )?(clips|examples)\b/i.test(m.prompt || "");
 function packPrompt(m, topic, o = {}) {
-  const cl = o.clips || [];
+  const cl = o.clips || [], hasRef = !!(o.ref && (o.ref.post || o.ref.clip));
   const c = [o.none ? "Footage: none. Make this one fully animated." : cl.length === 1 ? `Footage: use ONLY my clip "${cl[0]}". Full path: ${clipPath(cl[0])} (never use any other video).`
       : cl.length ? `Footage: use ONLY these ${cl.length} clips, in this order (never use any other video):\n${cl.map((n, i) => `  ${i + 1}. ${clipPath(n)}`).join("\n")}` : "",
-    o.len ? `Length: about ${o.len} seconds.` : o.ref && (o.ref.post || o.ref.clip) && o.look === "original" ? `Length: match the example's length${cl.length ? ", or my clip's length if it's shorter" : ""}.` : "", o.hook ? `Open with this hook, word for word: "${o.hook}"` : "", o.cta ? `End with this call to action: comment ${o.cta}` : ""].filter(Boolean);
-  if (o.ref && (o.ref.post || o.ref.clip)) {
+    // a move that animates on its own, given a talking clip: say what the clip is for, or the engine has to guess
+    cl.length && !needsClip(m) ? "My clip's role: this move is animated, so my voice sets the timing and the topic, and my footage shows inside the move's screens or frames. Every scene the move describes still happens." : "",
+    // the card's own length travels with the move; the example clip is often only a short preview
+    o.len ? `Length: about ${o.len} seconds.` : m.seconds ? `Length: about ${m.seconds} seconds (this move's length)${cl.length ? ", or my clip's length if it's shorter" : ""}.` : hasRef && o.look === "original" ? `Length: match the example's length${cl.length ? ", or my clip's length if it's shorter" : ""}.` : "", o.hook ? `Open with this hook, word for word: "${o.hook}"` : "", o.cta ? `End with this call to action: comment ${o.cta}` : ""].filter(Boolean);
+  if (hasRef) {
     c.push(`Reference: study the example before building anything.${o.ref.post ? ` Original post: ${o.ref.post}` : ""}${o.ref.clip ? ` Example clip: ${o.ref.clip}` : ""}`);
     c.push(o.look === "mine" ? "Look: copy the example's layout, motion, caption placement, text sizes and cut rhythm, but use my brand colors and fonts."
       : "Look: match the example as closely as you can (layout, caption style and position, text sizes, colors, font feel, motion, transitions, cut rhythm). Only the footage, words and topic are mine. This line wins over any colors or fonts named above.");
@@ -490,7 +496,7 @@ function packPrompt(m, topic, o = {}) {
   // we bundle no music, so a move that asks for a track must not end in a web download or a silent mismatch
   if (/\b(music|track|beat|song|bgm)s?\b/i.test(m.prompt || "")) c.push("Music: only use music if I put a track (mp3, wav or m4a) in my Inbox. If there isn't one, use no music and never download music from the web. Sound effects from my sound pack are fine.");
   if ((S.dirs || {}).home) c.push(`Studio folder: ${S.dirs.home}`);   // brand kit, Inbox and Projects live here
-  return `Edit Wherever move ${m.id} · ${m.name}\n\n${fill(m.prompt, topic)}${c.length ? "\n\nMy choices:\n- " + c.join("\n- ") : ""}`;
+  return `Edit Wherever move ${m.id} · ${m.name}\n\n${fill(m.prompt, topic, { match: hasRef && o.look === "original", spoken: cl.length > 0 && !o.cta })}${c.length ? "\n\nMy choices:\n- " + c.join("\n- ") : ""}`;
 }
 // ---- beginner helpers: clip picker with drag-and-drop upload, paste guide, tweaks
 let PICK = { clips: [], none: false, multi: false };
@@ -1115,7 +1121,7 @@ function openMove(id) {
   if (/^MY-/.test(id)) return openStyle(id);
   const m = S.moves.find(x => x.id === id); if (!m) return; CUR = id;
   PICK = { ...pickFor(m), len: null, look: "original" };
-  $("#dbody").innerHTML = `${vidPreview(m)}<div class="in">${(m.ref_clip || m.poster) ? `<p style="margin:0 0 8px;font-size:12.5px;color:var(--muted)">Preview: the original video this move recreates, by ${esc(m.credit || "its creator")}. ${safeUrl(m.ref_url) ? `<a href="${esc(m.ref_url)}" target="_blank" rel="noopener">See the original post</a>.` : ""} Your version comes out in your own colors, fonts and topic.</p>` : ""}<span class="k">${esc(m.id)} · ${esc(m.category)} · ${esc(m.level)}</span><h3>${esc(m.name)}</h3><p style="margin:0;color:var(--text-2)">${esc(m.tagline)}</p>
+  $("#dbody").innerHTML = `${vidPreview(m)}<div class="in">${(m.ref_clip || m.poster) ? `<p style="margin:0 0 8px;font-size:12.5px;color:var(--muted)">Preview: the original video this move recreates, by ${esc(m.credit || "its creator")}. ${safeUrl(m.ref_url) ? `<a href="${esc(m.ref_url)}" target="_blank" rel="noopener">See the original post</a>.` : ""} <span id="lookline">${(refSources(m).post || refSources(m).clip) ? "Your version copies its look, with your footage, words and topic." : "Your version comes out in your own colors, fonts and topic."}</span></p>` : ""}<span class="k">${esc(m.id)} · ${esc(m.category)} · ${esc(m.level)}</span><h3>${esc(m.name)}</h3><p style="margin:0;color:var(--text-2)">${esc(m.tagline)}</p>
    <div class="tags" style="margin:10px 0">${(m.best_for || []).map(x => `<span class="tag">${esc(x)}</span>`).join("")}<span class="tag">~${m.seconds}s</span></div>
    ${m.example ? `<div class="field"><label>Real example of this style <span style="font-weight:500;color:var(--muted)">by ${esc(m.example.creator || "the creator")}</span></label><div id="embedBox" class="embed"></div><p style="margin:6px 0 0;font-size:12.5px;color:var(--muted)">Shown with the platform's own embed. Your version uses your clips, brand and topic.</p></div>` : ""}
    ${m.attribution ? `<p style="margin:6px 0 0;font-size:12.5px;color:var(--muted)">${esc(m.attribution)}${safeUrl(m.source_url) ? ` · <a href="${esc(m.source_url)}" target="_blank" rel="noopener">source</a>` : ""}</p>` : ""}
@@ -1146,7 +1152,8 @@ function openMove(id) {
   $("#dtopic").oninput = upd; $("#dhook").oninput = upd; $("#dcta").oninput = upd;
   document.querySelectorAll("#dbody [data-look]").forEach(b => b.onclick = () => { PICK.look = b.dataset.look;
     document.querySelectorAll("#dbody [data-look]").forEach(x => x.setAttribute("aria-pressed", x === b));
-    $("#lookhint").textContent = PICK.look === "original" ? "Claude studies the example and copies it closely. Only your footage, words and topic change." : "Claude copies the example's layout, motion and rhythm, in your brand colors and fonts."; upd(); });
+    $("#lookhint").textContent = PICK.look === "original" ? "Claude studies the example and copies it closely. Only your footage, words and topic change." : "Claude copies the example's layout, motion and rhythm, in your brand colors and fonts.";
+    if ($("#lookline")) $("#lookline").textContent = PICK.look === "original" ? "Your version copies its look, with your footage, words and topic." : "Your version comes out in your own colors, fonts and topic."; upd(); });
   const go = copyOnly => {
     if (!hasFootage()) { toast("Step 1: add or pick a clip first"); return $("#dpick").scrollIntoView({ behavior: "smooth", block: "center" }); }
     if (PICK.none && !$("#dtopic").value.trim()) { toast("Step 2: say what your video is about"); return $("#dtopic").focus(); }
