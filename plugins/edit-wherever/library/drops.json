@@ -1,5 +1,18 @@
 [
   {
+    "version": "0.1.17",
+    "date": "2026-10-29",
+    "title": "Make this, Learn tab, smoother edits",
+    "items": [
+      "Make this: one click opens Claude with your Move ready, just press Enter",
+      "New Learn tab with short lessons and Do it now buttons",
+      "Library previews start on their best moment",
+      "Sharper edits: better length fitting, clearer captions placement, safer sound levels",
+      "Sound mixer stops with a clear message if a sound file is missing",
+      "Faster, sturdier license server"
+    ]
+  },
+  {
     "version": "0.1.16",
     "date": "2026-10-29",
     "title": "Safer loudness",
