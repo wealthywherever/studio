@@ -1,5 +1,16 @@
 [
   {
+    "version": "0.1.15",
+    "date": "2026-10-29",
+    "title": "Launch-film sound",
+    "items": [
+      "Faceless and voiceless videos now get their own sound set, made for each video and tuned to your music's key",
+      "New mixer: every video lands at streaming loudness with no clipped clicks",
+      "Faster pace now means more cuts at the same length",
+      "Animated videos render a quick draft first, then a smooth 60 fps final"
+    ]
+  },
+  {
     "version": "0.1.14",
     "date": "2026-10-29",
     "title": "Updates that find you",
