@@ -318,6 +318,10 @@ details.acc .in{padding:0 18px 18px 60px;color:var(--text-2);font-size:14.5px}de
 .longs{display:grid;gap:8px;margin-bottom:12px}.longs .tw{margin:0}.longs b{overflow-wrap:anywhere}
 .tst{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:0 0 14px}.tst .lab{font-size:13px;color:var(--muted)}
 /* style DNA */
+.prf{padding:20px}.prf h2{margin:4px 0 0}.prf .pl{list-style:none;margin:14px 0 0;padding:0;display:flex;flex-direction:column;gap:10px}.prf .pr{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:6px 12px;align-items:center;padding:12px 14px;border-radius:14px;background:var(--line-soft)}
+.prf .pr>b{font-size:14px;grid-column:1/-1}.prf .pr .pv2{min-width:0}.prf .pr .pv2 .input{padding:8px 12px}.prf .pr small{grid-column:1/-1;font-size:12.5px;color:var(--muted);overflow-wrap:anywhere}.prf .pr .btn{min-height:44px}
+.prf .pmv{font:700 10.5px var(--f-m);letter-spacing:.08em;text-transform:uppercase;color:var(--text-2);margin:16px 0 0}.prf .pb{display:flex;align-items:center;gap:8px;min-height:44px;cursor:pointer;font-size:14px}.prf .pb input{accent-color:var(--brand-b);width:20px;height:20px;flex:none}
+.prf .pfoot{margin-top:14px}.prf .pfoot .btn{min-height:44px}
 .dna{padding:20px}.dnl{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px;margin:14px 0 0}.dnl div{padding:10px 12px;border-radius:12px;background:var(--line-soft);min-width:0}
 .dnl dt{font:700 10.5px var(--f-m);letter-spacing:.08em;text-transform:uppercase;color:var(--text-2)}.dnl dd{margin:3px 0 0;font-weight:700;font-size:14px;overflow-wrap:anywhere}.dna ul{margin:12px 0 0;padding-left:18px;font-size:13.5px;color:var(--text-2)}
 .dna.lock{border-style:dashed;box-shadow:none}
@@ -1187,7 +1191,7 @@ async function toggleFav(id) { const f = new Set(S.state.favorites || []); f.has
 // ---------- BRAND
 let draft = null;
 VIEWS.brand = () => { draft = JSON.parse(JSON.stringify(S.brand)); return `<div class="top"><div><div class="k">Brand kit</div><h1>Your <em>look</em></h1><p class="lead">Every move uses these. Change them anytime: the whole library updates.</p></div></div>
-  <div class="bk"><div>${brandEditor()}<div class="field"><label class="tgl"><input type="checkbox" id="bend" ${draft.end_tag ? "checked" : ""}><span><b>Add a small "Made with Edit Wherever" line to my end cards</b><small>Off by default. You can turn it off again anytime.</small></span></label></div><div class="savebar" id="savebar"><span class="st" id="bstat" role="status">All saved</span><button class="btn grad" id="bsave">Save my brand</button></div><div style="margin-top:6px"><button class="btn sm lite" id="bredo">Redo setup from scratch</button></div></div>${mock()}</div><section>${dnaCard()}</section>`; };
+  <div class="bk"><div>${brandEditor()}<div class="field"><label class="tgl"><input type="checkbox" id="bend" ${draft.end_tag ? "checked" : ""}><span><b>Add a small "Made with Edit Wherever" line to my end cards</b><small>Off by default. You can turn it off again anytime.</small></span></label></div><div class="savebar" id="savebar"><span class="st" id="bstat" role="status">All saved</span><button class="btn grad" id="bsave">Save my brand</button></div><div style="margin-top:6px"><button class="btn sm lite" id="bredo">Redo setup from scratch</button></div></div>${mock()}</div><section><div class="card prf" id="prefs"></div></section><section>${dnaCard()}</section>`; };
 function brandEditor() {
   const d = draft;
   return `<div class="field"><label>Colors</label><div class="pal">${PALETTES.map(([n, p, a, bg]) => `<button data-pal="${n}" aria-pressed="${d.palette.primary === p && d.palette.accent === a}"><div class="sw"><i style="background:${p}"></i><i style="background:${a}"></i><i style="background:${bg}"></i></div>${n}</button>`).join("")}</div>
@@ -1213,7 +1217,35 @@ function bindBrand(root, onChange) {
   const cta = root.querySelector("#bcta"), h = root.querySelector("#bhandle");
   if (cta) cta.oninput = () => draft.cta = cta.value.trim().toUpperCase(); if (h) h.oninput = () => draft.handle = h.value.trim().replace(/^@/, "");
 }
-VIEWS.brand_after = () => { bindBrand(document, null);
+// "What Claude remembers": brand_kit.json preferences, read and written only through /api/preferences
+const PREF_LABELS = { grade: "Colour", skin_retouch: "Skin smoothing", teeth_whiten: "Teeth whitening", cut_pauses: "Pauses", cut_lookaways: "Look-aways", j_cuts: "Sound leads the cut (J-cuts)", zooms: "Zooms", motion_graphics: "Motion graphics", sfx: "Sound effects", captions: "Captions", review_bar: "Quality bar", qa: "Batches" };
+const PREF_META = ["updated", "source", "reasons", "moves"], prefLabel = k => PREF_LABELS[k] || (k.replace(/_/g, " ").replace(/^./, c => c.toUpperCase()));
+function prefField(k, v, move, id) {
+  const d = `data-pk="${esc(k)}"${move ? ` data-pm="${esc(move)}"` : ""}`;
+  if (typeof v === "boolean") return `<label class="pb"><input type="checkbox" ${d} ${v ? "checked" : ""} aria-label="${esc(prefLabel(k))}"><span>${v ? "On" : "Off"}</span></label>`;
+  return `<input class="input" ${d} type="${typeof v === "number" ? "number" : "text"}" maxlength="200" value="${esc(v)}" aria-label="${esc(prefLabel(k))}">`;
+}
+function prefRow(k, v, move, reason) {
+  const d = `data-pk="${esc(k)}"${move ? ` data-pm="${esc(move)}"` : ""}`;
+  return `<li class="pr"><b>${esc(prefLabel(k))}</b><div class="pv2">${prefField(k, v, move)}</div><button class="btn sm" type="button" data-pforget ${d} aria-label="Forget ${esc(prefLabel(k))}">Forget</button>${reason ? `<small>${esc(reason)}</small>` : ""}</li>`;
+}
+function renderPrefs(pr) {
+  const box = $("#prefs"); if (!box) return;
+  const keys = Object.keys(pr).filter(k => !PREF_META.includes(k)), mv = pr.moves && typeof pr.moves === "object" ? Object.entries(pr.moves).filter(([, o]) => o && typeof o === "object" && Object.keys(o).length) : [], rs = pr.reasons || {};
+  box.innerHTML = `<div class="k">Your preferences</div><h2>What Claude remembers about your videos</h2>` + (!keys.length && !mv.length
+    ? `<p class="muted" style="margin:8px 0 0;font-size:14px">Nothing yet. Every time you ask Claude for a change, it remembers it here, so you never have to ask twice.</p>`
+    : `<ul class="pl">${keys.map(k => prefRow(k, pr[k], null, rs[k])).join("")}</ul>` + mv.map(([m, o]) => `<div class="pmv">${esc(m)}</div><ul class="pl">${Object.keys(o).map(k => prefRow(k, o[k], m)).join("")}</ul>`).join("")
+      + `<div class="pfoot"><button class="btn sm lite" type="button" id="pforgetall">Forget everything</button></div>`);
+  const post = async (b, ok) => { const r = await api("/api/preferences", b).catch(() => ({})); if (!r.ok) { toast(r.error || "Couldn't save. Is your studio still running?"); return loadPrefs(); } renderPrefs(r.preferences); if (ok) toast(ok); };
+  const ref = el => ({ key: el.dataset.pk, ...(el.dataset.pm ? { move: el.dataset.pm } : {}) });
+  box.querySelectorAll("input[data-pk]").forEach(el => el.onchange = () => {
+    if (el.type === "checkbox") { el.nextElementSibling.textContent = el.checked ? "On" : "Off"; return post({ ...ref(el), value: el.checked }, "Saved"); }
+    post({ ...ref(el), value: el.type === "number" && el.value !== "" ? +el.value : el.value }, "Saved"); });
+  box.querySelectorAll("[data-pforget]").forEach(b => b.onclick = () => post({ ...ref(b), unset: true }, "Forgotten"));
+  const fa = $("#pforgetall"); if (fa) fa.onclick = () => askSheet("Forget everything?", "Claude will stop applying these choices to your videos. You can always ask again.", "Forget everything", () => post({ reset: true }, "All forgotten"), fa);
+}
+const loadPrefs = () => api("/api/preferences").then(r => renderPrefs(r.preferences || {})).catch(() => { const b = $("#prefs"); if (b) b.innerHTML = `<p class="muted">Couldn't load your preferences.</p>`; });
+VIEWS.brand_after = () => { bindBrand(document, null); loadPrefs();
   const stat = () => { const d = JSON.stringify(draft) !== JSON.stringify(S.brand), bar = $("#savebar"); if (!bar) return; bar.classList.toggle("dirty", d); $("#bstat").textContent = d ? "Unsaved changes" : "All saved"; };
   const v = $("#view"); v.onclick = () => setTimeout(stat, 0); v.oninput = stat;
   $("#bsave").onclick = async () => { const r = await api("/api/brand", draft).catch(() => ({ error: "Couldn't save. Is your studio still running?" })); if (!r.ok) return toast(r.error || "Couldn't save your brand.");
