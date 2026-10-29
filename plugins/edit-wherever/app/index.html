@@ -17,7 +17,7 @@
 <style>
 :root{color-scheme:light;
  --bg:#fffcf9;--surface:#ffffff;--raised:#ffffff;--line:#ece4da;--line-soft:#f4eee6;
- --text:#15161b;--text-2:#4a4650;--muted:#7d7680;
+ --text:#15161b;--text-2:#4a4650;--muted:#6b646f;
  --brand-a:#ff5c4d;--brand-b:#d93a2c;--brand-c:#f2b85a;
  --u-primary:#17151c;--u-accent:#ff5a3c;--u-bg:#fff7ef;--u-head:"Inter Tight";--u-body:"Inter";
  --good:#13a065;--bad:#e5483a;--coral:#ff5c4d;--good-soft:rgba(19,160,101,.12);
@@ -26,7 +26,7 @@
  --shadow:0 1px 0 rgba(255,255,255,.8) inset,0 20px 40px -28px rgba(40,20,60,.35)}
 @media (prefers-color-scheme:dark){:root:not([data-theme=light]){color-scheme:dark;--bg:#111216;--surface:#1b1c21;--raised:#222329;--line:#2e2f36;--line-soft:#25262c;--text:#f4f1ec;--text-2:#c9c3bb;--muted:#8f8a84;--brand-a:#ff6b5c;--brand-b:#ff5c4d;--brand-c:#f2b85a;--shadow:0 20px 40px -28px rgba(0,0,0,.7)}}
 :root[data-theme=dark]{color-scheme:dark;--bg:#111216;--surface:#1b1c21;--raised:#222329;--line:#2e2f36;--line-soft:#25262c;--text:#f4f1ec;--text-2:#c9c3bb;--muted:#8f8a84;--brand-a:#ff6b5c;--brand-b:#ff5c4d;--brand-c:#f2b85a;--shadow:0 20px 40px -28px rgba(0,0,0,.7)}
-*{box-sizing:border-box}html,body{margin:0;background:var(--bg);color:var(--text);font:15px/1.55 var(--f-b);-webkit-font-smoothing:antialiased}
+*{box-sizing:border-box}@media(min-width:861px){html{scrollbar-gutter:stable}}html,body{margin:0;background:var(--bg);color:var(--text);font:15px/1.55 var(--f-b);-webkit-font-smoothing:antialiased}
 button,input,select,textarea{font:inherit;color:inherit}a{color:inherit}
 :focus-visible{outline:2px solid var(--brand-b);outline-offset:2px;border-radius:8px}
 .app{display:grid;grid-template-columns:248px minmax(0,1fr);min-height:100vh}
@@ -71,19 +71,29 @@ section{margin-top:34px}.sh{display:flex;align-items:flex-end;justify-content:sp
 .ci.done i::after{content:"";width:9px;height:5px;border:2.5px solid #fff;border-top:0;border-right:0;transform:rotate(-45deg) translate(1px,-1px)}
 .ci b{font-size:14.5px}.ci.done b{color:var(--muted);text-decoration:line-through}.ci span{display:block;font-size:12.5px;color:var(--muted)}.ci .btn{margin-left:auto}
 .days{display:grid;grid-template-columns:repeat(7,1fr);gap:8px}.day{aspect-ratio:1;border-radius:14px;border:1.5px solid var(--line);display:grid;place-items:center;font:800 15px var(--f-h);cursor:pointer;background:var(--raised)}
-.day.on{background:linear-gradient(135deg,var(--brand-a),var(--brand-b));color:#fff;border:0}
+.day.on{background:linear-gradient(135deg,var(--brand-a),var(--brand-b));color:#fff;border:0}.day:disabled{opacity:.45;cursor:default}
+.ci.cur{background:color-mix(in srgb,var(--coral) 9%,transparent)}.ci.cur i{border-color:var(--coral)}.ci.cur b{font-size:16px}.ci:not(.cur) b{color:var(--text-2)}.ci>div{min-width:0}
+@media(max-width:1100px){.eng3>:last-child:nth-child(odd){grid-column:1/-1}}
+@media(max-width:480px){.top{flex-wrap:wrap}.top>div:first-child{flex:1 1 100%}.top>.btn{align-self:flex-start}.ci{flex-wrap:wrap}.ci .btn{margin-left:36px}}
 /* engines */
 .eng{padding:22px;display:flex;flex-direction:column;gap:10px;position:relative;overflow:hidden}.eng .ic{width:48px;height:48px;border-radius:14px;display:grid;place-items:center;color:#fff}
 .eng h3{margin:4px 0 0;font:700 19px var(--f-h)}.eng p{margin:0;color:var(--text-2);font-size:14px}.eng .btn{align-self:flex-start;margin-top:auto}
 /* move cards */
 .mc{background:var(--surface);border:1px solid var(--line-soft);border-radius:var(--r-lg);overflow:hidden;display:flex;flex-direction:column;cursor:pointer;text-align:left;padding:0;transition:transform .25s var(--ease),box-shadow .25s,border-color .2s}
-.mc:hover{transform:translateY(-3px);border-color:var(--line);box-shadow:var(--shadow)}
-.mc .pv{height:auto;aspect-ratio:1/1}.mc .bd{padding:13px 14px 15px;display:flex;flex-direction:column;gap:5px}.mc .id{font:600 11px var(--f-m);color:var(--muted);letter-spacing:.06em}
+.mc:focus-visible{outline-offset:3px;border-radius:var(--r-lg)}.mc:hover{transform:translateY(-3px);border-color:var(--line);box-shadow:var(--shadow)}
+.mc .pv{height:auto;aspect-ratio:1/1}.mc .vidpv video,.mc .vidpv img{object-fit:cover;transition:transform .6s var(--ease)}.mc .vidpv::before{display:none}.mc .bd{padding:13px 14px 15px;display:flex;flex-direction:column;gap:5px}.mc .id{font:600 11px var(--f-m);color:var(--text-2);letter-spacing:.06em}
+.mc .th{position:relative}.mc .mb{position:absolute;left:10px;right:10px;bottom:10px;z-index:2;display:flex;align-items:center;justify-content:space-between;gap:6px;pointer-events:none}
+.mc .mb span{display:inline-flex;align-items:center;gap:6px;font:700 11px var(--f-m);letter-spacing:.04em;color:#fff;background:rgba(15,12,20,.62);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);padding:4px 9px;border-radius:99px;white-space:nowrap}
+.mc .mb .lv::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--brand-c)}.mc .mb .lv.b::before{background:var(--good)}.mc .mb .lv.p::before{background:var(--brand-a)}
+.mc .kick{display:flex;justify-content:space-between;align-items:baseline;gap:8px}.mc .cat{font:700 10.5px var(--f-m);letter-spacing:.1em;text-transform:uppercase;color:var(--brand-b);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+@media (hover:hover){.mc:hover .vidpv video,.mc:hover .vidpv img{transform:scale(1.04)}}
+.sk{border-radius:var(--r-md);background:linear-gradient(100deg,var(--line-soft) 30%,var(--line) 50%,var(--line-soft) 70%);background-size:220% 100%;animation:sk 1.5s ease-in-out infinite}@keyframes sk{from{background-position:120% 0}to{background-position:-120% 0}}
+.skw{display:grid;gap:14px}.skg{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:14px}
 .mc h4{margin:0;font:700 16px var(--f-h)}.mc p{margin:0;font-size:13px;color:var(--text-2);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
 .tags{display:flex;gap:6px;flex-wrap:wrap;margin-top:4px}.tag{font:600 11px var(--f-m);border-radius:6px;padding:2px 7px;background:var(--line-soft);color:var(--text-2)}
 .fav{position:absolute;z-index:3;right:10px;top:10px;width:32px;height:32px;border-radius:50%;border:0;background:rgba(255,255,255,.85);display:grid;place-items:center;cursor:pointer;color:#17151c}
 .fav[aria-pressed=true]{background:var(--brand-b);color:#fff}
-/* live previews (brand-coloured, CSS only) */
+/* live previews (brand-colored, CSS only) */
 .pv{position:relative;overflow:hidden;background:var(--u-bg);display:grid;place-items:center}
 .phone{position:relative;height:82%;aspect-ratio:9/16;border-radius:14px;background:var(--u-bg);box-shadow:0 0 0 2px color-mix(in srgb,var(--u-primary) 12%,transparent),0 14px 26px -16px rgba(0,0,0,.4);overflow:hidden}
 .pv .tx{position:absolute;left:10%;right:10%;font-family:var(--u-head);font-weight:800;color:var(--u-primary);font-size:9px;line-height:1.1}
@@ -136,7 +146,7 @@ section{margin-top:34px}.sh{display:flex;align-items:flex-end;justify-content:sp
 .lcount{margin-left:auto;font:600 12.5px var(--f-m);color:var(--muted)}
 .lgrid.sz-xs{grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px}.lgrid.sz-s{grid-template-columns:repeat(auto-fill,minmax(210px,1fr))}
 .lgrid.sz-m{grid-template-columns:repeat(auto-fill,minmax(290px,1fr))}.lgrid.sz-l{grid-template-columns:repeat(auto-fill,minmax(420px,1fr))}
-.lgrid.sz-xs .mc .bd p,.lgrid.sz-xs .mc .tags,.lgrid.sz-xs .srcbadge{display:none}.lgrid.sz-xs .mc .bd{padding:8px 10px 10px}.lgrid.sz-xs .mc h4{font-size:13px}.lgrid.sz-xs .fav{width:26px;height:26px}
+.lgrid.sz-xs .mc .bd p,.lgrid.sz-xs .mc .tags,.lgrid.sz-xs .srcbadge,.lgrid.sz-xs .mc .mb .lv,.lgrid.sz-xs .mc .id,.lgrid.lv .mc .mb .lv{display:none}.lgrid.sz-xs .mc .bd{padding:8px 10px 10px}.lgrid.sz-xs .mc h4{font-size:13px}.lgrid.sz-xs .fav{width:26px;height:26px}
 .lgrid.lv{grid-template-columns:1fr;gap:8px}.lgrid.lv .mc{flex-direction:row;align-items:center}.lgrid.lv .mc>div:first-child{width:132px;flex:none}
 .lgrid.lv .mc .pv{aspect-ratio:1}.lgrid.lv .srcbadge,.lgrid.lv .fav{display:none}.lgrid.lv .mc .bd{flex:1;min-width:0}
 @media(max-width:640px){.lgrid.sz-xs,.lgrid.sz-s{grid-template-columns:repeat(2,minmax(0,1fr))}.lgrid.sz-m,.lgrid.sz-l{grid-template-columns:minmax(0,1fr)}.lgrid.lv .mc>div:first-child{width:96px}.lcount{width:100%;margin:0}}
@@ -172,9 +182,9 @@ kbd{font:700 12px var(--f-m);padding:2px 7px;border:1px solid var(--line);border
 .edlist{display:flex;flex-direction:column;gap:8px;max-height:calc(100vh - 220px);overflow:auto;position:sticky;top:16px}
 .edi{display:flex;gap:10px;align-items:center;text-align:left;padding:8px;border:1.5px solid var(--line);border-radius:14px;background:var(--surface);color:var(--text);cursor:pointer}
 .edi[aria-pressed=true]{border-color:var(--coral);box-shadow:0 0 0 3px color-mix(in srgb,var(--coral) 18%,transparent)}
-.edi video,.edi .edph{width:46px;height:64px;border-radius:9px;object-fit:cover;background:#0d0c10;flex:none;display:grid;place-items:center;color:var(--muted)}.edi .edph svg{width:20px;height:20px}
+.edi video,.edi .edph{width:46px;height:64px;border-radius:9px;object-fit:cover;background:#0d0c10;flex:none;display:grid;place-items:center;color:var(--muted)}.edi .edph{background:linear-gradient(135deg,var(--u-accent),var(--u-primary));color:#fff}.edi .edph svg{width:20px;height:20px}
 .edi span{min-width:0;display:flex;flex-direction:column}.edi b{font-size:13.5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.edi small{font-size:12px;color:var(--muted)}
-.edmain{min-width:0}.edempty{border:1.5px dashed var(--line);border-radius:18px;padding:22px;display:flex;flex-direction:column;gap:10px;align-items:flex-start}
+.edmain{min-width:0;margin-top:0}.edempty{border:1.5px dashed var(--line);border-radius:18px;padding:22px;display:flex;flex-direction:column;gap:10px;align-items:flex-start}
 .edbar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:10px}.edbar>b{font-size:15px;margin-right:auto}
 .edframe{width:100%;height:calc(100vh - 230px);min-height:560px;border:1.5px solid var(--line);border-radius:16px;background:#fff;display:block}
 .ednew{padding:20px;margin-bottom:18px}.ens{display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:8px}
@@ -203,11 +213,17 @@ kbd{font:700 12px var(--f-m);padding:2px 7px;border:1px solid var(--line);border
 .toast.on{opacity:1;transform:translate(-50%,0)}
 /* projects */
 .vg{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:14px}.vc{border-radius:16px;overflow:hidden;background:#000;aspect-ratio:9/16;position:relative}
-.vc video{width:100%;height:100%;object-fit:cover}.vc b{position:absolute;left:0;right:0;bottom:0;padding:24px 10px 10px;color:#fff;font-size:12.5px;background:linear-gradient(transparent,rgba(0,0,0,.7))}
+.vc{cursor:pointer}.vc video{width:100%;height:100%;object-fit:cover}.vc .pl{position:absolute;left:50%;top:50%;width:52px;height:52px;margin:-26px 0 0 -26px;border-radius:50%;background:rgba(15,12,20,.55);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);pointer-events:none;transition:opacity .2s}
+.vc .pl::after{content:"";position:absolute;left:21px;top:16px;border-style:solid;border-width:10px 0 10px 16px;border-color:transparent transparent transparent #fff}.vc.on .pl{opacity:0}.vc b{position:absolute;left:0;right:0;bottom:0;padding:24px 10px 10px;color:#fff;font-size:12.5px;background:linear-gradient(transparent,rgba(0,0,0,.7))}
 /* brand */
 .bk{display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:22px}@media(max-width:900px){.bk{grid-template-columns:minmax(0,1fr)}}
 .pal{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}.pal button{border:2px solid transparent;border-radius:14px;padding:8px;background:var(--raised);cursor:pointer;text-align:left;font-size:12px;font-weight:600}
-.pal button[aria-pressed=true]{border-color:var(--text)}.sw{display:flex;height:34px;border-radius:9px;overflow:hidden;margin-bottom:6px}.sw i{flex:1}
+.pal button[aria-pressed=true]{border-color:var(--text)}.sw{display:flex;height:34px;border-radius:9px;overflow:hidden;margin-bottom:6px;outline:1px solid var(--line);outline-offset:-1px}.sw i{flex:1}.sw i+i{box-shadow:inset 1px 0 0 rgba(128,128,128,.35)}
+.savebar{position:sticky;bottom:16px;z-index:8;display:flex;align-items:center;gap:10px;margin-top:20px;padding:10px 12px;border:1px solid var(--line);border-radius:18px;background:color-mix(in srgb,var(--surface) 92%,transparent);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);box-shadow:0 14px 30px -16px rgba(0,0,0,.35)}
+.savebar .st{flex:1;min-width:0;white-space:nowrap;display:flex;align-items:center;gap:8px;font-size:13.5px;color:var(--muted)}.savebar .st::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--good);flex:none}.savebar.dirty .st{color:var(--text);font-weight:600}.savebar.dirty .st::before{background:var(--brand-c)}
+.btn.lite{border-color:transparent;background:transparent;color:var(--muted)}.mock .mlab{display:none}
+@media(max-width:860px){.savebar{bottom:calc(88px + env(safe-area-inset-bottom,0px))}}
+@media(max-width:900px){.bk{display:flex;flex-direction:column;gap:12px}.bk>.mock{position:sticky;top:8px;z-index:9;order:-1;align-self:stretch;display:flex;align-items:center;gap:14px;border-radius:20px;padding:8px 14px}.mock .scr{zoom:.3;width:180px;flex:none;border-radius:26px}.mock .mlab{display:block;color:#fff;font-size:13px;font-weight:600;line-height:1.35}.mock .mlab small{display:block;color:rgba(255,255,255,.7);font-weight:500}}
 @media(max-width:640px){.pal{grid-template-columns:repeat(2,1fr)}}
 .fp{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}.fp button{border:2px solid var(--line-soft);border-radius:14px;padding:14px;background:var(--raised);cursor:pointer;text-align:left}.fp button[aria-pressed=true]{border-color:var(--text)}
 .fp b{display:block;font-size:22px;line-height:1.05}.fp span{font-size:12px;color:var(--muted)}@media(max-width:640px){.fp{grid-template-columns:repeat(2,1fr)}}
@@ -254,7 +270,7 @@ details.acc .in{padding:0 18px 18px 60px;color:var(--text-2);font-size:14.5px}
   <nav class="nav" id="nav"></nav>
   <div class="me" id="me"></div>
  </aside>
- <main id="view" tabindex="-1"></main>
+ <main id="view" tabindex="-1"><div class="skw" role="status" aria-label="Loading your studio"><div class="sk" style="height:14px;width:90px"></div><div class="sk" style="height:46px;width:min(420px,70%)"></div><div class="sk" style="height:200px;border-radius:var(--r-xl)"></div><div class="skg"><div class="sk" style="height:250px"></div><div class="sk" style="height:250px"></div><div class="sk" style="height:250px"></div></div></div></main>
 </div>
 <nav class="tabbar" id="tabbar"></nav>
 <div class="offline" id="offline" role="alert" hidden><div><b>Your studio is closed</b><span>It closes when its Claude chat ends. Paste this into Claude to reopen it.</span></div><button class="btn sm grad" data-copy="Open my Edit Wherever studio.">Copy "Open my studio"</button></div>
@@ -363,8 +379,8 @@ function packPrompt(m, topic, o = {}) {
     o.len ? `Length: about ${o.len} seconds.` : o.ref && o.look === "original" ? `Length: match the example's length${cl.length ? " (trim my footage to fit)" : ""}.` : "", o.hook ? `Open with this hook, word for word: "${o.hook}"` : "", o.cta ? `End with this call to action: comment ${o.cta}` : ""].filter(Boolean);
   if (o.ref && (o.ref.post || o.ref.clip)) {
     c.push(`Reference: study the example before building anything.${o.ref.post ? ` Original post: ${o.ref.post}` : ""}${o.ref.clip ? ` Example clip: ${o.ref.clip}` : ""}`);
-    c.push(o.look === "mine" ? "Look: copy the example's layout, motion, caption placement, text sizes and cut rhythm, but use my brand colours and fonts."
-      : "Look: match the example as closely as you can (layout, caption style and position, text sizes, colours, font feel, motion, transitions, cut rhythm). Only the footage, words and topic are mine. This line wins over any colours or fonts named above.");
+    c.push(o.look === "mine" ? "Look: copy the example's layout, motion, caption placement, text sizes and cut rhythm, but use my brand colors and fonts."
+      : "Look: match the example as closely as you can (layout, caption style and position, text sizes, colors, font feel, motion, transitions, cut rhythm). Only the footage, words and topic are mine. This line wins over any colors or fonts named above.");
   }
   // we bundle no music, so a move that asks for a track must not end in a web download or a silent mismatch
   if (/\b(music|track|beat|song|bgm)s?\b/i.test(m.prompt || "")) c.push("Music: only use music if I put a track (mp3, wav or m4a) in my Inbox. If there isn't one, use no music and never download music from the web. Sound effects from my sound pack are fine.");
@@ -458,10 +474,11 @@ function vidPreview(m) {
   return `<div class="pv vidpv"${bg}><video src="${esc(src)}" ${m.poster ? `poster="${esc(m.poster)}"` : ""} muted loop playsinline autoplay preload="${m.poster ? "none" : "metadata"}"></video>${tag}</div>`;
 }
 function moveCard(m) {
-  return `<article class="mc" data-move="${esc(m.id)}" tabindex="0" role="button" aria-label="${esc(m.name)}"><div style="position:relative">${vidPreview(m)}
+  const lv = m.level === "Beginner" ? "b" : /^(Pro|Advanced)/.test(m.level || "") ? "p" : "", sec = Math.round(m.seconds || 0);
+  return `<article class="mc" data-move="${esc(m.id)}" tabindex="0" role="button" aria-label="${esc(m.name)}"><div class="th">${vidPreview(m)}
+   <div class="mb"><span class="lv ${lv}">${esc(m.level)}</span>${sec ? `<span>~${sec}s${m.aspect && m.aspect !== "9:16" ? " · " + esc(m.aspect) : ""}</span>` : ""}</div>
    <button class="fav" data-fav="${esc(m.id)}" aria-pressed="${isFav(m.id)}" aria-label="Save">${I.heart}</button></div>
-   <div class="bd"><span class="id">${esc(m.id)} · ${esc(m.category)}</span><h4>${esc(m.name)}</h4><p>${esc(m.tagline)}</p>
-   <div class="tags"><span class="tag">${esc(m.level)}</span><span class="tag">~${m.seconds}s</span>${m.aspect && m.aspect !== "9:16" ? `<span class="tag">${esc(m.aspect)}</span>` : ""}</div></div></article>`;
+   <div class="bd"><div class="kick"><span class="cat">${esc(m.category)}</span><span class="id">${esc(m.id)}</span></div><h4>${esc(m.name)}</h4><p>${esc(m.tagline)}</p></div></article>`;
 }
 
 // ---------- router + chrome
@@ -488,19 +505,21 @@ VIEWS.home = () => {
   const b = S.brand || {}, done = S.state.done || {}, ch = S.state.challenge || [];
   const steps = [["setup", "Set up your studio", "Your brand kit is ready", true],
     ...(faceless() ? [] : [["clip", "Add your first clip", "Drag a video into the studio", S.inbox.length > 0, `<a class="btn sm" href="#/first">Add clip</a>`]]),
-    faceless() ? ["first", "Make your first video", "Pick an animated style, copy it, paste it into Claude", S.projects.length > 0, `<a class="btn sm grad" href="#/library">Start</a>`]
+    faceless() ? ["first", "Make your first video", "Pick an animated move, copy it, paste it into Claude", S.projects.length > 0, `<a class="btn sm grad" href="#/library">Start</a>`]
       : ["first", "Make your first video", "A guided walkthrough, about 15 minutes", S.projects.length > 0, `<a class="btn sm grad" href="#/first">Start</a>`],
     ["post", "Post it", "Share it and tag #EditWherever", !!done.post, `<button class="btn sm" data-done="post">I posted it</button>`],
     ["seven", "Start 7 videos in 7 days", "One a day, a new move each time", ch.length > 0, `<a class="btn sm" href="#challenge">See it</a>`]];
-  const picks = pickForYou(6), u = S.update;
+  const picks = pickForYou(6), u = S.update, made = S.projects.length > 0, left = steps.filter(s => !s[3]), nd = steps.length - left.length, locked = !made && !ch.length;
+  const fw = left.length ? `<div class="card"><div style="padding:18px 20px 4px"><div class="k">${made ? "Next up" : "Start here"}</div><h2 style="margin-top:4px">${made ? "Keep the momentum going" : "Your first video, step by step"}</h2>
+     <div class="fvp" style="margin:12px 0 6px"><i style="width:${Math.round(100 * nd / steps.length)}%"></i></div><span class="muted" style="font-size:12.5px">${nd} of ${steps.length} done</span></div>
+     <div class="check">${left.map(([id, t, s, ok, act], i) => `<div class="ci ${i === 0 ? "cur" : ""}"><i></i><div><b>${t}</b><span>${s}</span></div>${i === 0 ? (act || "").replace(/btn sm( grad)?/, "btn grad") : ""}</div>`).join("")}</div></div>` : "";
   return `${u ? `<div class="card upd" role="status"><div><b>Update ready: v${esc(u.latest)}${u.title ? ` · ${esc(u.title)}` : ""}</b><span>${esc((u.items || []).slice(0, 3).join(" · "))}</span></div>
     <button class="btn sm grad" data-copy="Update Edit Wherever to the latest version.">${I.copy} Copy "Update" for Claude</button></div>` : ""}<div class="hero"><div class="k">${greet()}, ${esc(b.name || "creator")}</div><h1>Your studio is ready.</h1>
-    <p>Pick a move, paste it into Claude, and your video lands in Projects, in your colours and fonts.</p>
-    <div class="row">${S.projects.length ? `<a class="btn" href="#/make">Make a video</a>` : `<a class="btn" href="#/first">Make my first video</a>`}<a class="btn ghost" href="#/library">Browse ${S.moves.length} moves</a></div></div>
-   <section class="grid g2"><div class="card"><div style="padding:18px 20px 4px"><div class="k">First win</div><h2 style="margin-top:4px">Your first video in 15 minutes</h2></div>
-     <div class="check">${steps.map(([id, t, s, ok, act]) => `<div class="ci ${ok ? "done" : ""}"><i></i><div><b>${t}</b><span>${s}</span></div>${ok ? "" : act || ""}</div>`).join("")}</div></div>
-    <div class="card" id="challenge" style="padding:20px"><div class="k">Challenge</div><h2 style="margin-top:4px">7 videos in 7 days</h2><p class="lead" style="font-size:14px">Tap a day when you've posted. Each day unlocks a suggested move.</p>
-     <div class="days" style="margin-top:16px">${[1, 2, 3, 4, 5, 6, 7].map(d => `<button class="day ${ch.includes(d) ? "on" : ""}" data-day="${d}" aria-pressed="${ch.includes(d)}">${d}</button>`).join("")}</div>
+    <p>Pick a move, paste it into Claude, and your video lands in Projects, in your colors and fonts.</p>
+    <div class="row">${S.projects.length ? `<a class="btn" href="#/make">Make a video</a>` : `<a class="btn" href="${firstHref()}">Make my first video</a>`}<a class="btn ghost" href="#/library">Browse ${S.moves.length} moves</a></div></div>
+   <section class="grid ${fw ? "g2" : ""}" style="align-items:start">${fw}
+    <div class="card" id="challenge" style="padding:20px"><div class="k">Challenge</div><h2 style="margin-top:4px">7 videos in 7 days</h2><p class="lead" style="font-size:14px">${locked ? "Unlocks after your first video. Then post one a day and tap each day here." : "Post one video a day. Tap a day once you've posted it."}</p>
+     <div class="days" style="margin-top:16px">${[1, 2, 3, 4, 5, 6, 7].map(d => `<button class="day ${ch.includes(d) ? "on" : ""}" data-day="${d}" aria-pressed="${ch.includes(d)}" aria-label="Day ${d}${ch.includes(d) ? ", posted" : ""}" ${locked ? "disabled" : ""}>${d}</button>`).join("")}</div>
      <p style="font-size:13px;color:var(--muted);margin:14px 0 0">${ch.length}/7 done${ch.length === 7 ? " · You did it. 🎉" : ""}</p></div></section>
    ${(S.state.recent || []).length ? `<section><div class="sh"><div><div class="k">Pick up where you left off</div><h2>Recently used</h2></div><a class="btn sm" href="#/library" onclick="LQ.recent=true">See all</a></div>
     <div class="grid g3">${(S.state.recent || []).slice(0, 3).map(id => S.moves.find(m => m.id === id)).filter(Boolean).map(moveCard).join("")}</div></section>` : ""}
@@ -521,8 +540,8 @@ function pickForYou(n) {
 
 // ---------- MAKE
 VIEWS.make = () => `<div class="top"><div><div class="k">Make</div><h1>What are we <em>making</em>?</h1><p class="lead">Pick one. You'll get a prompt made for you: paste it into Claude (Code tab) and your video appears in Projects.</p></div></div>
- <div class="grid g4">
-  <div class="card eng"><div class="ic" style="background:linear-gradient(135deg,#ff7e5f,#ff3f7a)">${I.proj}</div><h3>Edit my footage</h3><p>Talking to camera, vlog clips, b-roll. It cuts, captions, zooms and adds sound for you.</p><button class="btn pri" data-eng="edit">Start editing</button></div>
+ <div class="grid g3 eng3">
+  <div class="card eng"><div class="ic" style="background:linear-gradient(135deg,#ff7e5f,#ff3f7a)">${I.proj}</div><h3>Edit my footage</h3><p>Talking to camera or vlog clips. It cuts, captions, zooms and adds sound for you.</p><button class="btn pri" data-eng="edit">Start editing</button></div>
   <div class="card eng"><div class="ic" style="background:linear-gradient(135deg,#ff3f7a,#6a45ff)">${I.make}</div><h3>Create from one sentence</h3><p>No footage? Type an idea. It builds a motion-graphics explainer in your brand.</p><button class="btn pri" data-eng="create">Start creating</button></div>
   <div class="card eng"><div class="ic" style="background:linear-gradient(135deg,#22d3ee,#3ddc97)">${I.new}</div><h3>Recreate any edit</h3><p>Saw an edit you love? Paste the link. It copies the style onto your clips, in your brand.</p><button class="btn pri" data-eng="recreate">Recreate a style</button></div>
  </div>
@@ -534,7 +553,7 @@ const ENG = {
 function recreateComposer() {
   PICK = { clips: S.inbox[0] ? [S.inbox[0].name] : [], none: false, multi: true };
   $("#composer").innerHTML = `<div class="card" style="padding:22px"><div class="k">Recreate any edit</div><h2 style="margin-top:4px">Copy the style, keep it yours</h2>
-   <p class="lead" style="font-size:14px">Paste a link to a reel you love. Claude studies its cuts, text, colour and sound, then edits <b>your</b> clips the same way. It never uses their footage, music, voice or words.</p>
+   <p class="lead" style="font-size:14px">Paste a link to a reel you love. Claude studies its cuts, text, color and sound, then edits <b>your</b> clips the same way. It never uses their footage, music, voice or words.</p>
    <div class="field"><label for="rlink">1 · Reel link</label><input class="input" id="rlink" placeholder="https://www.instagram.com/reel/..."></div>
    <div class="field"><label>2 · Your clips <span style="font-weight:500;color:var(--muted)">(tap several, in order, or pick "No clip" to animate it)</span></label><div id="rpick"></div></div>
    <div class="field"><label>Look</label><div class="seg look" role="group"><button data-rlook="original" aria-pressed="true">Match it closely</button><button data-rlook="mine" aria-pressed="false">In my brand</button></div></div>
@@ -545,7 +564,7 @@ function recreateComposer() {
   const make = () => { const link = $("#rlink").value.trim(), topic = $("#rtopic").value.trim(), cl = PICK.clips || [];
     const lines = [link ? `Reference: Original post: ${link}` : "Reference: [paste the reel link]",
       PICK.none ? "Footage: none. Make this one fully animated." : cl.length ? `Footage: use ONLY these clips, in this order (never use any other video):\n${cl.map((n, i) => `  ${i + 1}. ${clipPath(n)}`).join("\n")}` : "Footage: [add a clip in the Studio]",
-      look === "mine" ? "Look: copy its cuts, layout, motion, text placement and rhythm, but use my brand colours and fonts." : "Look: match it as closely as you can (cuts, layout, text style and position, colour, motion, rhythm). Only my footage, words and topic change.",
+      look === "mine" ? "Look: copy its cuts, layout, motion, text placement and rhythm, but use my brand colors and fonts." : "Look: match it as closely as you can (cuts, layout, text style and position, color, motion, rhythm). Only my footage, words and topic change.",
       `Topic: ${topic || "the topic I talk about in my clips"}`, "Music: only if I've added a music file to my Inbox; otherwise no music.",
       (S.dirs || {}).home ? `Studio folder: ${S.dirs.home}` : ""].filter(Boolean);
     return `Edit Wherever recreate\n\nRecreate the editing style of this reel with my own footage. Copy the style only: never their footage, music, voice or exact words. Show me a short breakdown, a side-by-side preview, then wait for my OK before the final render.\n\nMy choices:\n- ${lines.join("\n- ")}`; };
@@ -565,7 +584,7 @@ function composer(k) {
   const clips = k === "edit" ? `<div class="field"><label>Your clip</label><div id="cpick"></div></div>` : "";
   $("#composer").innerHTML = `<div class="card" style="padding:22px"><div class="k">${e.title}</div>${clips}
    <div class="field"><label for="ctopic">${e.ask}</label><input class="input" id="ctopic" placeholder="e.g. 3 mistakes beginners make with ${esc((S.brand || {}).niche || "my niche")}"></div>
-   <div class="field"><label for="cmove">Style</label><input class="input" id="cmoveq" type="search" placeholder="Search ${opts.length} styles: captions, zoom, explainer…" aria-label="Search styles"><select class="input" id="cmove"></select></div>
+   <div class="field"><label for="cmove">Move</label><input class="input" id="cmoveq" type="search" placeholder="Search ${opts.length} moves: captions, zoom, explainer…" aria-label="Search moves"><select class="input" id="cmove"></select></div>
    <div id="cprev" class="grid g2" style="align-items:start"></div></div>`;
   const upd = () => { const m = S.moves.find(x => x.id === $("#cmove").value); if (!m) return;
     $("#cprev").innerHTML = `<div class="card" style="overflow:hidden">${m.preview && !hasVis(m) ? preview(m.preview) : vidPreview(m)}<div style="padding:12px 14px"><b>${esc(m.name)}</b><p style="margin:2px 0 0;font-size:13px;color:var(--text-2)">${esc(m.tagline)}</p></div></div>
@@ -577,7 +596,7 @@ function composer(k) {
       copy(packPrompt(m, $("#ctopic").value.trim(), { clips: PICK.clips, none: PICK.none, look: "original", ref: refSources(m) }), "Copied"); remember(m.id); pasteGuide(); }; };
   if (k === "edit") { const dp = () => { const m = S.moves.find(x => x.id === $("#cmove").value); if (m) PICK.multi = multiClip(m); $("#cpick").innerHTML = clipPicker(false); bindPicker($("#cpick"), () => { dp(); upd(); }); }; dp(); }
   const fillOpts = () => { const q = $("#cmoveq").value.trim().toLowerCase(), cur = $("#cmove").value, l = opts.filter(m => !q || [m.category, m.name, m.level, m.tagline].join(" ").toLowerCase().includes(q));
-    $("#cmove").innerHTML = l.map(m => `<option value="${esc(m.id)}">${esc(m.category)} · ${esc(m.name)} (${esc(m.level)})</option>`).join("") || `<option value="">No style matches</option>`; if (l.some(m => m.id === cur)) $("#cmove").value = cur; upd(); };
+    $("#cmove").innerHTML = l.map(m => `<option value="${esc(m.id)}">${esc(m.category)} · ${esc(m.name)} (${esc(m.level)})</option>`).join("") || `<option value="">No move matches</option>`; if (l.some(m => m.id === cur)) $("#cmove").value = cur; upd(); };
   $("#cmoveq").oninput = fillOpts; $("#cmove").onchange = upd; $("#ctopic").oninput = upd; fillOpts(); $("#composer").scrollIntoView({ behavior: "smooth", block: "start" });
 }
 
@@ -594,7 +613,7 @@ VIEWS.first = () => {
   return `<div class="top"><div><div class="k">Your first video</div><h1>Let's make <em>one together</em></h1><p class="lead">Five steps, about 15 minutes. Each step ticks itself when it's done. No code, ever.</p></div></div>
    <div class="fvp"><i style="width:${pct}%"></i></div>
    ${step(0, "Add a video of you talking", `<p>Any phone video works: 15 to 60 seconds of you talking to the camera. Drag it into the box or tap it to choose a file.</p><div id="fpick"></div>`)}
-   ${step(1, "Pick a style and copy it", `<p>Tap one of these beginner styles. Pick your clip, type what it's about, then tap <b>Copy for Claude</b>.</p><div class="grid g3">${starterMoves().map(moveCard).join("")}</div><p style="margin-top:10px"><a href="#/library">Or browse all ${S.moves.length} styles</a></p>`)}
+   ${step(1, "Pick a move and copy it", `<p>Tap one of these beginner moves. Pick your clip, type what it's about, then tap <b>Copy for Claude</b>.</p><div class="grid g3">${starterMoves().map(moveCard).join("")}</div><p style="margin-top:10px"><a href="#/library">Or browse all ${S.moves.length} moves</a></p>`)}
    ${step(2, "Paste it into Claude", `${pasteGuideHTML()}<p class="muted">This step ticks when Claude starts working.</p>`)}
    ${step(3, "Say \"looks good\" on the preview", `<p>Claude shows you 3 frames. Happy? Reply <b>looks good</b>. Not quite? Tap a tweak, paste it, and Claude changes it. Nothing is lost: it keeps your earlier version.</p><div class="tws">${tweakList()}</div>`)}
    ${step(4, "Your video is ready", made ? `<div class="vc" style="max-width:260px"><video src="/media/projects/${encodeURIComponent(S.projects[0].name)}" controls playsinline preload="metadata"></video></div><p>It's in Projects and in your Edit Wherever folder. Post it, then make the next one.</p><a class="btn grad" href="#/library">Make another</a>` : `<p>It shows up here and in Projects the moment Claude saves it.</p>`)}`;
@@ -604,26 +623,27 @@ VIEWS.first_after = () => { const fp = $("#fpick"); if (fp) { PICK = { clips: []
 // ---------- EDITOR: HyperFrames Studio (real timeline) on each video's saved project
 let ED = { list: [], open: null, url: null, busy: false, newOpen: false };
 const edDate = t => new Date(t).toLocaleDateString(undefined, { month: "short", day: "numeric" });
-VIEWS.editor = () => `<div class="top"><div><div class="k">Editor</div><h1>See every <em>layer</em></h1>
-   <p class="lead">Every video Claude makes keeps its full timeline here. Open one in <b>Wherever Frames</b>, our timeline editor: scrub it, click any text or clip to select it, then tell Claude what to change.</p></div>
+VIEWS.editor = () => `<div class="top"><div><div class="k">Editor</div><h1>Fine-tune <em>any video</em></h1>
+   <p class="lead">Every video Claude makes keeps its full timeline here, with each caption, clip and sound on its own line. Open one, tap the piece you want changed, then tell Claude what to change.</p></div>
    <button class="btn grad" id="ednew">＋ New edit</button></div>
   <div class="ednote">The Editor works best on a computer screen.</div>
   <div id="ednewp" ${ED.newOpen ? "" : "hidden"}></div>
-  <div class="edl"><aside class="edlist" id="edlist"><div class="empty">Loading your edits…</div></aside><section class="edmain" id="edmain"></section></div>`;
+  <div class="edl"><aside class="edlist" id="edlist" aria-busy="true"><div class="sk" style="height:80px"></div><div class="sk" style="height:80px"></div></aside><section class="edmain" id="edmain"></section></div>`;
 function edMain() {
   const box = $("#edmain"); if (!box) return; box.parentElement.classList.toggle("open", !!ED.open);
   if (!ED.open) return box.innerHTML = `<div class="edempty"><div class="k">How it works</div><ol class="pg">
      <li><div><b>Make a video</b> (New edit, or any move in the Library). Claude saves its project here.</div></li>
-     <li><div><b>Open it</b> from the list. You get the real HyperFrames timeline: every caption, clip and sound on its own track.</div></li>
-     <li><div><b>Click what you want changed</b> in the preview, then tap <b>Change what I selected</b> and paste it into Claude.</div></li>
-     <li><div><b>Watch it update.</b> Claude edits the project and the Editor reloads by itself. Export when you're happy.</div></li></ol></div>`;
-  if (ED.busy) return box.innerHTML = `<div class="edempty"><i class="spin"></i><p>Opening "${esc(ED.open)}" in HyperFrames Studio… (first time takes about 10 seconds)</p></div>`;
+     <li><div><b>Open it</b> from the list. You see your video's timeline: every caption, clip and sound on its own line.</div></li>
+     <li><div><b>Tap what you want changed</b> in the preview, then tap <b>Change what I selected</b> and paste it into Claude.</div></li>
+     <li><div><b>Watch it update.</b> Claude makes the change and this page reloads by itself. Export when you're happy.</div></li></ol>
+     <div style="display:flex;gap:10px;flex-wrap:wrap"><a class="btn grad" href="#/make">Make a video</a><a class="btn" href="#/library">Browse moves</a></div></div>`;
+  if (ED.busy) return box.innerHTML = `<div class="edempty"><i class="spin"></i><p>Opening "${esc(ED.open)}"… (the first time takes about 10 seconds)</p></div>`;
   const pre = tweakPre(`edit "${ED.open}" (its project is in Edits/${ED.open})`);
   box.innerHTML = `<div class="edbar"><b>${esc(ED.open)}</b><div class="tws" style="margin:0">
      <button class="chip tchip grad" data-copy="${esc(pre + "the part I selected in the Editor. Make it: (type what you want here)")}">${I.copy} Change what I selected</button>
      <button class="chip tchip" data-copy="${esc(pre + "render the final video again with my latest changes.")}">${I.copy} Render it again</button></div>
      <a class="btn sm" href="${esc(ED.url)}" target="_blank" rel="noopener">Full screen ↗</a><button class="btn sm" id="edclose">Close</button></div>
-   <iframe class="edframe" src="${esc(ED.url)}" title="HyperFrames Studio: ${esc(ED.open)}" allow="clipboard-read; clipboard-write; fullscreen"></iframe>
+   <iframe class="edframe" src="${esc(ED.url)}" title="Timeline editor: ${esc(ED.open)}" allow="clipboard-read; clipboard-write; fullscreen"></iframe>
    <details class="more"><summary>More changes you can ask for</summary><div class="tws">${tweakList(pre)}</div></details>`;
   $("#edclose").onclick = async () => { const n = ED.open; ED.open = ED.url = null; edMain(); edList(); await api("/api/edits/close", { name: n }); };
 }
@@ -632,7 +652,7 @@ function edList() {
   box.innerHTML = ED.list.length ? ED.list.map(e => `<button class="edi" data-ed="${esc(e.name)}" aria-pressed="${ED.open === e.name}">
      ${e.video ? `<video src="/media/projects/${encodeURIComponent(e.video)}#t=1" muted preload="metadata"></video>` : `<span class="edph">${I.edit}</span>`}
      <span><b>${esc(e.name)}</b><small>${edDate(e.t)}${e.video ? " · rendered" : " · not rendered yet"}</small></span></button>`).join("")
-    : `<div class="empty">No edits yet. Make a video with <b>New edit</b> and its timeline shows up here.</div>`;
+    : `<div class="empty">No edits yet. Tap <b>New edit</b> or <a href="#/make">make a video</a>, and its timeline shows up here.</div>`;
   box.querySelectorAll("[data-ed]").forEach(b => b.onclick = async () => {
     ED.open = b.dataset.ed; ED.busy = true; edList(); edMain();
     const r = await api("/api/edits/open", { name: ED.open }).catch(() => ({ ok: false, error: "Your studio stopped. Reopen it from Claude." }));
@@ -645,11 +665,11 @@ function edNew() {   // raw footage + a template, then Claude edits it in that s
   const m = S.moves.find(x => x.id === PICK.style) || styles[0];
   p.innerHTML = `<div class="card ednew"><div class="k">New edit · 3 steps</div>
     <div class="field"><label>1 · Your raw footage</label><div id="enpick"></div></div>
-    <div class="field"><label>2 · Pick a style</label><div class="ens">${styles.slice(0, 12).map(s => `<button class="ensi" data-style="${esc(s.id)}" aria-pressed="${s.id === (m || {}).id}">${vidPreview(s)}<b>${esc(s.name)}</b></button>`).join("")}</div>
+    <div class="field"><label>2 · Pick a move</label><div class="ens">${styles.slice(0, 12).map(s => `<button class="ensi" data-style="${esc(s.id)}" aria-pressed="${s.id === (m || {}).id}">${vidPreview(s)}<b>${esc(s.name)}</b></button>`).join("")}</div>
      <select class="input" id="enstyle" style="margin-top:8px">${styles.map(s => `<option value="${esc(s.id)}" ${s.id === (m || {}).id ? "selected" : ""}>${esc(s.category)} · ${esc(s.name)} (${esc(s.level)})</option>`).join("")}</select></div>
     <div class="field"><label for="entopic">3 · What's it about? <span style="font-weight:500;color:var(--muted)">(optional)</span></label><input class="input" id="entopic" placeholder="Leave empty and Claude uses what you say in your clip"></div>
     <div style="display:flex;gap:10px;flex-wrap:wrap"><button class="btn grad" id="encopy">${I.copy} Copy for Claude</button><button class="btn" id="encancel">Cancel</button></div>
-    <p class="muted" style="font-size:13px;margin:10px 0 0">Claude edits your footage in that style, shows you a preview, then saves the project here so you can open its timeline.</p></div>`;
+    <p class="muted" style="font-size:13px;margin:10px 0 0">Claude edits your footage with that move, shows you a preview, then saves the project here so you can open its timeline.</p></div>`;
   const dp = () => { $("#enpick").innerHTML = clipPicker(false); bindPicker($("#enpick"), dp); }; dp();
   watchVideos(p);
   PICK.multi = multiClip(m || {});
@@ -698,7 +718,7 @@ function featuredRank(moves) {
 }
 VIEWS.library = () => {
   const cats = ["All", ...[...new Set(S.moves.map(m => m.category))]];
-  return `<div class="top"><div><div class="k">Studio Moves</div><h1>The <em>library</em></h1><p class="lead">${S.moves.length} ready-to-paste moves, each already set to your colours, fonts and captions. Tap one to see it and copy it.</p></div></div>
+  return `<div class="top"><div><div class="k">Studio Moves</div><h1>The <em>library</em></h1><p class="lead">${S.moves.length} ready-to-paste moves, each already set to your colors, fonts and captions. Tap one to see it and copy it.</p></div></div>
    <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center"><input class="input" id="lq" type="search" placeholder="Search moves: captions, zoom, vlog, explainer…" style="flex:1;min-width:220px" value="${esc(LQ.q)}">
     <select class="input" id="llvl" aria-label="Level" style="width:auto">${["All", "Beginner", "Easy", "Pro"].map(l => `<option value="${l}" ${l === LQ.lvl ? "selected" : ""}>${l === "All" ? "Any level" : l}</option>`).join("")}</select>
     <button class="chip" id="lfav" aria-pressed="${LQ.fav}">${I.heart} Saved <span>${(S.state.favorites || []).length}</span></button>
@@ -724,18 +744,21 @@ function libRows() {
 const vio = new IntersectionObserver(es => es.forEach(e => { const v = e.target; e.isIntersecting ? v.play().catch(() => {}) : v.pause(); }), { threshold: .25 });
 function watchVideos(root) { root.querySelectorAll(".vidpv video").forEach(v => { v.removeAttribute("autoplay"); vio.observe(v); }); }
 VIEWS.library_after = () => {
-  const draw = () => { const r = libRows(); LIST = r.map(m => m.id);
-    $("#lgrid").className = `grid lgrid ${LQ.view === "list" ? "lv" : "sz-" + LQ.size}`;
-    $("#lcount").textContent = `${r.length} move${r.length === 1 ? "" : "s"}`;
-    $("#lgrid").innerHTML = r.slice(0, LQ.n).map(moveCard).join("") || `<div class="empty">${LQ.recent ? "Moves you copy show up here." : "Nothing matches yet. Try another word."}</div>`;
-    watchVideos($("#lgrid"));
-    $("#lmore").style.display = r.length > LQ.n ? "" : "none"; $("#lmore").textContent = `Show more (${r.length - LQ.n})`; };
+  let rows = [], shown = 0;
+  const more = () => { rows = libRows(); LIST = rows.map(m => m.id); const g = $("#lgrid");   // append only the new slice so playing videos and scroll position stay put
+    g.insertAdjacentHTML("beforeend", rows.slice(shown, LQ.n).map(moveCard).join("")); shown = Math.min(rows.length, LQ.n); watchVideos(g);
+    $("#lmore").style.display = rows.length > shown ? "" : "none"; $("#lmore").textContent = `Show more (${rows.length - shown})`; };
+  const draw = () => { const g = $("#lgrid"); rows = libRows(); shown = 0; g.innerHTML = "";
+    g.className = `grid lgrid ${LQ.view === "list" ? "lv" : "sz-" + LQ.size}`;
+    $("#lcount").textContent = `${rows.length} move${rows.length === 1 ? "" : "s"}`;
+    if (!rows.length) { LIST = []; g.innerHTML = `<div class="empty">${LQ.recent ? "Moves you copy show up here." : "Nothing matches yet. Try another word."}</div>`; $("#lmore").style.display = "none"; return; }
+    more(); };
   let t; $("#lq").oninput = e => { clearTimeout(t); t = setTimeout(() => { LQ.q = e.target.value; LQ.n = 36; draw(); }, 140); };
   $("#lft").onclick = e => { const o = $("#ltools").classList.toggle("open"); e.currentTarget.setAttribute("aria-expanded", o); };
   $("#llvl").onchange = e => { LQ.lvl = e.target.value; draw(); };
   $("#lfav").onclick = e => { LQ.fav = !LQ.fav; e.currentTarget.setAttribute("aria-pressed", LQ.fav); draw(); };
-  $("#lmore").onclick = () => { LQ.n += LQ.size === "xs" ? 72 : 36; draw(); };
-  document.querySelectorAll("[data-size]").forEach(b => b.onclick = () => { LQ.size = b.dataset.size; LQ.view = "grid"; if (LQ.size === "xs") LQ.n = Math.max(LQ.n, 72); saveLQ(); document.querySelectorAll("[data-size],[data-view]").forEach(x => x.setAttribute("aria-pressed", x === b)); draw(); });
+  $("#lmore").onclick = () => { LQ.n += LQ.size === "xs" ? 72 : 36; more(); };
+  document.querySelectorAll("[data-size]").forEach(b => b.onclick = () => { LQ.size = b.dataset.size; LQ.view = "grid"; LQ.n = LQ.size === "xs" ? 72 : 36; saveLQ(); document.querySelectorAll("[data-size],[data-view]").forEach(x => x.setAttribute("aria-pressed", x === b)); draw(); });
   document.querySelector("[data-view=list]").onclick = e => { LQ.view = "list"; saveLQ(); document.querySelectorAll("[data-size],[data-view]").forEach(x => x.setAttribute("aria-pressed", x === e.currentTarget)); draw(); };
   $("#lsort").onchange = e => { LQ.sort = e.target.value; saveLQ(); draw(); };
   $("#laspect").onchange = e => { LQ.aspect = e.target.value === "Any shape" ? "All" : e.target.value; draw(); };
@@ -751,7 +774,7 @@ let CUR = null;
 function openMove(id) {
   const m = S.moves.find(x => x.id === id); if (!m) return; CUR = id;
   PICK = { ...pickFor(m), len: null, look: "original" };
-  $("#dbody").innerHTML = `${vidPreview(m)}<div class="in">${(m.ref_clip || m.poster) ? `<p style="margin:0 0 8px;font-size:12.5px;color:var(--muted)">Preview: the original video this move recreates, by ${esc(m.credit || "its creator")}. ${m.ref_url ? `<a href="${esc(m.ref_url)}" target="_blank" rel="noopener">See the original post</a>.` : ""} Your version comes out in your own colours, fonts and topic.</p>` : ""}<span class="k">${esc(m.id)} · ${esc(m.category)} · ${esc(m.level)}</span><h3>${esc(m.name)}</h3><p style="margin:0;color:var(--text-2)">${esc(m.tagline)}</p>
+  $("#dbody").innerHTML = `${vidPreview(m)}<div class="in">${(m.ref_clip || m.poster) ? `<p style="margin:0 0 8px;font-size:12.5px;color:var(--muted)">Preview: the original video this move recreates, by ${esc(m.credit || "its creator")}. ${m.ref_url ? `<a href="${esc(m.ref_url)}" target="_blank" rel="noopener">See the original post</a>.` : ""} Your version comes out in your own colors, fonts and topic.</p>` : ""}<span class="k">${esc(m.id)} · ${esc(m.category)} · ${esc(m.level)}</span><h3>${esc(m.name)}</h3><p style="margin:0;color:var(--text-2)">${esc(m.tagline)}</p>
    <div class="tags" style="margin:10px 0">${(m.best_for || []).map(x => `<span class="tag">${esc(x)}</span>`).join("")}<span class="tag">~${m.seconds}s</span></div>
    ${m.example ? `<div class="field"><label>Real example of this style <span style="font-weight:500;color:var(--muted)">by ${esc(m.example.creator || "the creator")}</span></label><div id="embedBox" class="embed"></div><p style="margin:6px 0 0;font-size:12.5px;color:var(--muted)">Shown with the platform's own embed. Your version uses your clips, brand and topic.</p></div>` : ""}
    ${m.attribution ? `<p style="margin:6px 0 0;font-size:12.5px;color:var(--muted)">${esc(m.attribution)}${m.source_url ? ` · <a href="${esc(m.source_url)}" target="_blank" rel="noopener">source</a>` : ""}</p>` : ""}
@@ -771,8 +794,8 @@ function openMove(id) {
    <details class="more"><summary>See the full prompt</summary><div class="pre" id="dpre"></div></details>
    <div class="dbar" style="display:flex;gap:10px;flex-wrap:wrap"><button class="btn grad" id="dcopy">${I.copy} Copy for Claude</button><button class="btn" id="dprev" aria-label="Previous move">‹</button><button class="btn" id="dnext" aria-label="Next move">›</button><button class="btn" id="dfav" aria-pressed="${isFav(m.id)}">${I.heart} ${isFav(m.id) ? "Saved" : "Save"}</button></div>
    <h4 style="margin:22px 0 4px">How to use it</h4><ol class="steps">${(m.steps || []).map(s => `<li>${esc(s)}</li>`).join("")}</ol>
-   <h4 style="margin:22px 0 4px">After you paste</h4>${pasteGuideHTML()}<div class="tws">${tweakList()}</div>
-   <h4 style="margin:22px 0 4px">Tweaks for this move <span style="font-weight:500;color:var(--muted);font-size:13px">paste after your preview</span></h4>
+   <h4 style="margin:22px 0 4px">After you paste</h4>${pasteGuideHTML()}<div class="k" style="margin-top:12px">Quick tweaks for any video</div><div class="tws">${tweakList()}</div>
+   <h4 style="margin:26px 0 4px;padding-top:18px;border-top:1px solid var(--line-soft)">Tweaks made for this move <span style="font-weight:500;color:var(--muted);font-size:13px">paste after your preview</span></h4>
    ${(m.tweaks || []).map((t, i) => `<div class="tw"><span>${esc(t)}</span><button class="btn sm" data-tweak="${i}">${I.copy} Copy</button></div>`).join("")}</div>`;
   if (m.example) embed($("#embedBox"), m.example);
   const opts = () => ({ clips: PICK.clips, none: PICK.none, len: PICK.len, look: PICK.look, ref: refSources(m), hook: $("#dhook").value.trim(), cta: $("#dcta").value.trim().toUpperCase() !== ((S.brand || {}).cta || "") ? $("#dcta").value.trim().toUpperCase() : "" });
@@ -782,7 +805,7 @@ function openMove(id) {
   $("#dtopic").oninput = upd; $("#dhook").oninput = upd; $("#dcta").oninput = upd;
   document.querySelectorAll("#dbody [data-look]").forEach(b => b.onclick = () => { PICK.look = b.dataset.look;
     document.querySelectorAll("#dbody [data-look]").forEach(x => x.setAttribute("aria-pressed", x === b));
-    $("#lookhint").textContent = PICK.look === "original" ? "Claude studies the example and copies it closely. Only your footage, words and topic change." : "Claude copies the example's layout, motion and rhythm, in your brand colours and fonts."; upd(); });
+    $("#lookhint").textContent = PICK.look === "original" ? "Claude studies the example and copies it closely. Only your footage, words and topic change." : "Claude copies the example's layout, motion and rhythm, in your brand colors and fonts."; upd(); });
   $("#dcopy").onclick = () => {
     if (!hasFootage()) { toast("Step 1: add or pick a clip first"); return $("#dpick").scrollIntoView({ behavior: "smooth", block: "center" }); }
     if (PICK.none && !$("#dtopic").value.trim()) { toast("Step 2: say what your video is about"); return $("#dtopic").focus(); }
@@ -806,20 +829,20 @@ async function toggleFav(id) { const f = new Set(S.state.favorites || []); f.has
 // ---------- BRAND
 let draft = null;
 VIEWS.brand = () => { draft = JSON.parse(JSON.stringify(S.brand)); return `<div class="top"><div><div class="k">Brand kit</div><h1>Your <em>look</em></h1><p class="lead">Every move uses these. Change them anytime: the whole library updates.</p></div></div>
-  <div class="bk"><div>${brandEditor()}<div style="display:flex;gap:10px;margin-top:20px"><button class="btn grad" id="bsave">Save my brand</button><button class="btn" id="bredo">Redo setup</button></div></div>${mock()}</div>`; };
+  <div class="bk"><div>${brandEditor()}<div class="savebar" id="savebar"><span class="st" id="bstat" role="status">All saved</span><button class="btn grad" id="bsave">Save my brand</button></div><div style="margin-top:6px"><button class="btn sm lite" id="bredo">Redo setup from scratch</button></div></div>${mock()}</div>`; };
 function brandEditor() {
   const d = draft;
-  return `<div class="field"><label>Colours</label><div class="pal">${PALETTES.map(([n, p, a, bg]) => `<button data-pal="${n}" aria-pressed="${d.palette.primary === p && d.palette.accent === a}"><div class="sw"><i style="background:${p}"></i><i style="background:${a}"></i><i style="background:${bg}"></i></div>${n}</button>`).join("")}</div>
+  return `<div class="field"><label>Colors</label><div class="pal">${PALETTES.map(([n, p, a, bg]) => `<button data-pal="${n}" aria-pressed="${d.palette.primary === p && d.palette.accent === a}"><div class="sw"><i style="background:${p}"></i><i style="background:${a}"></i><i style="background:${bg}"></i></div>${n}</button>`).join("")}</div>
    <div style="display:flex;gap:12px;margin-top:10px;flex-wrap:wrap;font-size:13px">${["primary", "accent", "bg"].map(k => `<label style="display:flex;align-items:center;gap:6px">${k === "bg" ? "Background" : k[0].toUpperCase() + k.slice(1)} <input type="color" data-col="${k}" value="${d.palette[k]}"></label>`).join("")}</div></div>
    <div class="field"><label>Fonts</label><div class="fp">${FONTS.map((f, i) => `<button data-font="${i}" aria-pressed="${d.heading_font === f.h}"><b style="font-family:'${f.h}'">Aa Bold</b><span>${f.name} · ${f.h}</span></button>`).join("")}</div></div>
    <div class="field"><label>Caption style</label><div class="opts" style="margin:0">${CAPS.map(c => `<button class="chip" data-cap="${c.id}" aria-pressed="${d.caption_style === c.id}">${c.name}</button>`).join("")}</div></div>
    <div class="field" id="sndField"><label>Sound style</label>${soundPicker(d)}</div>
-   <div class="grid g2"><div class="field"><label for="bcta">Call to action word</label><input class="input" id="bcta" value="${esc(d.cta || "")}" placeholder="e.g. START"></div>
+   <div class="grid g2"><div class="field"><label for="bcta">Comment word (viewers comment it to get your link)</label><input class="input" id="bcta" value="${esc(d.cta || "")}" placeholder="e.g. START"></div>
     <div class="field"><label for="bhandle">Your handle</label><input class="input" id="bhandle" value="${esc(d.handle || "")}" placeholder="yourname"></div></div>`;
 }
 function mock() { const d = draft || S.brand, c = CAPS.find(x => x.id === d.caption_style) || CAPS[0], pl = d.palette || {};
   return `<div class="mock" id="mock" style="--u-primary:${esc(pl.primary)};--u-accent:${esc(pl.accent)};--u-bg:${esc(pl.bg)};--u-head:'${esc(d.heading_font)}';--u-body:'${esc(d.body_font)}'"><div class="scr"><div class="h">3 things I wish<br>I knew about <em>${esc((d.niche || "this").toLowerCase())}</em></div><div class="face"></div>
-   <div class="cp ${c.cls}">here's <mark>the one</mark> nobody tells you${c.id === "emoji" ? " 👀" : ""}</div></div></div>`; }
+   <div class="cp ${c.cls}">here's <mark>the one</mark> nobody tells you${c.id === "emoji" ? " 👀" : ""}</div></div><div class="mlab">Live preview<small>Updates as you choose</small></div></div>`; }
 function bindBrand(root, onChange) {
   const re = () => { if ($("#ob").classList.contains("on")) applyBrand(draft); const m = $("#mock"); if (m) m.outerHTML = mock(); onChange && onChange(); };
   root.querySelectorAll("[data-pal]").forEach(b => b.onclick = () => { const p = PALETTES.find(x => x[0] === b.dataset.pal); draft.palette = { primary: p[1], accent: p[2], bg: p[3] };
@@ -833,19 +856,22 @@ function bindBrand(root, onChange) {
   if (cta) cta.oninput = () => draft.cta = cta.value.trim().toUpperCase(); if (h) h.oninput = () => draft.handle = h.value.trim().replace(/^@/, "");
 }
 VIEWS.brand_after = () => { bindBrand(document, null);
-  $("#bsave").onclick = async () => { S.brand = draft; await api("/api/brand", draft); applyBrand(draft); chrome("brand"); toast("Saved. Every move now uses your new look."); };
+  const stat = () => { const d = JSON.stringify(draft) !== JSON.stringify(S.brand), bar = $("#savebar"); if (!bar) return; bar.classList.toggle("dirty", d); $("#bstat").textContent = d ? "Unsaved changes" : "All saved"; };
+  const v = $("#view"); v.onclick = () => setTimeout(stat, 0); v.oninput = stat;
+  $("#bsave").onclick = async () => { S.brand = draft; await api("/api/brand", draft); applyBrand(draft); chrome("brand"); stat(); toast("Saved. Every move now uses your new look."); };
   $("#bredo").onclick = () => startOnboarding(); };
 
 // ---------- PROJECTS
-VIEWS.projects = () => `<div class="top"><div><div class="k">Projects</div><h1>Your <em>videos</em></h1><p class="lead">Finished videos land here automatically. Tap one to play it.</p></div>
+VIEWS.projects = () => `<div class="top"><div><div class="k">Projects</div><h1>Your <em>videos</em></h1><p class="lead">Finished videos land here automatically. Tap or hover over one to play it.</p></div>
   <button class="btn" data-open="projects">${I.folder} Open folder</button></div>
- ${S.projects.length ? `<div class="vg">${S.projects.map((v, i) => `<div><div class="vc"><video src="/media/projects/${encodeURIComponent(v.name)}" muted loop playsinline preload="metadata"></video><b>${esc(v.name)}</b>${i === 0 && Date.now() - v.t < 36e5 ? `<span class="newb">New</span>` : ""}</div>
-    <details class="more vtw"><summary>Change something</summary><div class="tws">${tweakList(tweakPre(`video "${v.name}" (in Projects)`))}</div></details></div>`).join("")}</div>`
+ ${S.projects.length ? `<div class="vg">${S.projects.map((v, i) => `<div><div class="vc"><video src="/media/projects/${encodeURIComponent(v.name)}#t=0.5" muted loop playsinline preload="metadata"></video><span class="pl"></span><b>${esc(v.name)}</b>${i === 0 && Date.now() - v.t < 36e5 ? `<span class="newb">New</span>` : ""}</div>
+    <details class="more vtw"><summary>Ask Claude for a change</summary><div class="tws">${tweakList(tweakPre(`video "${v.name}" (in Projects)`))}</div></details></div>`).join("")}</div>`
   : faceless() ? `<div class="empty">No videos yet. <a href="#/library">Pick a style in the Library</a>, copy it and paste it into Claude.</div>`
   : `<div class="empty">No videos yet. <a href="#/first">Make your first one with the walkthrough</a>: about 15 minutes.</div>`}
  <section><div class="sh"><div><div class="k">Inbox</div><h2>Clips waiting to be edited</h2></div><button class="btn sm" data-open="inbox">${I.folder} Open Inbox</button></div>
  <div id="ppick"></div></section>`;
-VIEWS.projects_after = () => { document.querySelectorAll(".vc video").forEach(v => { v.parentElement.onmouseenter = () => v.play().catch(() => {}); v.parentElement.onmouseleave = () => v.pause();
+VIEWS.projects_after = () => { document.querySelectorAll(".vc video").forEach(v => { v.onplay = () => v.parentElement.classList.add("on"); v.onpause = () => v.parentElement.classList.remove("on");
+    v.parentElement.onmouseenter = () => v.play().catch(() => {}); v.parentElement.onmouseleave = () => v.pause();
     v.parentElement.onclick = () => { v.muted = false; v.paused ? v.play().catch(() => {}) : v.pause(); }; });
   PICK = { clips: [], none: false, multi: true }; const dp = () => { $("#ppick").innerHTML = clipPicker(false); bindPicker($("#ppick"), dp); }; dp(); };
 
@@ -905,9 +931,9 @@ const OSTEPS = [
  () => `<div class="k">1 of 7 · You</div><h1>What do you make videos about?</h1><div class="opts">${NICHES.map(n => `<button class="chip" data-o-niche="${n}" aria-pressed="${OD.niche === n}">${n}</button>`).join("")}</div>
    <div class="field"><label for="o-niche">Or type your own</label><input class="input" id="o-niche" value="${esc(NICHES.includes(OD.niche) ? "" : OD.niche || "")}" placeholder="e.g. Plant care for beginners"></div>
    <div class="field"><label for="o-aud">Who are they for?</label><input class="input" id="o-aud" value="${esc(OD.audience || "")}" placeholder="e.g. busy moms who want to start a side project"></div>`,
- () => `<div class="k">2 of 7 · How you show up</div><h1>On camera, or behind it?</h1><div class="vibes" style="grid-template-columns:repeat(3,1fr)">${[["face", "🎥", "On camera", "I talk to the camera"], ["faceless", "✍️", "Faceless", "Text, voiceover, b-roll"], ["both", "🔀", "Both", "A mix of everything"]].map(([id, a, n, s]) => `<button class="vibe" data-o-face="${id}" aria-pressed="${OD.face === id}"><div class="art" style="background:var(--line-soft)">${a}</div><div><b>${n}</b><span>${s}</span></div></button>`).join("")}</div>
+ () => `<div class="k">2 of 7 · How you show up</div><h1>On camera, or behind it?</h1><div class="vibes" style="grid-template-columns:repeat(3,1fr)">${[["face", "🎥", "On camera", "I talk to the camera"], ["faceless", "✍️", "Faceless", "Text, voiceover, stock clips"], ["both", "🔀", "Both", "A mix of everything"]].map(([id, a, n, s]) => `<button class="vibe" data-o-face="${id}" aria-pressed="${OD.face === id}"><div class="art" style="background:var(--line-soft)">${a}</div><div><b>${n}</b><span>${s}</span></div></button>`).join("")}</div>
    <h2 style="margin-top:26px">Where do you post?</h2><div class="opts">${PLATFORMS.map(p => `<button class="chip" data-o-plat="${p}" aria-pressed="${(OD.platforms || []).includes(p)}">${p}</button>`).join("")}</div>`,
- () => `<div class="k">3 of 7 · Vibe</div><h1>Pick a <em>vibe</em>.</h1><p class="lead">This sets your starting colours and fonts. You can tweak everything next.</p><div class="vibes">${VIBES.map(v => `<button class="vibe" data-o-vibe="${v.id}" aria-pressed="${OD.vibe === v.id}"><div class="art" style="background:${v.palette.bg};color:${v.palette.accent};font-family:'${FONTS[v.font].h}'"><span style="font-size:34px">${v.art}</span></div><div><b>${v.name}</b><span>${v.note}</span></div></button>`).join("")}</div>`,
+ () => `<div class="k">3 of 7 · Vibe</div><h1>Pick a <em>vibe</em>.</h1><p class="lead">This sets your starting colors and fonts. You can tweak everything next.</p><div class="vibes">${VIBES.map(v => `<button class="vibe" data-o-vibe="${v.id}" aria-pressed="${OD.vibe === v.id}"><div class="art" style="background:${v.palette.bg};color:${v.palette.accent};font-family:'${FONTS[v.font].h}'"><span style="font-size:34px">${v.art}</span></div><div><b>${v.name}</b><span>${v.note}</span></div></button>`).join("")}</div>`,
  () => `<div class="k">4 of 7 · Your look</div><h1>Make it <em>yours</em>.</h1><div class="bk" style="margin-top:18px"><div id="obBrand">${brandEditor()}</div>${mock()}</div>`,
  () => `<div class="k">5 of 7 · Sound</div><h1>How should it <em>sound</em>?</h1><p class="lead">Your studio adds sound effects for you on every cut, pop and reveal. Tap ▶ to hear each style.</p><div id="obSnd">${soundPicker(OD)}</div>`,
  () => `<div class="k">6 of 7 · Goal</div><h1>What should viewers do?</h1><div class="field"><label for="o-cta">Your comment word (the word people comment to get your link or freebie)</label><input class="input" id="o-cta" value="${esc(OD.cta || "")}" placeholder="e.g. START"></div>
@@ -923,7 +949,7 @@ function unlockScreen(msg) {   // library locked (no key, revoked, device limit,
 function offlineScreen() {   // key saved but license server unreachable: not a key problem, so retry instead of key entry
   $("#ob").classList.add("on"); $(".obnav").style.display = "none";
   $("#obw").innerHTML = `<div class="k">Offline</div><h1>Can't reach <em>Edit Wherever</em> right now.</h1><p class="lead">Check your internet.</p><button class="btn grad" id="o-retry">Try again</button>`;
-  $("#o-retry").onclick = async e => { const b = e.currentTarget; b.disabled = true; const lib = await api("/api/library").catch(() => ({ locked: "offline" })); b.disabled = false;
+  $("#o-retry").onclick = async e => { const b = e.currentTarget; b.disabled = true; b.textContent = "Checking…"; const lib = await api("/api/library").catch(() => ({ locked: "offline" })); b.disabled = false; b.textContent = "Try again";
     if (!lib.locked) { S.moves = lib.moves; S.drops = lib.drops; $(".obnav").style.display = ""; $("#ob").classList.remove("on"); route(); return toast("Back online."); }
     if (lib.locked === "offline") return toast("Still can't connect. Check your internet."); $(".obnav").style.display = ""; unlockScreen(lib.message); };
 }
@@ -966,7 +992,8 @@ function obValid() {
 $("#obNext").onclick = async () => {
   readOB(); const err = obValid(); if (err) return toast(err);
   if (OB === 7) {   // real check against the license server; also registers this computer (2 per key)
-    const nx = $("#obNext"); nx.disabled = true; const r = await api("/api/license", { key: OD.key }).catch(() => ({ ok: false, message: "Couldn't reach your studio. Is it still running?" })); nx.disabled = false;
+    const nx = $("#obNext"), lbl = nx.textContent; nx.disabled = true; nx.innerHTML = '<i class="spin" style="width:16px;height:16px;border-width:2px"></i> Checking your key…'; $("#o-keymsg").textContent = "";
+    const r = await api("/api/license", { key: OD.key }).catch(() => ({ ok: false, message: "Couldn't reach your studio. Is it still running?" })); nx.disabled = false; nx.textContent = lbl;
     if (!r.ok) { $("#o-keymsg").textContent = r.message; $("#o-keymsg").style.color = "var(--bad, #ff6b5c)"; return toast(r.message); }
     const lib = await api("/api/library"); S.moves = lib.moves; S.drops = lib.drops;
     if (UNLOCK_ONLY) { UNLOCK_ONLY = false; $("#ob").classList.remove("on"); route(); return toast("Unlocked. Welcome back."); }

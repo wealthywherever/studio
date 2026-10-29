@@ -15,4 +15,4 @@ Talk like a friendly helper. Never ask the user to open a terminal.
 4. Say what changed in 2-3 short lines, using the notes from the session start or the dashboard's What's new page.
 5. If auto-update isn't on yet, offer it once: "Want updates to install on their own? Type /plugin, open **Marketplaces**, pick **wealthywherever**, choose **Enable auto-update**." Don't ask again if they say no.
 
-Moves themselves never need this: the library comes from our server and is always the newest.
+Moves and editing rules never need this: they come from our server and are always the newest.

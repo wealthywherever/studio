@@ -1,5 +1,17 @@
 [
   {
+    "version": "0.1.13",
+    "date": "2026-10-29",
+    "title": "A calmer, clearer studio",
+    "items": [
+      "Your first video is now one clear step at a time on Home",
+      "Library cards fill their frame and show length, shape and level at a glance",
+      "Show more adds cards without restarting the ones playing",
+      "Brand kit has a save bar and a live preview that stays in view on your phone",
+      "The dashboard opens instantly, then checks your key in the background"
+    ]
+  },
+  {
     "version": "0.1.12",
     "date": "2026-10-29",
     "title": "Example clips load from your key",
