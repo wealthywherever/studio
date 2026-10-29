@@ -11,6 +11,10 @@ The user pasted a Studio Move: a personalised prompt copied from their Studio. M
 
 **Tweaks:** a prompt starting "Edit Wherever tweak for my edit/video" changes a video you already made. Open its existing project in `~/Edit Wherever/Edits/` (same name as the video, without `.mp4`), make only the change asked for, run the quality gate again, and render over the same Projects file. If the prompt still says "(type what you want here)", ask what they want changed first.
 
+**Save a style:** a prompt starting "Edit Wherever save style" saves how one of their finished videos is edited so they can reuse it. Open its project in `~/Edit Wherever/Edits/` (video name without `.mp4`), write the style in plain words to a JSON file in that project (`style_recipe.json` with `length`, `rhythm`, `text`, `colour`, `motion`, `sound`, `notes`: what a viewer sees and hears, never their words or topic), then run `node "${CLAUDE_SKILL_DIR}/../../scripts/style.mjs" save "<project folder>" --name "<label>" --recipe "<project folder>/style_recipe.json" --studio "<Studio folder>"`. Tell them it's in Library under My Styles and they can press Make this on it with any new clip. No render.
+
+**Trials:** a prompt starting "Edit Wherever trials" makes hook versions of a finished video for Instagram trial reels. Load the engine (below) and follow its "Trial versions" section.
+
 ## Talk like a friendly video editor, not a programmer
 - Start with one short line: what you're about to make and roughly how long it takes ("Making your 30-second captions video. First preview in about 3 minutes.").
 - Never show code, file paths, commands or error text unless they ask. Describe what you're doing in plain words ("cutting the pauses", "adding your captions").
