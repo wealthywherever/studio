@@ -1,5 +1,13 @@
 [
   {
+    "version": "0.1.14",
+    "date": "2026-10-29",
+    "title": "Updates that find you",
+    "items": [
+      "If automatic updates are off, Claude offers to turn them on (at most once a week)"
+    ]
+  },
+  {
     "version": "0.1.13",
     "date": "2026-10-29",
     "title": "A calmer, clearer studio",
