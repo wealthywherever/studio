@@ -1,5 +1,14 @@
 [
   {
+    "version": "0.1.25",
+    "date": "2026-10-29",
+    "title": "Edit like your favourite creators",
+    "items": [
+      "New Creators shelf: pick a creator like Adrian Per or Sam Kolder and Claude studies several of their videos, then edits your footage in their whole style",
+      "The library is now sorted the way creators look: Creators, Vlogs and cinematic, Talking and yap, Viral, Motion and launch, Explainers, Art and music"
+    ]
+  },
+  {
     "version": "0.1.24",
     "date": "2026-10-29",
     "title": "Studio opens again",

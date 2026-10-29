@@ -1034,7 +1034,7 @@ VIEWS.editor_after = async () => { edWatch();
 };
 
 // ---------- LIBRARY
-let LQ = { q: "", cat: "All", lvl: "All", fav: false, n: 36, size: "m", view: "grid", sort: "featured", aspect: "All", media: false, recent: false };
+let LQ = { q: "", cat: "All", lvl: "All", fav: false, n: 36, size: "m", view: "grid", sort: "featured", aspect: "All", media: false, recent: false, sub: "" };
 try { Object.assign(LQ, JSON.parse(localStorage.getItem("ew-lib") || "{}"), { q: "", n: 36 }); } catch (e) {}
 const saveLQ = () => { try { localStorage.setItem("ew-lib", JSON.stringify({ size: LQ.size, view: LQ.view, sort: LQ.sort })); } catch (e) {} };
 const hasVis = m => !!(m.ref_clip || m.poster || m.clip || m.example);
@@ -1053,8 +1053,18 @@ function featuredRank(moves) {
   const own = m => cam && FOOT.includes(m.category) ? 0 : 1, dyn = m => own(m) ? (ci(m.category) < DYN.length ? 0 : 1) : 0;   // on camera: moves for their own clips lead, still taking turns
   return (a, b) => visTier(b) - visTier(a) || fit(a) - fit(b) || own(a) - own(b) || dyn(a) - dyn(b) || rank.get(a.id) - rank.get(b.id) || ci(a.category) - ci(b.category);
 }
+// shelves group the categories the way social creators look for edits; a category missing here lands in "More"
+const SHELVES = [["Creators", ["Creator Styles"]], ["Vlogs & cinematic", ["Vlog Edits"]], ["Talking & yap", ["Yap Edits", "Captions"]], ["Viral & trends", ["Viral Formats", "Social Formats"]],
+  ["Motion & launch", ["Kinetic Type", "Motion", "Product & Tools", "UI Motion", "Logo & Brand", "3D & Worlds", "Data & Charts", "Studio Templates"]], ["Explainers & faceless", ["Explainers", "Faceless", "Characters & Story"]], ["Art & music", ["Music Visuals", "Generative Art", "Experimental"]]];
+const creatorPacks = () => { const n = {}; for (const m of S.moves) if (m.pack) n[m.pack] = (n[m.pack] || 0) + 1; return Object.keys(n).sort((a, b) => n[b] - n[a] || a.localeCompare(b)); };   // pack = the creator a move was studied from
+function shelfOf(m) { for (const [s, cs] of SHELVES) if (cs.includes(m.category)) return s; return "More"; }
+function shelfCats(s) { const all = [...new Set(S.moves.map(m => m.category))]; return s === "More" ? all.filter(c => shelfOf({ category: c }) === "More") : (SHELVES.find(x => x[0] === s) || [, []])[1].filter(c => all.includes(c)); }
+const inShelf = (m, s) => s === "All" || shelfOf(m) === s || (s === "Creators" && creatorPacks().includes(m.pack));   // creator moves filed under Yap/Vlog/Viral show here too
+const inSub = m => !LQ.sub || m.category === LQ.sub || m.pack === LQ.sub;
 VIEWS.library = () => {
-  const mine = (S.styles || []).length, cats = [...(mine ? ["My Styles"] : []), "All", ...[...new Set(S.moves.map(m => m.category))], ...(mine ? [] : ["My Styles"])];   // your own styles lead once you have any
+  if (S.moves.some(m => m.category === LQ.cat)) { LQ.sub = LQ.cat; LQ.cat = shelfOf({ category: LQ.cat }); }   // a category name opens its shelf with that category picked
+  const mine = (S.styles || []).length, shelves = [...SHELVES.map(s => s[0]), "More"].filter(s => S.moves.some(m => inShelf(m, s))),
+    cats = [...(mine ? ["My Styles"] : []), "All", ...shelves, ...(mine ? [] : ["My Styles"])];   // your own styles lead once you have any
   return `<div class="top"><div><div class="k">Studio Moves</div><h1>The <em>library</em></h1><p class="lead">${S.moves.length} moves, each already set to your colors, fonts and captions. Tap one to see it, then press Make this.</p></div></div>
    <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center"><input class="input" id="lq" type="search" placeholder="Search moves: captions, zoom, vlog, explainer…" style="flex:1;min-width:220px" value="${esc(LQ.q)}">
     <select class="input" id="llvl" aria-label="Level" style="width:auto">${["All", "Beginner", "Easy", "Pro"].map(l => `<option value="${l}" ${l === LQ.lvl ? "selected" : ""}>${l === "All" ? "Any level" : l}</option>`).join("")}</select>
@@ -1066,7 +1076,8 @@ VIEWS.library = () => {
     <select class="input sel" id="lsort" aria-label="Sort">${[["featured", "Featured (with video first)"], ["az", "Name A–Z"], ["level", "Easiest first"], ["short", "Shortest first"], ["new", "Newest"]].map(([k, l]) => `<option value="${k}" ${LQ.sort === k ? "selected" : ""}>${l}</option>`).join("")}</select>
     <select class="input sel" id="laspect" aria-label="Shape">${["All", "9:16", "1:1", "16:9"].map(a => `<option ${LQ.aspect === a ? "selected" : ""}>${a === "All" ? "Any shape" : a}</option>`).join("")}</select>
     <button class="chip" id="lmedia" aria-pressed="${LQ.media}">▶ With preview only</button></div>
-   <div class="lcats" style="display:flex;gap:8px;flex-wrap:wrap;margin:14px 0 18px">${cats.map(c => `<button class="chip" data-cat="${esc(c)}" aria-pressed="${c === LQ.cat}">${esc(c)} <span>${c === "All" ? S.moves.length : c === "My Styles" ? mine : S.moves.filter(m => m.category === c).length}</span></button>`).join("")}</div>
+   <div class="lcats" style="display:flex;gap:8px;flex-wrap:wrap;margin:14px 0 18px">${cats.map(c => `<button class="chip" data-cat="${esc(c)}" aria-pressed="${c === LQ.cat}">${esc(c)} <span>${c === "All" ? S.moves.length : c === "My Styles" ? mine : S.moves.filter(m => inShelf(m, c)).length}</span></button>`).join("")}</div>
+   <div class="lsubs" id="lsubs" style="display:flex;gap:6px;flex-wrap:wrap;margin:-6px 0 18px"></div>
    <div class="grid lgrid" id="lgrid"></div><div style="text-align:center;margin-top:18px"><button class="btn" id="lmore">Show more</button></div>`;
 };
 function libRows() {
@@ -1075,9 +1086,9 @@ function libRows() {
   const SORTS = { featured: featuredRank(S.moves), az: (a, b) => a.name.localeCompare(b.name), level: (a, b) => (LV[a.level] ?? 1) - (LV[b.level] ?? 1), short: (a, b) => (a.seconds || 0) - (b.seconds || 0), new: (a, b) => b.id.localeCompare(a.id) };
   if (LQ.recent) return rec.map(id => S.moves.find(m => m.id === id)).filter(Boolean);
   if (LQ.cat === "My Styles") return (S.styles || []).map(styleMove).filter(m => !q || [m.id, m.name, m.tagline].join(" ").toLowerCase().includes(q));
-  return S.moves.filter(m => (LQ.cat === "All" || m.category === LQ.cat) && (LQ.lvl === "All" || m.level === LQ.lvl) && (!LQ.fav || isFav(m.id))
+  return S.moves.filter(m => inShelf(m, LQ.cat) && inSub(m) && (LQ.lvl === "All" || m.level === LQ.lvl) && (!LQ.fav || isFav(m.id))
     && (LQ.aspect === "All" || (m.aspect || "9:16") === LQ.aspect) && (!LQ.media || hasVis(m))
-    && (!q || [m.id, m.name, m.tagline, m.category, m.credit || "", ...(m.best_for || []), ...(m.techniques || [])].join(" ").toLowerCase().includes(q))).sort(SORTS[LQ.sort] || SORTS.featured);
+    && (!q || [m.id, m.name, m.tagline, m.category, m.credit || "", m.pack || "", ...(m.best_for || []), ...(m.techniques || [])].join(" ").toLowerCase().includes(q))).sort(SORTS[LQ.sort] || SORTS.featured).sort((a, b) => LQ.cat === "Creators" ? !!b.creator_refs - !!a.creator_refs : 0);   // a creator's whole-style move leads their row
 }
 const vio = new IntersectionObserver(es => es.forEach(e => { const v = e.target; e.isIntersecting ? v.play().catch(() => {}) : v.pause(); }), { threshold: .25 });
 function watchVideos(root) { root.querySelectorAll(".vidpv video").forEach(v => { v.removeAttribute("autoplay"); vio.observe(v); }); }
@@ -1086,7 +1097,10 @@ VIEWS.library_after = () => {
   const more = () => { rows = libRows(); LIST = rows.map(m => m.id); const g = $("#lgrid");   // append only the new slice so playing videos and scroll position stay put
     g.insertAdjacentHTML("beforeend", rows.slice(shown, LQ.n).map(moveCard).join("")); shown = Math.min(rows.length, LQ.n); watchVideos(g);
     $("#lmore").style.display = rows.length > shown ? "" : "none"; $("#lmore").textContent = `Show more (${rows.length - shown})`; };
-  const draw = () => { const g = $("#lgrid"); rows = libRows(); shown = 0; g.innerHTML = "";
+  const subs = () => { const el = $("#lsubs"), cr = LQ.cat === "Creators", l = cr ? creatorPacks() : ["All", "My Styles"].includes(LQ.cat) ? [] : shelfCats(LQ.cat);
+    el.innerHTML = l.length > 1 ? [["", cr ? "Every creator" : "Everything"], ...l.map(x => [x, x])].map(([v, n]) => `<button class="chip" data-sub="${esc(v)}" aria-pressed="${v === LQ.sub}">${esc(n)} <span>${S.moves.filter(m => inShelf(m, LQ.cat) && (!v || m.category === v || m.pack === v)).length}</span></button>`).join("") : "";
+    el.querySelectorAll("[data-sub]").forEach(b => b.onclick = () => { LQ.sub = b.dataset.sub; LQ.n = 36; draw(); }); };
+  const draw = () => { const g = $("#lgrid"); subs(); rows = libRows(); shown = 0; g.innerHTML = "";
     g.className = `grid lgrid ${LQ.view === "list" ? "lv" : "sz-" + LQ.size}`;
     const st = LQ.cat === "My Styles" && !LQ.recent, all = st ? (S.styles || []).length : S.moves.length; $("#lcount").textContent = `${rows.length}${rows.length !== all ? ` of ${all}` : ""} ${st ? "style" : "move"}${all === 1 ? "" : "s"}`;
     if (!rows.length) { LIST = []; g.innerHTML = `<div class="empty">${LQ.recent ? "Moves you copy show up here." : st && !LQ.q ? STYLE_EMPTY : "Nothing matches yet. Try another word."}</div>`; $("#lmore").style.display = "none"; return; }
@@ -1102,7 +1116,7 @@ VIEWS.library_after = () => {
   $("#laspect").onchange = e => { LQ.aspect = e.target.value === "Any shape" ? "All" : e.target.value; draw(); };
   $("#lmedia").onclick = e => { LQ.media = !LQ.media; e.currentTarget.setAttribute("aria-pressed", LQ.media); draw(); };
   $("#lrec").onclick = e => { LQ.recent = !LQ.recent; e.currentTarget.setAttribute("aria-pressed", LQ.recent); draw(); };
-  document.querySelectorAll("[data-cat]").forEach(b => b.onclick = () => { LQ.cat = b.dataset.cat; LQ.n = 36; document.querySelectorAll("[data-cat]").forEach(x => x.setAttribute("aria-pressed", x === b)); draw(); });
+  document.querySelectorAll("[data-cat]").forEach(b => b.onclick = () => { LQ.cat = b.dataset.cat; LQ.sub = ""; LQ.n = 36; document.querySelectorAll("[data-cat]").forEach(x => x.setAttribute("aria-pressed", x === b)); draw(); });
   draw();
 };
 let LIST = [];
@@ -1129,7 +1143,7 @@ function openMove(id) {
   if (/^MY-/.test(id)) return openStyle(id);
   const m = S.moves.find(x => x.id === id); if (!m) return; CUR = id;
   PICK = { ...pickFor(m), len: null, look: "original" };
-  $("#dbody").innerHTML = `${vidPreview(m)}<div class="in">${(m.ref_clip || m.poster) ? `<p style="margin:0 0 8px;font-size:12.5px;color:var(--muted)">Preview: the original video this move recreates, by ${esc(m.credit || "its creator")}. ${safeUrl(m.ref_url) ? `<a href="${esc(m.ref_url)}" target="_blank" rel="noopener">See the original post</a>.` : ""} <span id="lookline">${(refSources(m).post || refSources(m).clip) ? "Your version copies its look, with your footage, words and topic." : "Your version comes out in your own colors, fonts and topic."}</span></p>` : ""}<span class="k">${esc(m.id)} · ${esc(m.category)} · ${esc(m.level)}</span><h3>${esc(m.name)}</h3><p style="margin:0;color:var(--text-2)">${esc(m.tagline)}</p>
+  $("#dbody").innerHTML = `${vidPreview(m)}<div class="in">${(m.ref_clip || m.poster) ? `<p style="margin:0 0 8px;font-size:12.5px;color:var(--muted)">${m.creator_refs ? `Preview: one of ${esc(m.pack)}&#39;s videos. This move studies ${m.creator_refs.length} of them to learn the whole style, then edits your footage that way.` : `Preview: the original video this move recreates, by ${esc(m.credit || "its creator")}.`} ${safeUrl(m.ref_url) ? `<a href="${esc(m.ref_url)}" target="_blank" rel="noopener">See the original post</a>.` : ""} <span id="lookline">${(refSources(m).post || refSources(m).clip) ? "Your version copies its look, with your footage, words and topic." : "Your version comes out in your own colors, fonts and topic."}</span></p>` : ""}<span class="k">${esc(m.id)} · ${esc(m.category)} · ${esc(m.level)}</span><h3>${esc(m.name)}</h3><p style="margin:0;color:var(--text-2)">${esc(m.tagline)}</p>
    <div class="tags" style="margin:10px 0">${(m.best_for || []).map(x => `<span class="tag">${esc(x)}</span>`).join("")}<span class="tag">~${m.seconds}s</span></div>
    ${m.example ? `<div class="field"><label>Real example of this style <span style="font-weight:500;color:var(--muted)">by ${esc(m.example.creator || "the creator")}</span></label><div id="embedBox" class="embed"></div><p style="margin:6px 0 0;font-size:12.5px;color:var(--muted)">Shown with the platform's own embed. Your version uses your clips, brand and topic.</p></div>` : ""}
    ${m.attribution ? `<p style="margin:6px 0 0;font-size:12.5px;color:var(--muted)">${esc(m.attribution)}${safeUrl(m.source_url) ? ` · <a href="${esc(m.source_url)}" target="_blank" rel="noopener">source</a>` : ""}</p>` : ""}
