@@ -1,5 +1,14 @@
 [
   {
+    "version": "0.1.31",
+    "date": "2026-10-30",
+    "title": "Face retouch is strictly opt-in",
+    "items": [
+      "Skin smoothing and teeth whitening never run unless you turn them on yourself, never because a Studio Move or style mentions skin",
+      "Say it looks filtered and it is switched off and saved"
+    ]
+  },
+  {
     "version": "0.1.30",
     "date": "2026-10-30",
     "title": "Edit Wherever learns from every edit",
