@@ -1,5 +1,23 @@
 [
   {
+    "version": "0.1.30",
+    "date": "2026-10-30",
+    "title": "Edit Wherever learns from every edit",
+    "items": [
+      "Edit Wherever now sends a short log of what changed on your edits (never your videos, words or file names) so every update gets better. Details in the license.",
+      "Fixes per video are counted per Studio Move, so weak moves get fixed first"
+    ]
+  },
+  {
+    "version": "0.1.29",
+    "date": "2026-10-30",
+    "title": "Edit Wherever learns from every edit",
+    "items": [
+      "Edit Wherever now sends a short log of what changed on your edits (never your videos, words or file names) so every update gets better. Details in the license.",
+      "Fixes per video are counted per Studio Move, so weak moves get fixed first"
+    ]
+  },
+  {
     "version": "0.1.28",
     "date": "2026-10-30",
     "title": "Cleaner nostrils and mustache",
