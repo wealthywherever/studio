@@ -1,5 +1,14 @@
 [
   {
+    "version": "0.1.32",
+    "date": "2026-10-30",
+    "title": "Face retouch that moves with the face",
+    "items": [
+      "Skin, teeth and under-eye retouch now follow a 478-point face mesh smoothed over time, so it no longer shimmers when the head moves (still off unless you turn it on)",
+      "The main face is picked by confidence, not size, so hands or a busy desk mat are never mistaken for it (fixes colour matching too)"
+    ]
+  },
+  {
     "version": "0.1.31",
     "date": "2026-10-30",
     "title": "Face retouch is strictly opt-in",
