@@ -1,5 +1,15 @@
 [
   {
+    "version": "0.1.39",
+    "date": "2026-10-31",
+    "title": "Easier first run",
+    "items": [
+      "Onboarding remembers your answers if the tab closes, asks for your comment word once (with an 'I don't have one' option), and has a new 'Places & things' choice for travel, food and product creators.",
+      "The studio installs the video tools before your first video, not halfway through it.",
+      "Fixed: 'Browse 0 moves', progress that looked done too early, the squashed Editorial font, and a silent error on an empty key."
+    ]
+  },
+  {
     "version": "0.1.38",
     "date": "2026-10-31",
     "title": "Neutral room colour",

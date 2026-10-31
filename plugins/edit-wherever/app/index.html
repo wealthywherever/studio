@@ -96,11 +96,11 @@ section{margin-top:34px}.sh{display:flex;align-items:flex-end;justify-content:sp
 /* live previews (brand-colored, CSS only) */
 .pv{position:relative;overflow:hidden;background:var(--u-bg);display:grid;place-items:center}
 .phone{position:relative;height:82%;aspect-ratio:9/16;border-radius:14px;background:var(--u-bg);box-shadow:0 0 0 2px color-mix(in srgb,var(--u-primary) 12%,transparent),0 14px 26px -16px rgba(0,0,0,.4);overflow:hidden}
-.pv .tx{position:absolute;left:10%;right:10%;font-family:var(--u-head);font-weight:800;color:var(--u-primary);font-size:9px;line-height:1.1}
+.pv .tx{position:absolute;left:10%;right:10%;font-family:var(--u-head);font-weight:var(--u-hw,800);color:var(--u-primary);font-size:9px;line-height:1.1}
 @keyframes m-morph{0%,100%{width:46%;height:12%;border-radius:40px;background:var(--u-primary)}33%{width:70%;height:30%;border-radius:12px;background:var(--u-accent)}66%{width:30%;height:30%;border-radius:50%;background:var(--u-primary)}}
 .pv-morph i{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);animation:m-morph 3.6s var(--ease) infinite}
 @keyframes m-roll{0%{transform:translateY(0)}100%{transform:translateY(-80%)}}
-.pv-count .nums{position:absolute;left:0;right:0;top:40%;height:20%;overflow:hidden;text-align:center;font:800 22px/1 var(--u-head);color:var(--u-accent)}.pv-count .nums div{animation:m-roll 3s steps(4) infinite}.pv-count .nums span{display:block;height:22px}
+.pv-count .nums{position:absolute;left:0;right:0;top:40%;height:20%;overflow:hidden;text-align:center;font:var(--u-hw,800) 22px/1 var(--u-head);color:var(--u-accent)}.pv-count .nums div{animation:m-roll 3s steps(4) infinite}.pv-count .nums span{display:block;height:22px}
 @keyframes m-bar{0%{transform:scaleY(.05)}60%,100%{transform:scaleY(1)}}
 .pv-chart{}.pv-chart .bars{position:absolute;left:14%;right:14%;bottom:22%;height:46%;display:flex;align-items:flex-end;gap:8%}.pv-chart .bars i{flex:1;background:var(--u-primary);transform-origin:bottom;animation:m-bar 2.8s var(--ease) infinite;border-radius:4px 4px 0 0}
 .pv-chart .bars i:nth-child(2){height:60%;animation-delay:.15s}.pv-chart .bars i:nth-child(3){height:85%;background:var(--u-accent);animation-delay:.3s}.pv-chart .bars i:nth-child(1){height:35%}
@@ -125,7 +125,7 @@ section{margin-top:34px}.sh{display:flex;align-items:flex-end;justify-content:sp
 .pv-timeline i{position:absolute;top:calc(50% - 6px);width:14px;height:14px;border-radius:50%;background:var(--u-accent);animation:m-dot 3s var(--ease) infinite}.pv-timeline i:nth-of-type(1){left:14%}.pv-timeline i:nth-of-type(2){left:44%;animation-delay:.3s}.pv-timeline i:nth-of-type(3){left:76%;animation-delay:.6s}
 @keyframes m-glow{0%,100%{filter:drop-shadow(0 0 0 transparent);transform:scale(1)}50%{filter:drop-shadow(0 0 10px var(--u-accent));transform:scale(1.06)}}
 .pv-glow .tx{top:40%;font-size:16px;text-align:center;color:var(--u-accent);animation:m-glow 2.4s ease-in-out infinite}
-.pv .cap{position:absolute;left:12%;right:12%;bottom:20%;text-align:center;font:800 7.5px/1.2 var(--u-head);color:var(--u-primary)}.pv .cap mark{background:var(--u-accent);color:#fff;border-radius:3px;padding:0 2px}
+.pv .cap{position:absolute;left:12%;right:12%;bottom:20%;text-align:center;font:var(--u-hw,800) 7.5px/1.2 var(--u-head);color:var(--u-primary)}.pv .cap mark{background:var(--u-accent);color:#fff;border-radius:3px;padding:0 2px}
 .vidpv{background:#0d0c10;position:relative}.vidpv video,.vidpv img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;display:block;z-index:1}
 .vidpv::before{content:"";position:absolute;inset:-24px;background:var(--bg,none) center/cover;filter:blur(24px) brightness(.5) saturate(1.2)}.vidpv .srcbadge{z-index:2}
 .srcbadge{position:absolute;left:10px;top:10px;max-width:calc(100% - 64px);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;z-index:1;font:700 10.5px var(--f-m);letter-spacing:.06em;background:rgba(0,0,0,.65);color:#fff;padding:3px 7px;border-radius:6px}
@@ -258,7 +258,7 @@ kbd{white-space:nowrap;font:700 12px var(--f-m);padding:2px 7px;border:1px solid
 .fp{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}.fp button{border:2px solid var(--line-soft);border-radius:14px;padding:14px;background:var(--raised);cursor:pointer;text-align:left}.fp button[aria-pressed=true]{border-color:var(--text)}
 .fp b{display:block;font-size:22px;line-height:1.05}.fp span{font-size:12px;color:var(--muted)}@media(max-width:640px){.fp{grid-template-columns:repeat(2,1fr)}}
 .mock{position:sticky;top:20px;align-self:start;border-radius:34px;padding:10px;background:#0f0e12}.mock .scr{aspect-ratio:9/16;border-radius:26px;overflow:hidden;position:relative;background:var(--u-bg)}
-.mock .h{position:absolute;left:9%;right:9%;top:24%;font:800 26px/1.05 var(--u-head);color:var(--u-primary)}.mock .h em{color:var(--u-accent);font-style:normal}
+.mock .h{position:absolute;left:9%;right:9%;top:24%;font:var(--u-hw,800) 26px/1.05 var(--u-head);color:var(--u-primary)}.mock .h em{color:var(--u-accent);font-style:normal}
 .mock .face{position:absolute;left:18%;right:18%;bottom:0;height:46%;border-radius:120px 120px 0 0;background:linear-gradient(180deg,color-mix(in srgb,var(--u-primary) 22%,var(--u-bg)),color-mix(in srgb,var(--u-primary) 40%,var(--u-bg)))}
 .mock .cp{position:absolute;left:8%;right:8%;bottom:26%;text-align:center;font:800 17px/1.2 var(--u-body);color:#fff;background:rgba(15,12,20,.78);border-radius:10px;padding:6px 8px}
 .cap-box mark{background:var(--u-accent);color:#fff;padding:0 4px;border-radius:5px}.cap-karaoke mark{background:none;color:var(--u-accent)}.cap-outline{-webkit-text-stroke:1.5px var(--u-primary)}
@@ -269,6 +269,7 @@ kbd{white-space:nowrap;font:700 12px var(--f-m);padding:2px 7px;border:1px solid
 .ob h1{font-size:clamp(38px,6vw,64px)}.ob .lead{font-size:17px}
 .opts{display:flex;flex-wrap:wrap;gap:10px;margin:18px 0}.opts .chip{padding:11px 16px;font-size:15px}
 .vibes{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:18px 0}@media(max-width:640px){.vibes{grid-template-columns:repeat(2,1fr)}}.vibes.v3{grid-template-columns:repeat(3,1fr)}@media(max-width:480px){.vibes.v3{grid-template-columns:minmax(0,1fr)}.v3 .vibe{display:flex;align-items:center}.v3 .art{width:72px;height:64px;flex:none}}
+.vibes.v4{grid-template-columns:repeat(2,1fr)}@media(max-width:480px){.vibes.v4{grid-template-columns:minmax(0,1fr)}.v4 .vibe{display:flex;align-items:center}.v4 .art{width:72px;height:64px;flex:none}}
 .vibe{border:2px solid var(--line-soft);border-radius:18px;overflow:hidden;cursor:pointer;background:var(--raised);text-align:left;padding:0}.vibe[aria-pressed=true]{border-color:var(--text);box-shadow:var(--shadow)}
 .vibe .art{height:110px;display:grid;place-items:center;font-size:30px;line-height:1}.vibe div:last-child{padding:10px 12px}.vibe b{display:block}.vibe span{font-size:12.5px;color:var(--muted)}
 .obnav{position:fixed;left:0;right:0;bottom:0;padding:16px 20px calc(16px + env(safe-area-inset-bottom));background:color-mix(in srgb,var(--bg) 88%,transparent);backdrop-filter:blur(14px);border-top:1px solid var(--line-soft);display:flex;justify-content:center;gap:10px;z-index:71}
@@ -389,6 +390,7 @@ const VIBES = [
 const PALETTES = [
  ["Ink & Coral", "#15161B", "#FF5C4D", "#FFFCF9"], ["Ocean", "#0B2545", "#13A3B4", "#EEF6F8"], ["Forest", "#1F2D24", "#4F9D69", "#F2F5EE"], ["Sunset", "#2B1B2F", "#FF7A45", "#FFF1E6"],
  ["Berry", "#2A1B3D", "#E2366B", "#FBEFF4"], ["Sand", "#3B2F2A", "#C9864E", "#FAF4EC"], ["Mono", "#111111", "#111111", "#FFFFFF"], ["Electric", "#0F0F1A", "#5B5BFF", "#F2F2FF"]];
+const HEAD_W = f => /Instrument Serif/i.test(f || "") ? 400 : 800;   // serif display faces ship one weight; faking bold squashes them
 const FONTS = [
  { h: "Inter Tight", b: "Inter", name: "Modern" }, { h: "Instrument Serif", b: "Inter", name: "Editorial" }, { h: "Fraunces", b: "Nunito", name: "Warm" },
  { h: "Anton", b: "Inter", name: "Headline" }, { h: "Playfair Display", b: "Inter", name: "Elegant" }, { h: "Baloo 2", b: "Nunito", name: "Rounded" }];
@@ -459,12 +461,12 @@ async function handoff(t, copyOnly) {
 function applyBrand(b) {
   if (!b) return; const r = document.documentElement.style;
   r.setProperty("--u-primary", b.palette.primary); r.setProperty("--u-accent", b.palette.accent); r.setProperty("--u-bg", b.palette.bg);
-  r.setProperty("--u-head", `"${b.heading_font}"`); r.setProperty("--u-body", `"${b.body_font}"`);
+  r.setProperty("--u-head", `"${b.heading_font}"`); r.setProperty("--u-hw", HEAD_W(b.heading_font)); r.setProperty("--u-body", `"${b.body_font}"`);
 }
 // match: the move copies an example, so colours and fonts name the example's roles, not brand values the Look line would discard
 // spoken: a clip is picked, so the CTA they say in it wins over the brand kit's
 function fill(prompt, topic, { match = false, spoken = false } = {}) {
-  const b = S.brand || {}, cap = (CAPS.find(c => c.id === b.caption_style) || CAPS[0]).name, cta = b.cta || "FOLLOW";
+  const b = S.brand || {}, cap = (CAPS.find(c => c.id === b.caption_style) || CAPS[0]).name, cta = b.cta || 'nothing (I have no comment word yet: end with a short "Follow for more" instead)';
   const map = { "{{topic}}": topic || "the topic I talk about in my clip", "{{niche}}": b.niche || "my niche", "{{audience}}": b.audience || "my audience",
     "{{cta}}": spoken ? `the call to action I say in my clip (${cta} if I don't say one)` : cta,
     "{{brand.primary}}": match ? "the example's main colour" : b.palette?.primary || "#15131A", "{{brand.accent}}": match ? "the example's accent colour" : b.palette?.accent || "#FF6A55", "{{brand.bg}}": match ? "the example's background colour" : b.palette?.bg || "#F3EEE6",
@@ -769,11 +771,11 @@ VIEWS.home = () => {
   const picks = pickForYou(6), u = S.update, made = S.projects.length > 0, left = steps.filter(s => !s[3]), nd = steps.length - left.length, locked = !made && !ch.length;
   const fw = left.length ? `<div class="card"><div style="padding:18px 20px 4px"><div class="k">${made ? "Next up" : "Start here"}</div><h2 style="margin-top:4px">${made ? "Keep the momentum going" : "Your first video, step by step"}</h2>
      <div class="fvp" style="margin:12px 0 6px"><i style="width:${Math.round(100 * nd / steps.length)}%"></i></div><span class="muted" style="font-size:12.5px">${nd} of ${steps.length} done</span></div>
-     <div class="check">${left.map(([id, t, s, ok, act], i) => `<div class="ci ${i === 0 ? "cur" : ""}"><i></i><div><b>${t}</b><span>${s}</span></div>${i === 0 ? (act || "").replace(/btn sm( grad)?/, "btn grad") : ""}</div>`).join("")}</div></div>` : "";
+     <div class="check">${steps.map(([id, t, s, ok, act]) => { const cur = id === left[0][0]; return `<div class="ci ${ok ? "done" : cur ? "cur" : ""}"><i></i><div><b>${t}</b><span>${s}</span></div>${cur ? (act || "").replace(/btn sm( grad)?/, "btn grad") : ""}</div>`; }).join("")}</div></div>` : "";
   return `${u ? `<div class="card upd" role="status"><div><b>Update ready: v${esc(u.latest)}${u.title ? ` · ${esc(u.title)}` : ""}</b><span>${esc((u.items || []).slice(0, 3).join(" · "))}</span></div>
     <button class="btn sm grad" data-claude="Update Edit Wherever to the latest version.">${I.play} Update in Claude</button></div>` : ""}<div class="hero"><div class="k">${greet()}, ${esc(b.name || "creator")}</div><h1>Your studio is ready.</h1>
     <p>Pick a move and press <b>Make this</b>. Claude edits it, and your video lands in Projects in your colors and fonts.</p>
-    <div class="row">${S.projects.length ? `<a class="btn" href="#/make">Make a video</a>` : `<a class="btn" href="${firstHref()}">Make my first video</a>`}<a class="btn ghost" href="#/library">Browse ${S.moves.length} moves</a></div></div>
+    <div class="row">${S.projects.length ? `<a class="btn" href="#/make">Make a video</a>` : `<a class="btn" href="${firstHref()}">Make my first video</a>`}<a class="btn ghost" href="#/library">Browse ${S.moves.length ? S.moves.length + " " : ""}moves</a></div></div>
    ${S.state.first_video ? "" : `<a class="card nxt" href="#/learn"><span class="lpl" style="margin:0">${I.learn}</span><div><b>New here? Start with the short guides</b><span>Track 1 · Your first video · ${TRACK1.filter(([id]) => lessonDone(id)).length} of ${TRACK1.length} done · about 15 minutes</span></div><span class="btn sm">Open Learn</span></a>`}
    ${done.feat_styles_trials || !S.state.first_video ? "" : `<div class="card nxt" role="region" aria-label="New in your studio"><span class="lpl" style="margin:0">${I.new}</span><div><b>New: My Styles and Trials</b><span>Save any edit you love as your own one-tap style. Then test 3 hooks as Instagram trial reels and see which one wins.</span></div>
     <div style="display:flex;gap:8px;flex-wrap:wrap"><a class="btn sm" href="#/library" onclick="LQ.cat='My Styles';LQ.recent=false">My Styles</a><a class="btn sm" href="#/trials">Trials</a><button class="btn sm lite" data-done="feat_styles_trials" aria-label="Hide this">✕</button></div></div>`}
@@ -804,6 +806,7 @@ async function drawWall() {
 }
 function pickForYou(n) {
   const b = S.brand || {}, faceless = b.face === "faceless", want = faceless ? ["Studio Templates", "Viral Formats", "Faceless", "Explainers", "Kinetic Type", "UI Motion"]
+    : b.face === "broll" ? ["Vlog Edits", "Viral Formats", "Motion", "Social Formats", "Music Visuals", "Captions"]   // they film places and things, not themselves
     : b.face === "face" ? ["Yap Edits", "Vlog Edits", "Viral Formats", "Captions", "Creator Styles"]   // on camera: moves that edit their own clips
     : ["Viral Formats", "Yap Edits", "Vlog Edits", "Studio Templates", "Explainers", "Kinetic Type"];
   const niche = (b.niche || "").toLowerCase();
@@ -935,7 +938,7 @@ function composer(k) {
 
 // ---------- FIRST VIDEO walkthrough (live: each step ticks itself as the studio sees it happen)
 function starterMoves() {
-  const fit = m => ["Yap Edits", "Captions"].includes(m.category) && ["Beginner", "Easy"].includes(m.level) && showcase(m) && !/screen/i.test(m.tagline || "");   // step 1 asks for a talking clip, not a screen recording
+  const broll = (S.brand || {}).face === "broll", fit = m => (broll ? ["Vlog Edits", "Viral Formats"] : ["Yap Edits", "Captions"]).includes(m.category) && ["Beginner", "Easy"].includes(m.level) && showcase(m) && !/screen/i.test(m.tagline || "");   // step 1 asks for a talking clip, not a screen recording
   return S.moves.filter(fit).sort((a, b) => (b.category === "Captions") - (a.category === "Captions") || ((b.example || {}).views || 0) - ((a.example || {}).views || 0)).slice(0, 3);
 }
 VIEWS.first = () => {
@@ -945,8 +948,9 @@ VIEWS.first = () => {
   const step = (i, title, body) => `<section class="fv ${st[i] ? "done" : i === cur ? "cur" : ""}"><div class="fvn">${st[i] ? "✓" : i + 1}</div><div class="fvb"><h3>${title}</h3>${i === cur || !st[i] || i === 4 ? body : ""}</div></section>`;
   return `<div class="top"><div><div class="k">Your first video</div><h1>Let's make <em>one together</em></h1><p class="lead">Five steps, about 15 minutes. Each step ticks itself when it's done. No code, ever.</p></div></div>
    <div class="fvp"><i style="width:${pct}%"></i></div>
-   ${step(0, "Add a video of you talking", `<p>Any phone video works: 15 to 60 seconds of you talking to the camera. Drag it into the box or tap it to choose a file.</p><div id="fpick"></div>`)}
-   ${step(1, "Pick a move and press Make this", `<p>Tap one of these beginner moves. Pick your clip, type what it's about, then tap <b>Make this</b>.</p><div class="grid g3">${starterMoves().map(moveCard).join("")}</div><p style="margin-top:10px"><a href="#/library">Or browse all ${S.moves.length} moves</a></p>`)}
+   ${(S.brand || {}).face === "broll" ? step(0, "Add your clips", `<p>Any phone videos work: places, food, products, a day out. A few clips of 5 to 30 seconds each is perfect. Drag them into the box or tap it to choose files.</p><div id="fpick"></div>`)
+     : step(0, "Add a video of you talking", `<p>Any phone video works: 15 to 60 seconds of you talking to the camera. Drag it into the box or tap it to choose a file.</p><div id="fpick"></div>`)}
+   ${step(1, "Pick a move and press Make this", `<p>Tap one of these beginner moves. Pick your clip, type what it's about, then tap <b>Make this</b>.</p><div class="grid g3">${starterMoves().map(moveCard).join("")}</div><p style="margin-top:10px"><a href="#/library">Or browse all ${S.moves.length ? S.moves.length + " " : ""}moves</a></p>`)}
    ${step(2, "Press Enter in Claude", `${pasteGuideHTML()}<p class="muted">This step ticks when Claude starts working.</p>`)}
    ${step(3, "Say \"looks good\" on the preview", `<p>Claude shows you 3 frames. Happy? Reply <b>looks good</b>. Not quite? Tap a tweak, paste it, and Claude changes it. Nothing is lost: it keeps your earlier version.</p><div class="tws">${tweakList()}</div>`)}
    ${step(4, "Your video is ready", made ? `<div class="vc" style="max-width:260px"><video src="/media/projects/${encodeURIComponent(S.projects[0].name)}" controls playsinline preload="metadata"></video></div><p>It's in Projects and in your Edit Wherever folder. Post it, then make the next one.</p><a class="btn grad" href="#/library">Make another</a>` : `<p>It shows up here and in Projects the moment Claude saves it.</p>`)}`;
@@ -1105,7 +1109,7 @@ VIEWS.library_after = () => {
     g.className = `grid lgrid ${LQ.view === "list" ? "lv" : "sz-" + LQ.size}`;
     const st = LQ.cat === "My Styles" && !LQ.recent, all = st ? (S.styles || []).length : S.moves.length; $("#lcount").textContent = `${rows.length}${rows.length !== all ? ` of ${all}` : ""} ${st ? "style" : "move"}${all === 1 ? "" : "s"}`;
     if (!rows.length) { LIST = []; let hid = 0; if (LQ.media && !st && !LQ.recent) { LQ.media = false; hid = libRows().length; LQ.media = true; }   // moves the preview filter hid
-      g.innerHTML = `<div class="empty">${LQ.recent ? "Moves you copy show up here." : st && !LQ.q ? STYLE_EMPTY : hid ? `${hid} move${hid === 1 ? " matches" : "s match"} but ${hid === 1 ? "has" : "have"} no preview yet. <button class="btn" id="lshowall">Show ${hid === 1 ? "it" : "them"}</button>` : "Nothing matches yet. Try another word."}</div>`;
+      g.innerHTML = `<div class="empty">${LQ.recent ? "Moves you copy show up here." : st && !LQ.q ? STYLE_EMPTY : hid ? `${hid} move${hid === 1 ? " matches" : "s match"} but ${hid === 1 ? "has" : "have"} no preview yet. <button class="btn" id="lshowall">Show ${hid === 1 ? "it" : "them"}</button>`   : !S.moves.length ? (S.licensed ? "The library didn't load. Check your internet, then reload this page." : "Add your key to open the library.") : "Nothing matches yet. Try another word."}</div>`;
       if (hid) $("#lshowall").onclick = () => { LQ.media = false; $("#lmedia").setAttribute("aria-pressed", false); draw(); }; $("#lmore").style.display = "none"; return; }
     more(); };
   let t; $("#lq").oninput = e => { clearTimeout(t); t = setTimeout(() => { LQ.q = e.target.value; LQ.n = 36; draw(); }, 140); };
@@ -1213,14 +1217,14 @@ function brandEditor() {
   const d = draft;
   return `<div class="field"><label>Colors</label><div class="pal">${PALETTES.map(([n, p, a, bg]) => `<button data-pal="${n}" aria-pressed="${d.palette.primary === p && d.palette.accent === a}"><div class="sw"><i style="background:${p}"></i><i style="background:${a}"></i><i style="background:${bg}"></i></div>${n}</button>`).join("")}</div>
    <div style="display:flex;gap:12px;margin-top:10px;flex-wrap:wrap;font-size:13px">${["primary", "accent", "bg"].map(k => `<label style="display:flex;align-items:center;gap:6px">${k === "bg" ? "Background" : k[0].toUpperCase() + k.slice(1)} <input type="color" data-col="${k}" value="${esc(d.palette[k])}"></label>`).join("")}</div></div>
-   <div class="field"><label>Fonts</label><div class="fp">${FONTS.map((f, i) => `<button data-font="${i}" aria-pressed="${d.heading_font === f.h}"><b style="font-family:'${f.h}'">Aa Bold</b><span>${f.name} · ${f.h}</span></button>`).join("")}</div></div>
+   <div class="field"><label>Fonts</label><div class="fp">${FONTS.map((f, i) => `<button data-font="${i}" aria-pressed="${d.heading_font === f.h}"><b style="font-family:'${f.h}';font-weight:${HEAD_W(f.h)}">Aa Bold</b><span>${f.name} · ${f.h}</span></button>`).join("")}</div></div>
    <div class="field"><label>Caption style</label><div class="opts" style="margin:0">${CAPS.map(c => `<button class="chip" data-cap="${c.id}" aria-pressed="${d.caption_style === c.id}">${c.name}</button>`).join("")}</div></div>
    <div class="field" id="sndField"><label>Sound style</label>${soundPicker(d)}</div>
    <div class="grid g2"><div class="field"><label for="bcta">Comment word (viewers comment it to get your link)</label><input class="input" id="bcta" value="${esc(d.cta || "")}" placeholder="e.g. START"></div>
     <div class="field"><label for="bhandle">Your handle</label><input class="input" id="bhandle" value="${esc(d.handle || "")}" placeholder="yourname"></div></div>`;
 }
 function mock() { const d = draft || S.brand, c = CAPS.find(x => x.id === d.caption_style) || CAPS[0], pl = d.palette || {};
-  return `<div class="mock" id="mock" style="--u-primary:${esc(pl.primary)};--u-accent:${esc(pl.accent)};--u-bg:${esc(pl.bg)};--u-head:'${esc(d.heading_font)}';--u-body:'${esc(d.body_font)}'"><div class="scr"><div class="h">3 things I wish<br>I knew about <em>${esc((d.niche || "this").toLowerCase())}</em></div><div class="face"></div>
+  return `<div class="mock" id="mock" style="--u-primary:${esc(pl.primary)};--u-accent:${esc(pl.accent)};--u-bg:${esc(pl.bg)};--u-head:'${esc(d.heading_font)}';--u-hw:${HEAD_W(d.heading_font)};--u-body:'${esc(d.body_font)}'"><div class="scr"><div class="h">3 things I wish<br>I knew about <em>${esc((d.niche || "this").toLowerCase())}</em></div><div class="face"></div>
    <div class="cp ${c.cls}">here's <mark>the one</mark> nobody tells you${c.id === "emoji" ? " 👀" : ""}</div></div><div class="mlab">Live preview<small>Updates as you choose</small></div></div>`; }
 function bindBrand(root, onChange) {
   const re = () => { if ($("#ob").classList.contains("on")) applyBrand(draft); const m = $("#mock"); if (m) m.outerHTML = mock(); onChange && onChange(); };
@@ -1597,12 +1601,12 @@ const OSTEPS = [
  () => `<div class="k">1 of 7 · You</div><h1>What do you make videos about?</h1><div class="opts">${NICHES.map(n => `<button class="chip" data-o-niche="${n}" aria-pressed="${OD.niche === n}">${n}</button>`).join("")}</div>
    <div class="field"><label for="o-niche">Or type your own</label><input class="input" id="o-niche" value="${esc(NICHES.includes(OD.niche) ? "" : OD.niche || "")}" placeholder="e.g. Plant care for beginners"></div>
    <div class="field"><label for="o-aud">Who are they for?</label><input class="input" id="o-aud" value="${esc(OD.audience || "")}" placeholder="e.g. busy moms who want to start a side project"></div>`,
- () => `<div class="k">2 of 7 · How you show up</div><h1>On camera, or behind it?</h1><div class="vibes v3">${[["face", "🎥", "On camera", "I talk to the camera"], ["faceless", "✍️", "Faceless", "Text, voiceover, stock clips"], ["both", "🔀", "Both", "A mix of everything"]].map(([id, a, n, s]) => `<button class="vibe" data-o-face="${id}" aria-pressed="${OD.face === id}"><div class="art" style="background:var(--line-soft)">${a}</div><div><b>${n}</b><span>${s}</span></div></button>`).join("")}</div>
+ () => `<div class="k">2 of 7 · How you show up</div><h1>On camera, or behind it?</h1><div class="vibes v4">${[["face", "🎥", "On camera", "I talk to the camera"], ["faceless", "✍️", "Faceless", "Text, voiceover, stock clips"], ["broll", "🌄", "Places & things", "Travel, food, products: I film what's around me"], ["both", "🔀", "Both", "A mix of everything"]].map(([id, a, n, s]) => `<button class="vibe" data-o-face="${id}" aria-pressed="${OD.face === id}"><div class="art" style="background:var(--line-soft)">${a}</div><div><b>${n}</b><span>${s}</span></div></button>`).join("")}</div>
    <h2 style="margin-top:26px">Where do you post?</h2><div class="opts">${PLATFORMS.map(p => `<button class="chip" data-o-plat="${p}" aria-pressed="${(OD.platforms || []).includes(p)}">${p}</button>`).join("")}</div>`,
  () => `<div class="k">3 of 7 · Vibe</div><h1>Pick a <em>vibe</em>.</h1><p class="lead">This sets your starting colors and fonts. You can tweak everything next.</p><div class="vibes">${VIBES.map(v => `<button class="vibe" data-o-vibe="${v.id}" aria-pressed="${OD.vibe === v.id}"><div class="art" style="background:${v.palette.bg};color:${v.palette.accent};font-family:'${FONTS[v.font].h}'"><span style="font-size:34px">${v.art}</span></div><div><b>${v.name}</b><span>${v.note}</span></div></button>`).join("")}</div>`,
  () => `<div class="k">4 of 7 · Your look</div><h1>Make it <em>yours</em>.</h1><div class="bk" style="margin-top:18px"><div id="obBrand">${brandEditor()}</div>${mock()}</div>`,
  () => `<div class="k">5 of 7 · Sound</div><h1>How should it <em>sound</em>?</h1><p class="lead">Your studio adds sound effects for you on every cut, pop and reveal. Tap ▶ to hear each style.</p><div id="obSnd">${soundPicker(OD)}</div>`,
- () => `<div class="k">6 of 7 · Goal</div><h1>What should viewers do?</h1><div class="field"><label for="o-cta">Your comment word (the word people comment to get your link or freebie)</label><input class="input" id="o-cta" value="${esc(OD.cta || "")}" placeholder="e.g. START"></div>
+ () => `<div class="k">6 of 7 · Goal</div><h1>What should viewers do?</h1><div class="field"><label for="o-cta">Your comment word (the word people comment to get your link or freebie)</label><input class="input" id="o-cta" value="${esc(OD.cta || "")}" placeholder="e.g. START"></div><button class="chip" id="o-nocta" aria-pressed="${OD.cta === "" && !!OD.no_cta}">I don't have one yet</button><p class="muted" style="font-size:13px;margin-top:6px">No comment word? Your videos end with "Follow for more" instead. You can add one any time in Brand.</p>
    <div class="field"><label>Your main goal right now</label><div class="opts" style="margin:0">${["Grow followers", "Get leads", "Sell my offer", "Build a habit of posting"].map(g => `<button class="chip" data-o-goal="${g}" aria-pressed="${OD.goal === g}">${g}</button>`).join("")}</div></div>`,
  () => `<div class="k">${UNLOCK_ONLY ? "Unlock" : "7 of 7 · Unlock"}</div><h1>Enter your <em>key</em>.</h1><p class="lead">It came in your purchase email. It unlocks the full library and every new drop.</p>
    <div class="field"><label for="o-key">Your key</label><input class="input" id="o-key" value="${esc(OD.key || "")}" placeholder="EW-XXXX-XXXX" style="font-family:var(--f-m);letter-spacing:.08em;text-transform:uppercase"></div><p id="o-keymsg" style="font-size:13px;color:var(--muted)"></p>
@@ -1619,7 +1623,10 @@ function offlineScreen() {   // key saved but license server unreachable: not a 
     if (!lib.locked) { S.moves = lib.moves; S.drops = lib.drops; $(".obnav").style.display = ""; $("#ob").classList.remove("on"); route(); return toast("Back online."); }
     if (lib.locked === "offline") return toast("Still can't connect. Check your internet."); $(".obnav").style.display = ""; unlockScreen(lib.message); };
 }
+const OB_DRAFT = "ew_onboarding_draft", saveDraft = () => { try { localStorage.setItem(OB_DRAFT, JSON.stringify({ OB, OD })); } catch {} }, dropDraft = () => { try { localStorage.removeItem(OB_DRAFT); } catch {} };
 function startOnboarding() {
+  let d = null; try { d = !UNLOCK_ONLY && !(S.brand || {}).setup_done && JSON.parse(localStorage.getItem(OB_DRAFT) || "null"); } catch {}
+  if (d && d.OD) { OD = d.OD; OB = Math.min(d.OB | 0, 6); $("#ob").classList.add("on"); return drawOB(); }   // pick up where they left off
   const b = S.brand; OD = b ? JSON.parse(JSON.stringify(b)) : { platforms: ["Instagram", "TikTok"], vibe: "editorial", face: "face", caption_style: "box", sound_style: "studio", sfx_density: "medium" };
   if (!OD.palette) { const v = VIBES.find(x => x.id === OD.vibe); OD.palette = { ...v.palette }; OD.heading_font = FONTS[v.font].h; OD.body_font = FONTS[v.font].b; }
   OB = 0; $("#ob").classList.add("on"); drawOB();
@@ -1634,7 +1641,8 @@ function drawOB() {
   on("[data-o-plat]", b => b.onclick = () => { const s = new Set(OD.platforms || []); s.has(b.dataset.oPlat) ? s.delete(b.dataset.oPlat) : s.add(b.dataset.oPlat); OD.platforms = [...s]; drawOB(); });
   on("[data-o-vibe]", b => b.onclick = () => { const v = VIBES.find(x => x.id === b.dataset.oVibe); OD.vibe = v.id; OD.palette = { ...v.palette }; OD.heading_font = FONTS[v.font].h; OD.body_font = FONTS[v.font].b; drawOB(); });
   on("[data-o-goal]", b => b.onclick = () => { OD.goal = b.dataset.oGoal; drawOB(); });
-  if (OB === 4) { const sf = $("#sndField"); if (sf) sf.remove(); bindBrand($("#obw"), null); }
+  const nc = $("#o-nocta"); if (nc) nc.onclick = () => { OD.cta = ""; OD.no_cta = true; drawOB(); };
+  if (OB === 4) { const sf = $("#sndField"); if (sf) sf.remove(); const cf = $("#bcta"); if (cf) cf.closest(".field").remove(); bindBrand($("#obw"), null); }   // sound and comment word have their own steps
   if (OB === 5) bindSound($("#obw"), OD, drawOB);
   const demo = $("#o-demo"); if (demo) demo.onclick = () => { $("#o-key").value = "EW-PREV-2026"; checkKey(); };
   const k = $("#o-key"); if (k) k.oninput = checkKey;
@@ -1647,7 +1655,7 @@ function readOB() {
   const g = id => { const el = $("#" + id); return el ? el.value.trim() : null; };
   if (OB === 0) OD.name = g("o-name") || OD.name;
   if (OB === 1) { const t = g("o-niche"); if (t) OD.niche = t; OD.audience = g("o-aud") || OD.audience; }
-  if (OB === 6) OD.cta = (g("o-cta") || OD.cta || "").toUpperCase();
+  if (OB === 6) { OD.cta = (g("o-cta") || OD.cta || "").toUpperCase(); if (OD.cta) delete OD.no_cta; }
   if (OB === 7) OD.key = (g("o-key") || "").toUpperCase();
 }
 function obValid() {
@@ -1656,7 +1664,7 @@ function obValid() {
   if (OB === 7 && !/^EW-[A-Z0-9]{4}-[A-Z0-9]{4}$/.test(OD.key || "")) return S.licensed ? "Enter your key" : "Enter your key (or tap \"Use preview key\")";
 }
 $("#obNext").onclick = async () => {
-  readOB(); const err = obValid(); if (err) return toast(err);
+  readOB(); const err = obValid(); if (err) { if (OB === 7) { $("#o-keymsg").textContent = err; $("#o-keymsg").style.color = "var(--bad, #ff6b5c)"; $("#o-key").focus(); } return toast(err); }
   if (OB === 7) {   // real check against the license server; also registers this computer (2 per key)
     const nx = $("#obNext"), lbl = nx.textContent; nx.disabled = true; nx.innerHTML = '<i class="spin" style="width:16px;height:16px;border-width:2px"></i> Checking your key…'; $("#o-keymsg").textContent = "";
     const r = await api("/api/license", { key: OD.key }).catch(() => ({ ok: false, message: "Couldn't reach your studio. Is it still running?" })); nx.disabled = false; nx.textContent = lbl;
@@ -1664,8 +1672,8 @@ $("#obNext").onclick = async () => {
     const lib = await api("/api/library"); S.moves = lib.moves; S.drops = lib.drops;
     if (UNLOCK_ONLY) { UNLOCK_ONLY = false; $("#ob").classList.remove("on"); route(); return toast("Unlocked. Welcome back."); }
   }
-  if (OB < OSTEPS.length - 1) { OB++; return drawOB(); }
-  OD.setup_done = new Date().toISOString(); S.brand = OD; await api("/api/brand", OD); applyBrand(OD);
+  if (OB < OSTEPS.length - 1) { OB++; if (OB < 7) saveDraft(); return drawOB(); }
+  dropDraft(); OD.setup_done = new Date().toISOString(); S.brand = OD; await api("/api/brand", OD); applyBrand(OD);
   $("#ob").classList.remove("on"); location.hash = S.projects.length ? "#/home" : firstHref(); route();
 };
 $("#obBack").onclick = () => { readOB(); if (OB) { OB--; drawOB(); } };

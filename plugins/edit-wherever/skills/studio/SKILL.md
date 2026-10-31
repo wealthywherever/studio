@@ -5,7 +5,7 @@ description: Open the user's Edit Wherever dashboard (their personal video studi
 
 # Open Edit Wherever
 
-1. Check Node is available (`node --version`). If it is missing, run the `setup` skill first.
+1. Check the video tools are in place: `node --version`, `ffmpeg -version` and `hyperframes --version` (one command each, quietly). If any is missing, run the `setup` skill first, before opening the studio, and tell the user in one line why: it's a one-time install so their first video doesn't stop halfway. If setup ends with `RESTART NEEDED`, follow its restart step and stop here.
 2. Start the studio server in the background (it only listens on this computer):
    `node "${CLAUDE_SKILL_DIR}/../../scripts/studio-server.mjs"`
    It prints `Edit Wherever is open: http://localhost:<port>` (usually 4747). If an older studio is still running (from before an update), the new one replaces it by itself; if this version is already running, it says so and exits, which is fine. Only if it says the port is used by another app, pass another port as the first argument.
