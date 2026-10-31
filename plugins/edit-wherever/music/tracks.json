@@ -1,0 +1,247 @@
+{
+  "note": "Music Claude may use when the user has not added their own track. bpm is approximate. Every track is 90 s at most, levelled to -16 LUFS and fades out at the end: trim or loop to fit, and sit it 10-12 dB under the voice.",
+  "tracks": [
+    {
+      "id": "adding-the-sun",
+      "file": "adding-the-sun.mp3",
+      "title": "Adding the Sun",
+      "mood": "warm, sunny",
+      "energy": "calm",
+      "bpm": 90,
+      "seconds": 90,
+      "source": "FreePD.com (Kevin MacLeod and others)",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "advertime",
+      "file": "advertime.mp3",
+      "title": "Advertime",
+      "mood": "bright ad, product",
+      "energy": "high",
+      "bpm": 120,
+      "seconds": 90,
+      "source": "FreePD.com (Kevin MacLeod and others)",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "backbeat",
+      "file": "backbeat.mp3",
+      "title": "Backbeat",
+      "mood": "electronic beat",
+      "energy": "high",
+      "bpm": 128,
+      "seconds": 46,
+      "source": "FreePD.com (Kevin MacLeod and others)",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "beat-one",
+      "file": "beat-one.mp3",
+      "title": "Beat One",
+      "mood": "electronic, techy",
+      "energy": "high",
+      "bpm": 120,
+      "seconds": 90,
+      "source": "FreePD.com (Kevin MacLeod and others)",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "bit-bit-loop",
+      "file": "bit-bit-loop.mp3",
+      "title": "Bit Bit Loop",
+      "mood": "chiptune, playful",
+      "energy": "medium",
+      "bpm": 100,
+      "seconds": 76,
+      "source": "FreePD.com (Kevin MacLeod and others)",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "blippy-trance",
+      "file": "blippy-trance.mp3",
+      "title": "Blippy Trance",
+      "mood": "chill electronic",
+      "energy": "calm",
+      "bpm": 80,
+      "seconds": 90,
+      "source": "FreePD.com (Kevin MacLeod and others)",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "city-sunshine",
+      "file": "city-sunshine.mp3",
+      "title": "City Sunshine",
+      "mood": "feel-good, lifestyle",
+      "energy": "medium",
+      "bpm": 85,
+      "seconds": 90,
+      "source": "FreePD.com (Kevin MacLeod and others)",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "downtown-boogie",
+      "file": "downtown-boogie.mp3",
+      "title": "Downtown Boogie",
+      "mood": "groovy, chill",
+      "energy": "medium",
+      "bpm": 105,
+      "seconds": 90,
+      "source": "FreePD.com (Kevin MacLeod and others)",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "energizing",
+      "file": "energizing.mp3",
+      "title": "Energizing",
+      "mood": "chill pop, positive",
+      "energy": "medium",
+      "bpm": 91,
+      "seconds": 90,
+      "source": "FreePD.com (Kevin MacLeod and others)",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "epic-blockbuster-2",
+      "file": "epic-blockbuster-2.mp3",
+      "title": "Epic Blockbuster 2",
+      "mood": "cinematic, trailer",
+      "energy": "high",
+      "bpm": 118,
+      "seconds": 90,
+      "source": "FreePD.com (Kevin MacLeod and others)",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "fresh-focus",
+      "file": "fresh-focus.mp3",
+      "title": "Fresh Focus",
+      "mood": "focused, productive",
+      "energy": "medium",
+      "bpm": 103,
+      "seconds": 90,
+      "source": "FreePD.com (Kevin MacLeod and others)",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "funshine",
+      "file": "funshine.mp3",
+      "title": "Funshine",
+      "mood": "happy, playful",
+      "energy": "medium",
+      "bpm": 97,
+      "seconds": 90,
+      "source": "FreePD.com (Kevin MacLeod and others)",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "going-bananas",
+      "file": "going-bananas.mp3",
+      "title": "Going Bananas",
+      "mood": "comedy, silly",
+      "energy": "high",
+      "bpm": 130,
+      "seconds": 90,
+      "source": "FreePD.com (Kevin MacLeod and others)",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "gotta-keep-on-movin",
+      "file": "gotta-keep-on-movin.mp3",
+      "title": "Gotta Keep On Movin",
+      "mood": "driving, motivational",
+      "energy": "high",
+      "bpm": 109,
+      "seconds": 90,
+      "source": "FreePD.com (Kevin MacLeod and others)",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "hear-what-they-say",
+      "file": "hear-what-they-say.mp3",
+      "title": "Hear What They Say",
+      "mood": "electronic, story",
+      "energy": "medium",
+      "bpm": 115,
+      "seconds": 90,
+      "source": "FreePD.com (Kevin MacLeod and others)",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "hit-n-smash",
+      "file": "hit-n-smash.mp3",
+      "title": "Hit n Smash",
+      "mood": "hard-hitting, sport",
+      "energy": "high",
+      "bpm": 130,
+      "seconds": 90,
+      "source": "FreePD.com (Kevin MacLeod and others)",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "inspiration",
+      "file": "inspiration.mp3",
+      "title": "Inspiration",
+      "mood": "uplifting, corporate",
+      "energy": "medium",
+      "bpm": 120,
+      "seconds": 90,
+      "source": "FreePD.com (Kevin MacLeod and others)",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "motions",
+      "file": "motions.mp3",
+      "title": "Motions",
+      "mood": "energetic pop, fast cuts",
+      "energy": "high",
+      "bpm": 150,
+      "seconds": 90,
+      "source": "FreePD.com (Kevin MacLeod and others)",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "natural-vibes",
+      "file": "natural-vibes.mp3",
+      "title": "Natural Vibes",
+      "mood": "upbeat, travel",
+      "energy": "high",
+      "bpm": 133,
+      "seconds": 90,
+      "source": "FreePD.com (Kevin MacLeod and others)",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "new-hero-in-town",
+      "file": "new-hero-in-town.mp3",
+      "title": "New Hero in Town",
+      "mood": "epic, reveal",
+      "energy": "high",
+      "bpm": 171,
+      "seconds": 56,
+      "source": "FreePD.com (Kevin MacLeod and others)",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "screen-saver",
+      "file": "screen-saver.mp3",
+      "title": "Screen Saver",
+      "mood": "ambient, tech, calm",
+      "energy": "calm",
+      "bpm": 80,
+      "seconds": 90,
+      "source": "FreePD.com (Kevin MacLeod and others)",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "sunday-dub",
+      "file": "sunday-dub.mp3",
+      "title": "Sunday Dub",
+      "mood": "laid-back dub",
+      "energy": "calm",
+      "bpm": 102,
+      "seconds": 90,
+      "source": "FreePD.com (Kevin MacLeod and others)",
+      "license": "CC0-1.0"
+    }
+  ]
+}

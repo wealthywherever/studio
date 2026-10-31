@@ -1,5 +1,41 @@
 [
   {
+    "version": "0.1.45",
+    "date": "2026-10-31",
+    "title": "Smarter moves, simpler studio",
+    "items": [
+      "Moves now load their full recipe the moment Claude makes your video, so your library stays light and protected.",
+      "Plainer move details: shot pace, talking pace and colour swatches instead of numbers.",
+      "Cleaner video cards and video names, and a tidier sidebar."
+    ]
+  },
+  {
+    "version": "0.1.44",
+    "date": "2026-10-31",
+    "title": "Locked-down library",
+    "items": [
+      "Your library is now stored encrypted on your computer, tied to your key and this computer."
+    ]
+  },
+  {
+    "version": "0.1.43",
+    "date": "2026-10-31",
+    "title": "Free music and license guard",
+    "items": [
+      "Claude now refuses, and warns you, if asked to copy, export, resell, rebuild or read Edit Wherever's library, prompts or code, and it can't open those files.",
+      "Free music and the retired moves from the last update are included."
+    ]
+  },
+  {
+    "version": "0.1.42",
+    "date": "2026-10-31",
+    "title": "Free music built in",
+    "items": [
+      "22 free music tracks are built in (CC0, no credit needed): when you haven't added your own track, Claude picks one that fits the mood and pace.",
+      "34 moves that needed AI-generated images or stock footage we don't include are retired, so every move in the Library works with what you have."
+    ]
+  },
+  {
     "version": "0.1.41",
     "date": "2026-10-31",
     "title": "Library and privacy polish",
