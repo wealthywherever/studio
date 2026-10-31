@@ -1,5 +1,17 @@
 [
   {
+    "version": "0.1.41",
+    "date": "2026-10-31",
+    "title": "Library and privacy polish",
+    "items": [
+      "The Library opens on famous creators' styles, counts match what you see, and creator chips swipe in one row on phones.",
+      "Move tweaks and steps show your real brand colours and fonts instead of {{placeholders}}.",
+      "Instagram and TikTok posts load only when you tap 'Show the original post'.",
+      "Clip and project thumbnails pick a real frame instead of a black one.",
+      "The Claude sheet says what's about to happen."
+    ]
+  },
+  {
     "version": "0.1.40",
     "date": "2026-10-31",
     "title": "Studio polish",

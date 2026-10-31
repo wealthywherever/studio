@@ -218,6 +218,7 @@ kbd{white-space:nowrap;font:700 12px var(--f-m);padding:2px 7px;border:1px solid
 .vc .pl::after{content:"";position:absolute;left:21px;top:16px;border-style:solid;border-width:10px 0 10px 16px;border-color:transparent transparent transparent #fff}.vc.on .pl{opacity:0}.vc b{position:absolute;left:0;right:0;bottom:0;padding:24px 10px 10px;color:#fff;font-size:12.5px;background:linear-gradient(transparent,rgba(0,0,0,.7))}
 .vact{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}.ssf{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}.ssf .input{flex:1 1 100%;padding:7px 11px;font-size:13.5px;min-width:0}
 .tfree{flex:1 1 100%;flex-wrap:nowrap}.tfree .input{flex:1 1 auto}
+.lsubs{display:flex;gap:6px;flex-wrap:wrap;margin:-6px 0 18px}@media(max-width:640px){.lsubs{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;margin-right:-16px;padding-right:16px}.lsubs .chip{flex:none}}   /* phone: one swipeable row, so the grid stays on screen */
 /* trials */
 .trial{padding:20px;margin-top:18px}.trial .sh{margin-bottom:12px}.trial h2{font-size:24px;overflow-wrap:anywhere}
 .tvg{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:14px}
@@ -453,12 +454,17 @@ async function copy(t, msg = "Copied. Paste it into Claude.") {
 // The app cuts q off around 14,000 characters, so longer prompts go copy + paste only.
 const DEEP_MAX = 13000;
 const claudeLink = t => `claude://code/new?q=${encodeURIComponent(t)}${(S.dirs || {}).home ? `&folder=${encodeURIComponent(S.dirs.home)}` : ""}`;
+// buttons carry a short id, not the prompt text, so inspecting the page shows no prompts
+const CL = new Map(), CLK = new Map(), clp = t => { if (!CLK.has(t)) { const k = "p" + CLK.size; CLK.set(t, k); CL.set(k, t); } return CLK.get(t); };
 async function handoff(t, copyOnly) {
   await copy(t, null);
   const open = !copyOnly && t.length <= DEEP_MAX;
   if (open) location.href = claudeLink(t);
-  pasteGuide(open);
+  pasteGuide(open, doing(t));
 }
+// what Claude is about to do, from the prompt's first line (the sheet says it instead of a generic "your video")
+const DOING = { move: "edit your video with this move", review: "watch your reel and score it", cover: "make a cover and a caption", trials: "make 3 trial versions with different hooks", tweak: "make your change", export: "make the platform versions", batch: "edit every clip in your Inbox", repurpose: "cut your long video into reels", idea: "make a reel from your idea", script: "write your hooks and script", stats: "read your trial stats", save: "save this style to My Styles", recreate: "recreate that edit with your clip" };
+const doing = t => { const k = (/^Edit Wherever (\w+)/.exec(t) || [])[1]; return DOING[k] || (/^Fix my studio/.test(t) ? "check and fix your studio" : /^Update Edit Wherever/i.test(t) ? "update Edit Wherever" : "start on it"); };
 function applyBrand(b) {
   if (!b) return; const r = document.documentElement.style;
   r.setProperty("--u-primary", b.palette.primary); r.setProperty("--u-accent", b.palette.accent); r.setProperty("--u-bg", b.palette.bg);
@@ -511,7 +517,7 @@ const hasFootage = () => PICK.none || (PICK.clips || []).length > 0;
 const pickFor = (m, keep) => ({ clips: needsClip(m) ? (keep && keep.length ? keep : (S.inbox[0] ? [S.inbox[0].name] : [])) : [], none: !needsClip(m), multi: multiClip(m) });
 function clipPicker(allowNone) {
   const clips = S.inbox;
-  return `<div class="cpk">${clips.map(v => `<button class="cpi" data-pick="${esc(v.name)}" aria-pressed="${(PICK.clips || []).includes(v.name)}"><video src="/media/inbox/${encodeURIComponent(v.name)}#t=0.5" muted preload="metadata"></video><b>${esc(nm(v.name))}</b></button>`).join("")}
+  return `<div class="cpk">${clips.map(v => `<button class="cpi" data-pick="${esc(v.name)}" aria-pressed="${(PICK.clips || []).includes(v.name)}"><video src="/media/inbox/${encodeURIComponent(v.name)}#t=0.5" poster="/thumb/inbox/${encodeURIComponent(v.name)}" muted preload="none"></video><b>${esc(nm(v.name))}</b></button>`).join("")}
    ${allowNone ? `<button class="cpi none" data-pick="none" aria-pressed="${!!PICK.none}"><span>✦</span><b>No clip, animate it</b></button>` : ""}
    <label class="drop" tabindex="0"><input type="file" accept="video/*" multiple hidden data-upload><span class="dz">＋</span><b>Add a video</b><small>Drag it here or tap to choose</small><i class="bar"><i></i></i></label></div>`;
 }
@@ -543,7 +549,7 @@ const TWEAKS = ["Looks good, make it.", "Make it punchier: faster cuts and a str
 const tweakPre = what => `Edit Wherever tweak for my ${what}.\n${(S.dirs || {}).home ? `Studio folder: ${S.dirs.home}\n` : ""}Change: `;
 const faceless = () => (S.brand || {}).face === "faceless", firstHref = () => faceless() ? "#/library" : "#/first";   // the first-video walkthrough needs a talking clip
 // with a prefix (names the studio + video) a tweak works in a fresh chat, so it opens Claude; without one it's a reply in the same chat, so it's copied
-const tweakList = (prefix = "") => TWEAKS.filter(t => !prefix || !/^Looks good/.test(t)).map(t => prefix ? `<button class="chip tchip" data-claude="${esc(prefix + t)}">${I.play} ${esc(t)}</button>` : `<button class="chip tchip" data-copy="${esc(t)}">${I.copy} ${esc(t)}</button>`).join("")
+const tweakList = (prefix = "") => TWEAKS.filter(t => !prefix || !/^Looks good/.test(t)).map(t => prefix ? `<button class="chip tchip" data-claude="${clp(prefix + t)}">${I.play} ${esc(t)}</button>` : `<button class="chip tchip" data-copy="${esc(t)}">${I.copy} ${esc(t)}</button>`).join("")
   + `<div class="ssf tfree"><input class="input" placeholder="Or say it in your own words, e.g. make the captions bigger" aria-label="Your change, in your own words" maxlength="400"><button class="btn sm grad" data-tfree="${esc(prefix)}">${prefix ? I.play + " Send" : I.copy + " Copy"}</button></div>`;
 // My Styles + Trials: like tweaks, each prompt names the studio so it works in a fresh Claude chat
 const studioLine = () => (S.dirs || {}).home ? `\n\nStudio folder: ${S.dirs.home}` : "";
@@ -606,8 +612,8 @@ function openReview(name) {
   $("#dbody").innerHTML = `<div class="in"><span class="k">Review · ${esc(nm(name))}</span><h3>${r.overall != null ? `${score(r.overall)} <small>out of ${max}</small>` : "Your review"}</h3>
    <p style="margin:0;color:var(--text-2)">Claude's notes on what works and what to change. Tap <b>Fix this</b> and Claude makes that change in a new version.</p>
    <ul class="rvl">${r.items.map(i => `<li><div class="rvh"><b>${esc(i.area || "Note")}</b>${i.score != null ? `<em>${score(i.score)}/${max}</em>` : ""}</div>${i.score != null ? `<div class="rvbar" role="img" aria-label="${esc(i.area)}: ${score(i.score)} out of ${max}"><i style="width:${Math.max(4, Math.min(100, 100 * i.score / max))}%"></i></div>` : ""}
-     ${i.note ? `<p>${esc(i.note)}</p>` : ""}${i.fix ? `<small>Fix: ${esc(i.fix)}</small><button class="btn sm grad" data-claude="${esc(P.fix(name, i.fix))}">${I.play} Fix this</button>` : ""}</li>`).join("") || `<li>No notes in this review.</li>`}</ul>
-   <div class="dbar"><button class="btn" data-claude="${esc(P.review(name))}">${I.play} Review it again</button></div></div>`;
+     ${i.note ? `<p>${esc(i.note)}</p>` : ""}${i.fix ? `<small>Fix: ${esc(i.fix)}</small><button class="btn sm grad" data-claude="${clp(P.fix(name, i.fix))}">${I.play} Fix this</button>` : ""}</li>`).join("") || `<li>No notes in this review.</li>`}</ul>
+   <div class="dbar"><button class="btn" data-claude="${clp(P.review(name))}">${I.play} Review it again</button></div></div>`;
   openDrawer();
 }
 // Add from phone: a separate upload-only link on the home Wi-Fi, closed again with the dialog (or after 15 minutes)
@@ -690,10 +696,10 @@ function pasteGuideHTML(opened = true) {
     <li><div><b>Reply in plain words</b> in the same chat. "Looks good" to finish it, or say what to change. Tap a tweak to copy one.</div></li>
     <li><div><b>Your video lands in Projects.</b> This page tells you when it's ready. Keep the Claude window open while it works.</div></li></ol>`;
 }
-function pasteGuide(opened) {
-  if (S.state.hide_paste_guide) return toast(opened ? "Claude is opening with your video ready. Press Enter." : `Copied. Paste it into Claude with ${PASTE}.`);
-  $("#pgc").innerHTML = `${opened ? `<div class="k">Opening Claude ✓</div><h2 id="pgt">Claude is opening with your video ready. Press Enter.</h2>
-   <p class="muted" style="margin:8px 0 0;font-size:14px">Didn't open? It's copied: paste it into Claude. <span style="white-space:nowrap">(Code tab, click the message box, <kbd>${PASTE}</kbd>)</span></p>` :`<div class="k">Copied ✓</div><h2 id="pgt">Now paste it into Claude</h2>`}${pasteGuideHTML(opened)}
+function pasteGuide(opened, what = "start on your video") {
+  if (S.state.hide_paste_guide) return toast(opened ? `Claude is opening to ${what}. Press Enter.` : `Copied. Paste it into Claude with ${PASTE}.`);
+  $("#pgc").innerHTML = `${opened ? `<div class="k">Opening Claude ✓</div><h2 id="pgt">Claude is opening to ${what}. Press Enter.</h2>
+   <p class="muted" style="margin:8px 0 0;font-size:14px">Didn't open? It's copied: paste it into Claude. <span style="white-space:nowrap">(Code tab, click the message box, <kbd>${PASTE}</kbd>)</span></p>` :`<div class="k">Copied ✓</div><h2 id="pgt">Paste it into Claude to ${what}</h2>`}${pasteGuideHTML(opened)}
    <div class="k" style="margin-top:14px">Quick replies for the preview (tap to copy, paste in the same chat)</div><div class="tws">${tweakList()}</div>
    <div class="row" style="margin-top:18px;display:flex;gap:10px;flex-wrap:wrap"><button class="btn grad" id="pgok">Got it</button><button class="btn" id="pgno">Don't show this again</button><a class="btn ghost" href="#/first" id="pgfirst">Full walkthrough</a></div>`;
   const from = document.activeElement; $("#pgm").classList.add("on"); $("#pgc").scrollTop = 0; $("#pgok").focus({ preventScroll: true });
@@ -821,12 +827,12 @@ function pickForYou(n) {
 // ---------- MAKE
 VIEWS.make = () => `<div class="top"><div><div class="k">Make</div><h1>What are we <em>making</em>?</h1><p class="lead">Pick one, choose a move, then press <b>Make this</b>. Claude opens with everything filled in, and your video appears in Projects.</p></div></div>
  <div class="grid g3 eng3">
-  <div class="card eng"><div class="ic" style="background:linear-gradient(135deg,#ff7e5f,#ff3f7a)">${I.proj}</div><h3>Edit my footage</h3><p>Talking to camera or vlog clips. It cuts, captions, zooms and adds sound for you.</p><button class="btn pri" data-eng="edit">Start editing</button></div>
-  <div class="card eng"><div class="ic" style="background:linear-gradient(135deg,#ff3f7a,#6a45ff)">${I.make}</div><h3>Create from one sentence</h3><p>No footage? Type an idea. It builds a motion-graphics explainer in your brand.</p><button class="btn pri" data-eng="create">Start creating</button></div>
+  <div class="card eng"><div class="ic" style="background:linear-gradient(135deg,var(--brand-a),var(--brand-b))">${I.proj}</div><h3>Edit my footage</h3><p>Talking to camera or vlog clips. It cuts, captions, zooms and adds sound for you.</p><button class="btn pri" data-eng="edit">Start editing</button></div>
+  <div class="card eng"><div class="ic" style="background:linear-gradient(135deg,var(--brand-c),var(--brand-a))">${I.make}</div><h3>Create from one sentence</h3><p>No footage? Type an idea. It builds a motion-graphics explainer in your brand.</p><button class="btn pri" data-eng="create">Start creating</button></div>
   <div class="card eng"><div class="ic" style="background:linear-gradient(135deg,#22d3ee,#3ddc97)">${I.new}</div><h3>Recreate any edit</h3><p>Saw an edit you love? Paste the link. It copies the style onto your clips, in your brand.</p><button class="btn pri" data-eng="recreate">Recreate a style</button></div>
  </div>
  <div class="sh" style="margin-top:22px"><div><div class="k">More ways to make</div><h2>Shortcuts</h2></div></div>
- <div class="grid g4">${MINI_CARDS.map(([k, t, p, b, ic]) => `<div class="card eng"><div class="ic" style="background:linear-gradient(135deg,#ff7e5f,#ff3f7a)">${ic}</div><h3>${t}</h3><p>${p}</p><button class="btn" data-eng="${k}">${b}</button></div>`).join("")}</div>
+ <div class="grid g4">${MINI_CARDS.map(([k, t, p, b, ic]) => `<div class="card eng"><div class="ic" style="background:linear-gradient(135deg,var(--brand-a),var(--brand-b))">${ic}</div><h3>${t}</h3><p>${p}</p><button class="btn" data-eng="${k}">${b}</button></div>`).join("")}</div>
  <section id="composer"></section>
  <section id="scripts">${scriptsHTML()}</section>
  <section><div class="sh"><div><div class="k">My Styles</div><h2>Your saved styles</h2>${(S.styles || []).length ? "<p>Tap one, then Make this. Claude uses it on a clip from your Inbox.</p>" : ""}</div>${(S.styles || []).length ? `<a class="btn sm" href="#/library" onclick="LQ.cat='My Styles';LQ.recent=false">See all</a>` : ""}</div>
@@ -979,8 +985,8 @@ function edMain() {
   if (ED.busy) return box.innerHTML = `<div class="edempty"><i class="spin"></i><p>Opening "${esc(ED.open)}"… (the first time takes about 10 seconds)</p></div>`;
   const pre = tweakPre(`edit "${ED.open}" (its project is in Edits/${ED.open})`);
   box.innerHTML = `<div class="edbar"><b>${esc(ED.open)}</b><div class="tws" style="margin:0">
-     <button class="chip tchip grad" data-claude="${esc(pre + "the part I selected in the Editor. Make it: (type what you want here)")}">${I.play} Change what I selected</button>
-     <button class="chip tchip" data-claude="${esc(pre + "render the final video again with my latest changes.")}">${I.play} Render it again</button></div>
+     <button class="chip tchip grad" data-claude="${clp(pre + "the part I selected in the Editor. Make it: (type what you want here)")}">${I.play} Change what I selected</button>
+     <button class="chip tchip" data-claude="${clp(pre + "render the final video again with my latest changes.")}">${I.play} Render it again</button></div>
      <a class="btn sm" href="${esc(ED.url)}" target="_blank" rel="noopener">Full screen ↗</a><button class="btn sm" id="edclose">Close</button></div>
    <iframe class="edframe" src="${esc(ED.url)}" title="Timeline editor: ${esc(ED.open)}" allow="clipboard-read; clipboard-write; fullscreen"></iframe>
    <details class="more"><summary>More changes you can ask for</summary><div class="tws">${tweakList(pre)}</div></details>`;
@@ -1058,7 +1064,9 @@ function featuredRank(moves) {
   const fit = m => (["Beginner", "Easy"].includes(m.level) ? 0 : 1) + ((m.aspect || "9:16") === "9:16" ? 0 : 1);   // the first screen is what a beginner can make for Reels
   const cam = (S.brand || {}).face === "face", FOOT = ["Yap Edits", "Vlog Edits", "Viral Formats", "Captions", "Creator Styles"];
   const own = m => cam && FOOT.includes(m.category) ? 0 : 1, dyn = m => own(m) ? (ci(m.category) < DYN.length ? 0 : 1) : 0;   // on camera: moves for their own clips lead, still taking turns
-  return (a, b) => visTier(b) - visTier(a) || fit(a) - fit(b) || own(a) - own(b) || dyn(a) - dyn(b) || rank.get(a.id) - rank.get(b.id) || ci(a.category) - ci(b.category);
+  // the first cards are famous creators' whole styles (most-viewed first): the strongest "I want my videos to look like that" moment
+  const views = m => (m.example || {}).views || 0, LEAD = new Map(moves.filter(m => m.creator_refs && hasVis(m)).sort((a, b) => views(b) - views(a)).slice(0, 4).map((m, i) => [m.id, i])), lead = m => LEAD.has(m.id) ? LEAD.get(m.id) : 99;
+  return (a, b) => lead(a) - lead(b) || visTier(b) - visTier(a) || fit(a) - fit(b) || own(a) - own(b) || dyn(a) - dyn(b) || rank.get(a.id) - rank.get(b.id) || ci(a.category) - ci(b.category);
 }
 // shelves group the categories the way social creators look for edits; a category missing here lands in "More"
 const SHELVES = [["Creators", ["Creator Styles"]], ["Vlogs & cinematic", ["Vlog Edits"]], ["Talking & yap", ["Yap Edits", "Captions"]], ["Viral & trends", ["Viral Formats", "Social Formats"]],
@@ -1084,7 +1092,7 @@ VIEWS.library = () => {
     <select class="input sel" id="laspect" aria-label="Shape">${["All", "9:16", "1:1", "16:9"].map(a => `<option ${LQ.aspect === a ? "selected" : ""}>${a === "All" ? "Any shape" : a}</option>`).join("")}</select>
     <button class="chip" id="lmedia" aria-pressed="${LQ.media}">▶ With preview only</button></div>
    <div class="lcats" style="display:flex;gap:8px;flex-wrap:wrap;margin:14px 0 18px">${cats.map(c => `<button class="chip" data-cat="${esc(c)}" aria-pressed="${c === LQ.cat}">${esc(c)} <span>${c === "All" ? S.moves.length : c === "My Styles" ? mine : S.moves.filter(m => inShelf(m, c)).length}</span></button>`).join("")}</div>
-   <div class="lsubs" id="lsubs" style="display:flex;gap:6px;flex-wrap:wrap;margin:-6px 0 18px"></div>
+   <div class="lsubs" id="lsubs"></div>
    <div class="grid lgrid" id="lgrid"></div><div style="text-align:center;margin-top:18px"><button class="btn" id="lmore">Show more</button></div>`;
 };
 function libRows() {
@@ -1105,11 +1113,12 @@ VIEWS.library_after = () => {
     g.insertAdjacentHTML("beforeend", rows.slice(shown, LQ.n).map(moveCard).join("")); shown = Math.min(rows.length, LQ.n); watchVideos(g);
     $("#lmore").style.display = rows.length > shown ? "" : "none"; $("#lmore").textContent = `Show more (${rows.length - shown})`; };
   const subs = () => { const el = $("#lsubs"), cr = LQ.cat === "Creators", l = cr ? creatorPacks() : ["All", "My Styles"].includes(LQ.cat) ? [] : shelfCats(LQ.cat);
-    el.innerHTML = l.length > 1 ? [["", cr ? "Every creator" : "Everything"], ...l.map(x => [x, x])].map(([v, n]) => `<button class="chip" data-sub="${esc(v)}" aria-pressed="${v === LQ.sub}">${esc(n)} <span>${S.moves.filter(m => inShelf(m, LQ.cat) && (!v || m.category === v || m.pack === v)).length}</span></button>`).join("") : "";
+    el.innerHTML = l.length > 1 ? [["", cr ? "Every creator" : "Everything"], ...l.map(x => [x, x])].map(([v, n]) => `<button class="chip" data-sub="${esc(v)}" aria-pressed="${v === LQ.sub}">${esc(n)} <span>${S.moves.filter(m => inShelf(m, LQ.cat) && (!v || m.category === v || m.pack === v) && (!LQ.media || hasVis(m))).length}</span></button>`).join("") : "";
     el.querySelectorAll("[data-sub]").forEach(b => b.onclick = () => { LQ.sub = b.dataset.sub; LQ.n = 36; draw(); }); };
   const draw = () => { const g = $("#lgrid"); subs(); rows = libRows(); shown = 0; g.innerHTML = "";
     g.className = `grid lgrid ${LQ.view === "list" ? "lv" : "sz-" + LQ.size}`;
-    const st = LQ.cat === "My Styles" && !LQ.recent, all = st ? (S.styles || []).length : S.moves.length; $("#lcount").textContent = `${rows.length}${rows.length !== all ? ` of ${all}` : ""} ${st ? "style" : "move"}${all === 1 ? "" : "s"}`;
+    const st = LQ.cat === "My Styles" && !LQ.recent, all = st ? (S.styles || []).length : S.moves.length; const filtered = LQ.cat !== "All" || LQ.sub || LQ.lvl !== "All" || LQ.fav || LQ.aspect !== "All" || LQ.q || LQ.recent;   // "of 1146" only when the user narrowed it; the preview switch says so itself
+    $("#lcount").textContent = `${rows.length} ${st ? "style" : "move"}${rows.length === 1 ? "" : "s"}${filtered && rows.length !== all ? ` of ${all}` : ""}${LQ.media && !st && !LQ.recent ? " with a preview" : ""}`;
     if (!rows.length) { LIST = []; let hid = 0; if (LQ.media && !st && !LQ.recent) { LQ.media = false; hid = libRows().length; LQ.media = true; }   // moves the preview filter hid
       g.innerHTML = `<div class="empty">${LQ.recent ? "Moves you copy show up here." : st && !LQ.q ? STYLE_EMPTY : hid ? `${hid} move${hid === 1 ? " matches" : "s match"} but ${hid === 1 ? "has" : "have"} no preview yet. <button class="btn" id="lshowall">Show ${hid === 1 ? "it" : "them"}</button>`   : !S.moves.length ? (S.licensed ? "The library didn't load. Check your internet, then reload this page." : "Add your key to open the library.") : "Nothing matches yet. Try another word."}</div>`;
       if (hid) $("#lshowall").onclick = () => { LQ.media = false; $("#lmedia").setAttribute("aria-pressed", false); draw(); }; $("#lmore").style.display = "none"; return; }
@@ -1171,11 +1180,14 @@ function openMove(id) {
     <div class="k" style="margin-top:6px">3 · Press Make this: Claude opens with it ready</div></div>
    <details class="more"><summary>See the full prompt</summary><div class="pre" id="dpre"></div></details>
    <div class="dbar" style="display:flex;gap:10px;flex-wrap:wrap"><button class="btn grad" id="dcopy">${I.play} Make this</button><button class="btn" id="dcopy2" aria-label="Copy the prompt instead">${I.copy} Copy</button><button class="btn" id="dprev" aria-label="Previous move">‹</button><button class="btn" id="dnext" aria-label="Next move">›</button><button class="btn" id="dfav" aria-pressed="${isFav(m.id)}">${I.heart} ${isFav(m.id) ? "Saved" : "Save"}</button></div>
-   <h4 style="margin:22px 0 4px">How to use it</h4><ol class="steps">${(m.steps || []).filter(s => !/^Drop (your clip|the clips) in (the|your) Studio inbox/i.test(s)).map(s => `<li>${esc(s)}</li>`).join("")}</ol>
+   <h4 style="margin:22px 0 4px">How to use it</h4><ol class="steps">${(m.steps || []).filter(s => !/^Drop (your clip|the clips) in (the|your) Studio inbox/i.test(s)).map(s => `<li>${esc(fill(s))}</li>`).join("")}</ol>
    <h4 style="margin:22px 0 4px">After you press Make this</h4>${pasteGuideHTML()}<div class="k" style="margin-top:12px">Quick replies for the preview (paste in the same chat)</div><div class="tws">${tweakList()}</div>
    <h4 style="margin:26px 0 4px;padding-top:18px;border-top:1px solid var(--line-soft)">Tweaks made for this move <span style="font-weight:500;color:var(--muted);font-size:13px">paste after your preview</span></h4>
-   ${(m.tweaks || []).map((t, i) => `<div class="tw"><span>${esc(t)}</span><button class="btn sm" data-tweak="${i}">${I.copy} Copy</button></div>`).join("")}</div>`;
-  if (m.example && safeUrl(m.example.post_url)) embed($("#embedBox"), m.example);
+   ${(m.tweaks || []).map((t, i) => `<div class="tw"><span>${esc(fill(t))}</span><button class="btn sm" data-tweak="${i}">${I.copy} Copy</button></div>`).join("")}</div>`;
+  if (m.example && safeUrl(m.example.post_url)) {   // Instagram's / TikTok's embed script talks to their servers: load it only when the user asks
+    const box = $("#embedBox"), site = m.example.platform === "instagram" ? "Instagram" : "TikTok";
+    box.innerHTML = `<button class="btn sm" id="embedGo">${I.play} Show the original post</button><span class="muted" style="font-size:12.5px;margin-left:8px">Loads it from ${site}.</span>`;
+    $("#embedGo").onclick = () => embed(box, m.example); }
   const opts = () => ({ clips: PICK.clips, none: PICK.none, len: PICK.len, look: PICK.look, ref: refSources(m), hook: $("#dhook").value.trim(), cta: $("#dcta").value.trim().toUpperCase() !== ((S.brand || {}).cta || "") ? $("#dcta").value.trim().toUpperCase() : "" });
   const upd = () => $("#dpre").textContent = packPrompt(m, $("#dtopic").value.trim(), opts());
   const drawPick = () => { $("#dpick").innerHTML = clipPicker(!needsClip(m)); bindPicker($("#dpick"), drawPick); upd(); }; drawPick();
@@ -1192,7 +1204,7 @@ function openMove(id) {
   $("#dcopy").onclick = () => go(false); $("#dcopy2").onclick = () => go(true);
   $("#dprev").onclick = () => stepMove(-1); $("#dnext").onclick = () => stepMove(1);
   $("#dfav").onclick = async () => { await toggleFav(m.id); $("#dfav").innerHTML = `${I.heart} ${isFav(m.id) ? "Saved" : "Save"}`; };
-  document.querySelectorAll("[data-tweak]").forEach(b => b.onclick = () => copy(m.tweaks[+b.dataset.tweak]));
+  document.querySelectorAll("[data-tweak]").forEach(b => b.onclick = () => copy(fill(m.tweaks[+b.dataset.tweak])));
   openDrawer();
 }
 function embed(box, ex) {
@@ -1297,10 +1309,10 @@ function projectCard(v, i) {
    ${ex ? `<div class="vout"><span class="k">Platform versions</span>${ex.files.map(f => `<a class="chip" href="${esc(f.url)}" target="_blank" rel="noopener" aria-label="Play the ${esc(platName(f.platform))} version">${I.watch} ${esc(platName(f.platform))}</a>`).join("")}<button class="chip" data-opensub="${esc(ex.dir)}" aria-label="Open the folder with the platform versions">${I.folder}</button></div>` : ""}
    ${c ? `<div class="vcov">${c.tall || c.feed ? `<a href="${esc(c.tall || c.feed)}" target="_blank" rel="noopener"><img src="${esc(c.tall || c.feed)}" alt="Cover for ${esc(v.name)}" loading="lazy"></a>` : ""}<div>${c.caption ? `<p>${esc(c.caption)}</p><button class="btn sm" data-copy="${esc(c.caption)}" data-msg="Caption copied. Paste it when you post.">${I.copy} Copy caption</button>` : `<p>Cover ready.</p>`}</div></div>` : ""}
    <details class="more vtw"><summary>Ask Claude for a change</summary><div class="tws">${tweakList(tweakPre(`video "${v.name}" (in Projects)`))}</div></details>
-   <div class="vact">${r ? "" : `<button class="chip tchip" data-claude="${esc(P.review(v.name))}">${I.play} Review my reel</button>`}
+   <div class="vact">${r ? "" : `<button class="chip tchip" data-claude="${clp(P.review(v.name))}">${I.play} Review my reel</button>`}
     <button class="chip tchip" data-exp="${esc(v.name)}">${I.play} Platform versions</button>
-    <button class="chip tchip" data-claude="${esc(P.cover(v.name))}">${I.play} Cover + caption</button>
-    <button class="chip tchip" data-claude="${esc(trialPrompt(v.name))}">${I.trial} Make 3 trial versions</button>
+    <button class="chip tchip" data-claude="${clp(P.cover(v.name))}">${I.play} Cover + caption</button>
+    <button class="chip tchip" data-claude="${clp(trialPrompt(v.name))}">${I.trial} Make 3 trial versions</button>
     ${isLong(v) ? `<button class="chip tchip" data-long="${esc(v.name)}" data-where="Projects">${I.make} Turn into reels</button>` : ""}
     ${S.licensed && mp4 ? `<button class="chip tchip" data-wall="${esc(v.name)}">${I.heart} Share to the wall</button>` : ""}</div>
    <details class="more"><summary>Save this style</summary><div class="ssf"><input class="input" data-sname placeholder="Name it, e.g. Fast captions" aria-label="Name for this style" maxlength="60"><button class="btn sm grad" data-ssave="${esc(v.name)}">${I.play} Make this</button></div></details></div>`;
@@ -1358,7 +1370,7 @@ function trialCard(t) {
      ${live ? `<button class="btn" data-trefresh ${t.publishing ? "disabled" : ""}>Refresh stats</button>` : ""}
      <span class="lab">${t.insights && t.insights.text ? esc(t.insights.text) : t.insights ? `Views from Instagram · updated ${since(t.insights.at)}` : n && !live ? "Shown to people who don't follow you first." : ""}</span></div>` : "";
   return `<section class="card trial" data-trial="${esc(t.name)}"><div class="sh"><div><div class="k">${status}</div><h2>${esc(nm(t.source))}</h2></div><span class="lcount">${t.versions.length} version${t.versions.length === 1 ? "" : "s"}</span></div>
-   ${t.versions.length ? `${pub}<div class="tst"><button class="btn sm" data-claude="${esc(P.stats(t.name))}">${I.play} Read my stats from a screenshot</button><span class="lab">Attach your Instagram insights screenshots in Claude, then press Enter.</span></div><div class="tvg">${t.versions.map(v => `<div class="tv ${t.winner === v.letter ? "win" : ""}"><div class="vc"><video src="/media/trials/${u}/${encodeURIComponent(v.letter)}.mp4" poster="/media/trials/${u}/${encodeURIComponent(v.letter)}.jpg" muted loop playsinline preload="none" aria-label="Version ${esc(v.letter)}"></video><span class="pl"></span><span class="tl" aria-hidden="true">${esc(v.letter)}</span>${t.winner === v.letter ? `<span class="newb">Winner</span>` : ""}</div>
+   ${t.versions.length ? `${pub}<div class="tst"><button class="btn sm" data-claude="${clp(P.stats(t.name))}">${I.play} Read my stats from a screenshot</button><span class="lab">Attach your Instagram insights screenshots in Claude, then press Enter.</span></div><div class="tvg">${t.versions.map(v => `<div class="tv ${t.winner === v.letter ? "win" : ""}"><div class="vc"><video src="/media/trials/${u}/${encodeURIComponent(v.letter)}.mp4" poster="/media/trials/${u}/${encodeURIComponent(v.letter)}.jpg" muted loop playsinline preload="none" aria-label="Version ${esc(v.letter)}"></video><span class="pl"></span><span class="tl" aria-hidden="true">${esc(v.letter)}</span>${t.winner === v.letter ? `<span class="newb">Winner</span>` : ""}</div>
      <q>${esc(v.hook)}</q><span class="tag">${esc(v.type)}</span>${igChip(t, v)}
      ${v.caption && !igLive(v) ? `<button class="btn sm" data-copy="${esc(v.caption)}" data-msg="Caption ${esc(v.letter)} copied. Paste it when you post.">${I.copy} Copy caption</button>` : ""}
      <div class="ts">${STATS.map(([k, l, st]) => `<label><span>${l}</span><input class="input" type="number" min="0" step="${st}" inputmode="${st < 1 ? "decimal" : "numeric"}" data-stat="${k}" data-l="${esc(v.letter)}" value="${v.stats ? esc(v.stats[k]) : ""}" aria-label="Version ${esc(v.letter)} ${l.toLowerCase()}"></label>`).join("")}</div>
@@ -1542,7 +1554,7 @@ VIEWS.learn = () => {
   <section><div class="sh"><div><div class="k">More tracks</div><h2>Coming soon</h2><p>They appear here when they're ready.</p></div></div>
    <div class="grid g2">${TRACKS_SOON.map(([k, t, ls]) => `<div class="card" style="padding:20px"><div class="k">${k} · Coming soon</div><h3 style="margin:4px 0 8px;font:700 19px var(--f-h)">${t}</h3><ol class="soonl">${ls.map(l => `<li>${esc(l)}</li>`).join("")}</ol></div>`).join("")}</div></section>
   <section><div class="sh"><div><div class="k">Quick tips</div><h2>Two-minute answers</h2></div></div>
-  ${LESSONS.map(([t, body, p]) => `<details class="acc"><summary><span class="n">${I.learn}</span>${esc(t)}</summary><div class="in"><p style="margin:0 0 10px">${esc(body)}</p>${p ? `<div class="tw"><span>${esc(p)}</span><button class="btn sm" data-claude="${esc(p)}">${I.play} Send to Claude</button></div>` : ""}</div></details>`).join("")}</section>`;
+  ${LESSONS.map(([t, body, p]) => `<details class="acc"><summary><span class="n">${I.learn}</span>${esc(t)}</summary><div class="in"><p style="margin:0 0 10px">${esc(body)}</p>${p ? `<div class="tw"><span>${esc(p)}</span><button class="btn sm" data-claude="${clp(p)}">${I.play} Send to Claude</button></div>` : ""}</div></details>`).join("")}</section>`;
 };
 const newer = v => { const a = String(v).split("."), b = String(S.version || "").split("."); for (let i = 0; i < 3; i++) if ((+a[i] || 0) !== (+b[i] || 0)) return (+a[i] || 0) > (+b[i] || 0); return false; };
 VIEWS.new = () => `<div class="top"><div><div class="k">What's new · you have v${esc(S.version || "")}</div><h1>Fresh <em>drops</em></h1><p class="lead">New moves and templates come with each update. When one is ready, your Home page shows it.</p></div></div>
@@ -1559,7 +1571,7 @@ const FAQ = [["Do I need to know how to code?", "No. You pick a move and press M
  ["Can I change my style later?", "Yes. Brand kit → change anything → Save. Every move updates."]];
 VIEWS.help = () => `<div class="top"><div><div class="k">Help</div><h1>We've got <em>you</em></h1></div></div>
  <div class="card" style="padding:20px;margin-bottom:18px"><b>Fix-it message</b><p style="margin:4px 0 10px;color:var(--text-2);font-size:14px">Send this to Claude when anything feels off. It checks and repairs your studio.</p>
-  <div class="tw wrap"><span>${esc(FIXIT)}</span><button class="btn sm grad" data-claude="${esc(FIXIT)}">${I.play} Fix my studio</button><button class="btn sm" data-copy="${esc(FIXIT)}" aria-label="Copy the fix-it message">${I.copy}</button></div></div>
+  <div class="tw wrap"><span>${esc(FIXIT)}</span><button class="btn sm grad" data-claude="${clp(FIXIT)}">${I.play} Fix my studio</button><button class="btn sm" data-copy="${esc(FIXIT)}" aria-label="Copy the fix-it message">${I.copy}</button></div></div>
  ${FAQ.map(([q, a], i) => `<details class="acc"><summary><span class="n">?</span>${esc(q)}</summary><div class="in">${esc(a)}</div></details>`).join("")}
  <div class="card" style="padding:20px;margin-top:18px"><b>Setup</b><p style="margin:4px 0 12px;color:var(--text-2);font-size:14px">Optional. It helps us find the setup steps that trip people up.</p>
   <label class="tgl"><input type="checkbox" id="htel" ${S.state.telemetry === true ? "checked" : ""}><span><b>Help improve setup (sends only pass/fail of each setup step and your OS, no files or names)</b></span></label></div>`;
@@ -1573,7 +1585,7 @@ document.addEventListener("click", async e => {
     return t.dataset.tfree ? handoff(t.dataset.tfree + v) : copy(v, "Copied. Paste it into Claude and press Enter."); }
   if (t.dataset.claude && t.closest(".vact") && t.dataset.armed !== "1") {   // project actions open Claude: ask for a second tap so a stray click doesn't
     const lbl = t.innerHTML; t.dataset.armed = "1"; t.innerHTML = `${I.play} Tap again to open Claude`; setTimeout(() => { if (t.isConnected) { t.dataset.armed = ""; t.innerHTML = lbl; } }, 3500); return; }
-  if (t.dataset.claude) { if ($("#dbody .rvl") && $("#drawer").contains(t)) closeDrawer(); return handoff(t.dataset.claude); }
+  if (t.dataset.claude) { if ($("#dbody .rvl") && $("#drawer").contains(t)) closeDrawer(); return handoff(CL.get(t.dataset.claude) ?? t.dataset.claude); }
   if (t.dataset.review) return openReview(t.dataset.review);
   if (t.dataset.exp) return exportSheet(t.dataset.exp, t);
   if (t.dataset.long) return longSheet(t.dataset.long, t.dataset.where || "Inbox", t);
@@ -1698,7 +1710,7 @@ function drawJob() {
     : j.status === "done" && (j.kind ? j.kind === "video" : VIDEO_FILE.test(j.file || "")) ? `<span class="ok">✓</span><div><b>Your video is ready</b><span>${esc(nm(j.file || j.title))}</span></div><a class="btn sm grad" href="#/projects">Watch it</a><button class="btn sm" data-seen="${esc(j.id)}" aria-label="Hide this">✕</button>`
     : j.status === "done" ? `<span class="ok">✓</span><div><b>${esc(j.note || "Claude is done")}</b><span>${esc(nm(j.title))}</span></div><a class="btn sm grad" href="#/projects">Open Projects</a><button class="btn sm" data-seen="${esc(j.id)}" aria-label="Hide this">✕</button>`
     : j.status === "stalled" ? `<span class="warn">!</span><div><b>Claude went quiet</b><span>Check the Claude window. It may be waiting for your answer.</span></div><button class="btn sm" data-seen="${esc(j.id)}">✕</button>`
-    : `<span class="warn">!</span><div><b>Your video didn't finish</b><span>${esc(nm(j.title))} · ${esc(j.step)}</span></div><button class="btn sm grad" data-claude="${esc(`Fix my studio. My video "${j.title}" stopped with: ${j.step}. Check my Edit Wherever setup, repair anything that's broken, then tell me in one sentence what you fixed and how to try that video again.`)}">Fix it</button><button class="btn sm" data-seen="${esc(j.id)}" aria-label="Hide this">✕</button>`;
+    : `<span class="warn">!</span><div><b>Your video didn't finish</b><span>${esc(nm(j.title))} · ${esc(j.step)}</span></div><button class="btn sm grad" data-claude="${clp(`Fix my studio. My video "${j.title}" stopped with: ${j.step}. Check my Edit Wherever setup, repair anything that's broken, then tell me in one sentence what you fixed and how to try that video again.`)}">Fix it</button><button class="btn sm" data-seen="${esc(j.id)}" aria-label="Hide this">✕</button>`;
   bar.querySelectorAll("[data-seen]").forEach(b => b.onclick = async () => { await saveState({ seen_job: b.dataset.seen }); bar.hidden = true; });
 }
 async function poll() {
