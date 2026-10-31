@@ -80,7 +80,11 @@
   "SM-5114": "FACE: man talking-head; phone UI",
   "SM-5123": "FACE: man talking; adidas jacket; 'SUBMAGIC.CO' caption",
   "SM-5134": "FACE: man talking-head",
-  "SM-5146": "HANDLE+IP: cat-logo watermark bottom right; witch-on-broom chase looks Kiki's Delivery Service-like"
+  "SM-5146": "HANDLE+IP: cat-logo watermark bottom right; witch-on-broom chase looks Kiki's Delivery Service-like",
+  "SM-4200": "BRAND: Feastables (MrBeast) packaging in every shot (launch-marketing review 10-30)",
+  "SM-4320": "FACES: real wedding couple (clients) in every shot (launch-marketing review 10-30)",
+  "SM-1461": "BRAND: \"Hi, I'm CLAUDE\" frame at 0.8-1.8 s in the linked clip (launch-marketing review 10-30)",
+  "SM-1579": "WATERMARK: another tool (getreely.co pill) in the linked clip (launch-marketing review 10-30)"
  },
  "weak": [
   "SM-1015",

@@ -1,5 +1,16 @@
 [
   {
+    "version": "0.1.33",
+    "date": "2026-10-31",
+    "title": "Cleaner Library previews",
+    "items": [
+      "Eight example previews re-cut to skip third-party logos, creators on camera and an old date card; four with no clean moment are hidden",
+      "25 top Moves get sharper 720p previews",
+      "The Library shows Moves with a real preview first; the rest are one tap away",
+      "Clearer guide to saving your first style"
+    ]
+  },
+  {
     "version": "0.1.32",
     "date": "2026-10-30",
     "title": "Face retouch that moves with the face",

@@ -58,7 +58,7 @@ section{margin-top:34px}.sh{display:flex;align-items:flex-end;justify-content:sp
 .grid{display:grid;gap:14px}.g2{grid-template-columns:repeat(2,minmax(0,1fr))}.g3{grid-template-columns:repeat(3,minmax(0,1fr))}.g4{grid-template-columns:repeat(4,minmax(0,1fr))}
 @media(max-width:1100px){.g4{grid-template-columns:repeat(2,minmax(0,1fr))}.g3{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:640px){.g2,.g3,.g4{grid-template-columns:minmax(0,1fr)}}
-.empty{padding:26px;border:1.5px dashed var(--line);border-radius:var(--r-md);color:var(--muted);text-align:center}
+.empty{grid-column:1/-1;padding:26px;border:1.5px dashed var(--line);border-radius:var(--r-md);color:var(--muted);text-align:center}
 /* hero */
 .hero{position:relative;overflow:hidden;border-radius:var(--r-xl);padding:30px;color:#fff;min-height:220px;display:flex;flex-direction:column;justify-content:flex-end;
  background:radial-gradient(120% 120% at 0% 0%,color-mix(in srgb,var(--u-accent) 90%,#fff 10%),transparent 55%),linear-gradient(135deg,var(--u-accent),color-mix(in srgb,var(--u-primary) 80%,var(--u-accent)) 70%)}
@@ -674,7 +674,7 @@ function bindShare() {
 }
 // a saved style drawn as a move card (its own preview clip, no heart: it's already yours)
 const styleMove = s => ({ id: s.id, name: s.name, category: "My Styles", tagline: s.credit ? `Learned from ${s.credit}` : "Saved from one of your videos", level: "Yours", clip: s.preview, poster: s.poster, aspect: s.aspect, mine: true });
-const STYLE_EMPTY = `Save any edit you love as your own style. After a recreate, or on any finished video in <a href="#/projects">Projects</a>, tap <b>Save this style</b>. It shows up here, ready to use on your next clip with one tap.`;
+const STYLE_EMPTY = `<b style="color:var(--text)">Make your own style in 3 steps</b><ol style="text-align:left;max-width:440px;margin:12px auto 14px;padding-left:20px;line-height:1.6"><li>Edit a clip: pick a move, or paste a link to an edit you love in <b>Recreate any edit</b>.</li><li>Tweak it until it looks right (say what to change, Claude redoes it).</li><li>Open the video in <b>Projects</b> and tap <b>Save this style</b>.</li></ol>It lands here, and your next clip gets the same look with one tap.<div style="display:flex;gap:8px;justify-content:center;margin-top:14px;flex-wrap:wrap"><a class="btn pri" href="#/make">Edit a clip</a><a class="btn" href="#/projects">Open Projects</a></div>`;
 function pasteGuideHTML(opened = true) {
   return `<ol class="pg">${opened ? `
     <li><div><b>Claude opens with your video typed in.</b> If it asks to open your Edit Wherever folder, say yes.</div></li>
@@ -911,7 +911,7 @@ function composer(k) {
   if (k === "recreate") return recreateComposer();
   if (MINI_CARDS.some(c => c[0] === k)) return miniComposer(k);
   const LV = { Beginner: 0, Easy: 1 }, e = ENG[k], opts = S.moves.filter(m => e.cats.includes(m.category) && (k === "edit" ? needsClip(m) : k === "create" ? !needsClip(m) : true))
-    .sort((a, b) => (LV[a.level] ?? 2) - (LV[b.level] ?? 2) || (b.ref_clip || b.poster ? 1 : 0) - (a.ref_clip || a.poster ? 1 : 0));   // easiest + previewed first
+    .sort((a, b) => hasVis(b) - hasVis(a) || (LV[a.level] ?? 2) - (LV[b.level] ?? 2));   // previewed first (the first pick shows a real preview), then easiest
   PICK = k === "edit" ? { clips: (PICK.clips || []).length ? PICK.clips : (S.inbox[0] ? [S.inbox[0].name] : []), none: false, multi: false } : { clips: [], none: true, multi: false };
   const clips = k === "edit" ? `<div class="field"><label>Your clip</label><div id="cpick"></div></div>` : "";
   $("#composer").innerHTML = `<div class="card" style="padding:22px"><div class="k">${e.title}</div>${clips}
@@ -1034,8 +1034,9 @@ VIEWS.editor_after = async () => { edWatch();
 };
 
 // ---------- LIBRARY
-let LQ = { q: "", cat: "All", lvl: "All", fav: false, n: 36, size: "m", view: "grid", sort: "featured", aspect: "All", media: false, recent: false, sub: "" };
+let LQ = { q: "", cat: "All", lvl: "All", fav: false, n: 36, size: "m", view: "grid", sort: "featured", aspect: "All", media: true, recent: false, sub: "" };
 try { Object.assign(LQ, JSON.parse(localStorage.getItem("ew-lib") || "{}"), { q: "", n: 36 }); } catch (e) {}
+// media: true by default, so the grid shows only moves with a real preview (Jake 10-30: no generic cards on screen). The Filters chip turns it off.
 const saveLQ = () => { try { localStorage.setItem("ew-lib", JSON.stringify({ size: LQ.size, view: LQ.view, sort: LQ.sort })); } catch (e) {} };
 const hasVis = m => !!(m.ref_clip || m.poster || m.clip || m.example);
 // Featured order: moving previews first, then stills, then moves with no visual yet. Inside a tier the most dynamic
@@ -1103,7 +1104,9 @@ VIEWS.library_after = () => {
   const draw = () => { const g = $("#lgrid"); subs(); rows = libRows(); shown = 0; g.innerHTML = "";
     g.className = `grid lgrid ${LQ.view === "list" ? "lv" : "sz-" + LQ.size}`;
     const st = LQ.cat === "My Styles" && !LQ.recent, all = st ? (S.styles || []).length : S.moves.length; $("#lcount").textContent = `${rows.length}${rows.length !== all ? ` of ${all}` : ""} ${st ? "style" : "move"}${all === 1 ? "" : "s"}`;
-    if (!rows.length) { LIST = []; g.innerHTML = `<div class="empty">${LQ.recent ? "Moves you copy show up here." : st && !LQ.q ? STYLE_EMPTY : "Nothing matches yet. Try another word."}</div>`; $("#lmore").style.display = "none"; return; }
+    if (!rows.length) { LIST = []; let hid = 0; if (LQ.media && !st && !LQ.recent) { LQ.media = false; hid = libRows().length; LQ.media = true; }   // moves the preview filter hid
+      g.innerHTML = `<div class="empty">${LQ.recent ? "Moves you copy show up here." : st && !LQ.q ? STYLE_EMPTY : hid ? `${hid} move${hid === 1 ? " matches" : "s match"} but ${hid === 1 ? "has" : "have"} no preview yet. <button class="btn" id="lshowall">Show ${hid === 1 ? "it" : "them"}</button>` : "Nothing matches yet. Try another word."}</div>`;
+      if (hid) $("#lshowall").onclick = () => { LQ.media = false; $("#lmedia").setAttribute("aria-pressed", false); draw(); }; $("#lmore").style.display = "none"; return; }
     more(); };
   let t; $("#lq").oninput = e => { clearTimeout(t); t = setTimeout(() => { LQ.q = e.target.value; LQ.n = 36; draw(); }, 140); };
   $("#lft").onclick = e => { const o = $("#ltools").classList.toggle("open"); e.currentTarget.setAttribute("aria-expanded", o); };
