@@ -1,5 +1,16 @@
 [
   {
+    "version": "0.1.37",
+    "date": "2026-10-31",
+    "title": "Tighter talking heads",
+    "items": [
+      "Talking heads cut TikTok-tight: words flow with about 60-120 ms between them",
+      "Stutters ('I I', 'you can you can') are cut; soft words at the end of a line are never cut off",
+      "Lists like 'not a career mom, not a stay-at-home mom' are no longer mistaken for retakes",
+      "Studio voice: neural-net noise removal, and music sits 10-12 dB under the voice"
+    ]
+  },
+  {
     "version": "0.1.36",
     "date": "2026-10-31",
     "title": "Viral Now 10-30",

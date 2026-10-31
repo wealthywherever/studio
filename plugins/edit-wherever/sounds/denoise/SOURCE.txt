@@ -1,0 +1,2 @@
+speech.rnnn: RNNoise model "somnolent-hogwash" (recording noise, speech) from github.com/GregorR/rnnoise-models.
+That repository states the models are not creative work and not subject to copyright.
