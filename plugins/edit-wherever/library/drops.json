@@ -1,5 +1,14 @@
 [
   {
+    "version": "0.1.38",
+    "date": "2026-10-31",
+    "title": "Neutral room colour",
+    "items": [
+      "When colour is on, a yellow or orange room now reads neutral: walls, shirts and doors go back to white while skin stays natural.",
+      "A gentle saturation lift (x1.12) for the natural look."
+    ]
+  },
+  {
     "version": "0.1.37",
     "date": "2026-10-31",
     "title": "Tighter talking heads",
