@@ -1,5 +1,17 @@
 [
   {
+    "version": "0.1.40",
+    "date": "2026-10-31",
+    "title": "Studio polish",
+    "items": [
+      "Type a tweak in your own words, not just the chips.",
+      "Project cards show a picture right away, on phones too, and 'before' copies no longer get their own card.",
+      "Project buttons that open Claude ask for a second tap, so a stray click doesn't start anything.",
+      "Saved style previews are longer (12 s) and sharper (720 px).",
+      "Quality check ignores backup files and keeps its face cache when a project folder is copied."
+    ]
+  },
+  {
     "version": "0.1.39",
     "date": "2026-10-31",
     "title": "Easier first run",

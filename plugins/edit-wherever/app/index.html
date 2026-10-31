@@ -217,6 +217,7 @@ kbd{white-space:nowrap;font:700 12px var(--f-m);padding:2px 7px;border:1px solid
 .vc{cursor:pointer}.vc video{width:100%;height:100%;object-fit:cover}.vc .pl{position:absolute;left:50%;top:50%;width:52px;height:52px;margin:-26px 0 0 -26px;border-radius:50%;background:rgba(15,12,20,.55);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);pointer-events:none;transition:opacity .2s}
 .vc .pl::after{content:"";position:absolute;left:21px;top:16px;border-style:solid;border-width:10px 0 10px 16px;border-color:transparent transparent transparent #fff}.vc.on .pl{opacity:0}.vc b{position:absolute;left:0;right:0;bottom:0;padding:24px 10px 10px;color:#fff;font-size:12.5px;background:linear-gradient(transparent,rgba(0,0,0,.7))}
 .vact{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}.ssf{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}.ssf .input{flex:1 1 100%;padding:7px 11px;font-size:13.5px;min-width:0}
+.tfree{flex:1 1 100%;flex-wrap:nowrap}.tfree .input{flex:1 1 auto}
 /* trials */
 .trial{padding:20px;margin-top:18px}.trial .sh{margin-bottom:12px}.trial h2{font-size:24px;overflow-wrap:anywhere}
 .tvg{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:14px}
@@ -542,7 +543,8 @@ const TWEAKS = ["Looks good, make it.", "Make it punchier: faster cuts and a str
 const tweakPre = what => `Edit Wherever tweak for my ${what}.\n${(S.dirs || {}).home ? `Studio folder: ${S.dirs.home}\n` : ""}Change: `;
 const faceless = () => (S.brand || {}).face === "faceless", firstHref = () => faceless() ? "#/library" : "#/first";   // the first-video walkthrough needs a talking clip
 // with a prefix (names the studio + video) a tweak works in a fresh chat, so it opens Claude; without one it's a reply in the same chat, so it's copied
-const tweakList = (prefix = "") => TWEAKS.filter(t => !prefix || !/^Looks good/.test(t)).map(t => prefix ? `<button class="chip tchip" data-claude="${esc(prefix + t)}">${I.play} ${esc(t)}</button>` : `<button class="chip tchip" data-copy="${esc(t)}">${I.copy} ${esc(t)}</button>`).join("");
+const tweakList = (prefix = "") => TWEAKS.filter(t => !prefix || !/^Looks good/.test(t)).map(t => prefix ? `<button class="chip tchip" data-claude="${esc(prefix + t)}">${I.play} ${esc(t)}</button>` : `<button class="chip tchip" data-copy="${esc(t)}">${I.copy} ${esc(t)}</button>`).join("")
+  + `<div class="ssf tfree"><input class="input" placeholder="Or say it in your own words, e.g. make the captions bigger" aria-label="Your change, in your own words" maxlength="400"><button class="btn sm grad" data-tfree="${esc(prefix)}">${prefix ? I.play + " Send" : I.copy + " Copy"}</button></div>`;
 // My Styles + Trials: like tweaks, each prompt names the studio so it works in a fresh Claude chat
 const studioLine = () => (S.dirs || {}).home ? `\n\nStudio folder: ${S.dirs.home}` : "";
 const stylePrompt = s => `Edit Wherever recreate\n\nUse my saved style "${s.name}" (${s.id}) on a video clip from my Inbox (not a voice memo; ask me which if there are several). Show me a preview, then wait for my OK before the final render.${studioLine()}`;
@@ -1289,7 +1291,7 @@ const inboxButtons = () => `<button class="btn sm" data-phone>${I.phone} Add fro
 const longList = (vs, where) => { const l = vs.filter(isLong); return l.length ? `<div class="longs">${l.map(v => `<div class="tw"><span><b>${esc(nm(v.name))}</b> · ${mins(v.dur)}. Long enough to cut into several reels.</span><button class="btn sm" data-long="${esc(v.name)}" data-where="${where}">${I.make} Turn into reels</button></div>`).join("")}</div>` : ""; };
 function projectCard(v, i) {
   const r = v.review, ex = v.exports, c = v.cover, u = encodeURIComponent(v.name), mp4 = /\.mp4$/i.test(v.name);
-  return `<div class="pc"><div class="vc"><video src="/media/projects/${u}#t=0.5" ${c && c.tall ? `poster="${esc(c.tall)}"` : ""} muted loop playsinline preload="metadata"></video><span class="pl"></span><b>${esc(nm(v.name))}</b>${i === 0 && Date.now() - v.t < 36e5 ? `<span class="newb">New</span>` : ""}
+  return `<div class="pc"><div class="vc"><video src="/media/projects/${u}#t=0.5" poster="${c && c.tall ? esc(c.tall) : `/thumb/projects/${u}`}" muted loop playsinline preload="none"></video><span class="pl"></span><b>${esc(nm(v.name))}</b>${i === 0 && Date.now() - v.t < 36e5 ? `<span class="newb">New</span>` : ""}
     ${r && r.overall != null ? `<span class="rvb" aria-hidden="true">${score(r.overall)}</span>` : ""}</div>
    ${r ? `<button class="rvrow" data-review="${esc(v.name)}" aria-label="Open the review of ${esc(v.name)}">${r.overall != null ? `<b>${score(r.overall)}</b>` : ""}<span>Review · ${r.items.length} note${r.items.length === 1 ? "" : "s"}${r.items.some(x => x.fix) ? " · tap to fix" : ""}</span></button>` : ""}
    ${ex ? `<div class="vout"><span class="k">Platform versions</span>${ex.files.map(f => `<a class="chip" href="${esc(f.url)}" target="_blank" rel="noopener" aria-label="Play the ${esc(platName(f.platform))} version">${I.watch} ${esc(platName(f.platform))}</a>`).join("")}<button class="chip" data-opensub="${esc(ex.dir)}" aria-label="Open the folder with the platform versions">${I.folder}</button></div>` : ""}
@@ -1564,8 +1566,13 @@ VIEWS.help = () => `<div class="top"><div><div class="k">Help</div><h1>We've got
 VIEWS.help_after = () => { const h = $("#htel"); if (h) h.onchange = async () => { await saveState({ telemetry: h.checked }).catch(() => {}); toast(h.checked ? "Thanks. Only pass/fail of each setup step is sent." : "Turned off. Nothing more is sent."); }; };
 
 // ---------- global clicks
+document.addEventListener("keydown", e => { if (e.key === "Enter" && e.target.matches(".tfree input")) { e.preventDefault(); e.target.nextElementSibling.click(); } });   // Enter sends a typed tweak
 document.addEventListener("click", async e => {
-  const t = e.target.closest("[data-move],[data-fav],[data-open],[data-done],[data-day],[data-eng],[data-copy],[data-claude],[data-lesson],[data-review],[data-exp],[data-long],[data-wall],[data-phone],[data-go],[data-opensub]"); if (!t) return;
+  const t = e.target.closest("[data-move],[data-fav],[data-open],[data-done],[data-day],[data-eng],[data-copy],[data-claude],[data-tfree],[data-lesson],[data-review],[data-exp],[data-long],[data-wall],[data-phone],[data-go],[data-opensub]"); if (!t) return;
+  if ("tfree" in t.dataset) { const inp = t.previousElementSibling, v = inp.value.trim(); if (!v) { toast("Type your change first"); return inp.focus(); }
+    return t.dataset.tfree ? handoff(t.dataset.tfree + v) : copy(v, "Copied. Paste it into Claude and press Enter."); }
+  if (t.dataset.claude && t.closest(".vact") && t.dataset.armed !== "1") {   // project actions open Claude: ask for a second tap so a stray click doesn't
+    const lbl = t.innerHTML; t.dataset.armed = "1"; t.innerHTML = `${I.play} Tap again to open Claude`; setTimeout(() => { if (t.isConnected) { t.dataset.armed = ""; t.innerHTML = lbl; } }, 3500); return; }
   if (t.dataset.claude) { if ($("#dbody .rvl") && $("#drawer").contains(t)) closeDrawer(); return handoff(t.dataset.claude); }
   if (t.dataset.review) return openReview(t.dataset.review);
   if (t.dataset.exp) return exportSheet(t.dataset.exp, t);
