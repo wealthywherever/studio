@@ -1,5 +1,14 @@
 [
   {
+    "version": "0.1.55",
+    "date": "2026-11-01",
+    "title": "Cleaner cuts on restarts",
+    "items": [
+      "When you restart a long line mid-sentence, the studio now keeps only your second take.",
+      "Cuts land in the quiet between words, so no more half-words glued together."
+    ]
+  },
+  {
     "version": "0.1.45",
     "date": "2026-10-31",
     "title": "Smarter moves, simpler studio",
