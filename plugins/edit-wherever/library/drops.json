@@ -1,5 +1,13 @@
 [
   {
+    "version": "0.1.58",
+    "date": "2026-11-02",
+    "title": "Watch your planned videos",
+    "items": [
+      "Calendar: tap Watch on any planned video to play it right there."
+    ]
+  },
+  {
     "version": "0.1.57",
     "date": "2026-11-02",
     "title": "Studio opens again",
