@@ -1,5 +1,13 @@
 [
   {
+    "version": "0.1.57",
+    "date": "2026-11-02",
+    "title": "Studio opens again",
+    "items": [
+      "Fixed: after the last update the studio could close straight away when you opened it. It opens normally now."
+    ]
+  },
+  {
     "version": "0.1.56",
     "date": "2026-11-02",
     "title": "A cleaner, faster studio",
