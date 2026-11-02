@@ -1,0 +1,405 @@
+// Fast footage pipeline: one command turns a raw talking clip into everything an edit needs, so Claude only makes creative calls.
+//   node prep.mjs "<clip>" "<project folder>" [--aspect 9:16|16:9|1:1|4:5|keep] [--name clip2] [--tight] [--pause 0.3] [--pad 0.08] [--keep-fillers] [--keep-takes] [--no-video] [--follow-face]
+//   node prep.mjs --selftest      check the pure helpers (silence floor, word-end clamp, repeated-take finder)
+//   --follow-face: when the clip is wider than the frame (16:9 -> 9:16), slide the crop to keep the speaker's face in it (track.mjs; needs the cutout models).
+//   --keep-takes: keep every take of a repeated line (default: keep the last complete take, list the rest in prep.json takes_dropped).
+//   Cut edges where the face is missing or turned away move inward a little, or are listed in prep.json edge_warnings.
+//   --aspect: frame of the clean clip (default 9:16; pass the example's aspect when matching it). --name: per-clip outputs for multi-clip edits.
+// Writes into the project (the original clip is never touched):
+//   assets/source.<ext>  copy of the clip          transcript.json  words with original timings
+//   assets/clean.mp4     dead air + fillers cut,   words.json       words re-timed to clean.mp4 (drive captions from this)
+//                        30fps (23.976/24/25 fps footage keeps its rate, clean.fps), colour untouched (HDR phone clips are converted to normal range so they don't look washed out)
+//                                                  cuts.json  kept spans   prep.json  summary
+// With --name X every output is prefixed: assets/X.source.*, assets/X.clean.mp4, X.words.json, X.transcript.json, X.cuts.json, X.prep.json.
+import fs from "node:fs";
+import path from "node:path";
+import { execFileSync, spawnSync } from "node:child_process";
+import { fileURLToPath } from "node:url";
+import { run } from "./run.mjs";
+import { needTool, needFfmpeg } from "./paths.mjs";
+import { uprightSize, modelPath } from "./onnx.mjs";
+
+const argv = process.argv.slice(2), opt = (k, d) => { const i = argv.indexOf(k); return i >= 0 ? argv[i + 1] : d; };
+if (argv.includes("--selftest")) { selftest(); process.exit(0); }
+const VALUED = ["--pause", "--pad", "--aspect", "--name"], [clip, proj] = argv.filter((a, i) => !a.startsWith("--") && !VALUED.includes(argv[i - 1]));
+if (!clip || !proj || !fs.existsSync(clip)) { console.log("usage: node prep.mjs <clip> <project folder>   (clip not found)"); process.exit(1); }
+// --tight (talking heads, Jake's QA 10-31): words flow into each other with ~60-120 ms of air, no held pauses
+const TIGHT = argv.includes("--tight"), PAUSE = +opt("--pause", TIGHT ? 0.14 : 0.3), PAD = +opt("--pad", TIGHT ? 0.05 : 0.08), VIDEO = !argv.includes("--no-video");
+const TAIL = 0.2;   // air kept after the last word (CutAI's finished cuts end 0.1-0.3 s after it)
+const NAME = String(opt("--name", "")).replace(/[^\w-]/g, ""), pre = NAME ? NAME + "." : "";   // multi-clip: clip1.words.json, assets/clip1.clean.mp4 ...
+const SIZES = { "9:16": [1080, 1920], "16:9": [1920, 1080], "1:1": [1080, 1080], "4:5": [1080, 1350] }, ASPECT = opt("--aspect", "9:16");
+if (ASPECT !== "keep" && !SIZES[ASPECT]) { console.log(`--aspect must be one of ${Object.keys(SIZES).join(", ")} or keep`); process.exit(1); }
+const FILLER = argv.includes("--keep-fillers") ? null : /^(um+|uh+|erm+|uhm+|hmm+|ah+)[,.!?]*$/i;
+const step = s => console.log("· " + s);
+
+needFfmpeg();
+const assets = path.join(proj, "assets"); fs.mkdirSync(assets, { recursive: true });
+const src = path.join(assets, pre + "source" + path.extname(clip).toLowerCase());
+fs.copyFileSync(clip, src); step(`copied clip (original untouched)`);
+
+let probe;
+try { probe = JSON.parse(execFileSync("ffprobe", ["-v", "error", "-show_entries", "format=duration:stream=codec_type,width,height,color_transfer,r_frame_rate:stream_tags=rotate:stream_side_data=rotation", "-of", "json", src], { encoding: "utf8", stdio: "pipe" })); }
+catch (e) { if (e.code === "ENOENT") needTool(e, "ffprobe"); console.log("I couldn't read that file as a video. Try exporting it again from your phone or camera."); process.exit(1); }
+const dur = +probe.format.duration, v = probe.streams.find(s => s.codec_type === "video"), hasAudio = probe.streams.some(s => s.codec_type === "audio");
+if (!v) { console.log("That file has no picture. Use a video clip."); process.exit(1); }
+[v.width, v.height] = uprightSize(v);   // upright size: ffmpeg rotates phone clips when it decodes them
+const HDR = /arib-std-b67|smpte2084/.test(v.color_transfer || "");   // iPhone HLG / Dolby Vision / HDR10
+// film-rate footage (23.976/24/25) keeps its rate: forcing 30 repeats every 4th frame, a judder the eye and the score both read as pops
+const srcFps = (([a, b]) => +a / (+b || 1))((v.r_frame_rate || "30/1").split("/")), FPS = srcFps >= 23 && srcFps < 29 ? v.r_frame_rate : "30";
+
+let words = [];
+if (hasAudio) {
+  step("transcribing (runs offline, about 1 minute per 5 minutes of video)");
+  const out = run("hyperframes", ["transcribe", src, "--json"], { stdio: ["ignore", "pipe", "ignore"] });
+  const meta = JSON.parse(out.trim().split(/\r?\n/).pop());
+  words = JSON.parse(fs.readFileSync(meta.transcriptPath, "utf8")).filter(w => w.text && w.end > w.start);
+  if (path.resolve(path.dirname(meta.transcriptPath)) === path.resolve(assets)) fs.rmSync(meta.transcriptPath, { force: true });   // keep assets/ tidy
+} else step("no sound in this clip: keeping all of it (b-roll), nothing to transcribe or cut");
+fs.writeFileSync(path.join(proj, pre + "transcript.json"), JSON.stringify(words, null, 1));
+
+// Cut on the sound, not the word stamps: the transcriber stretches a word across the silence after it.
+// Loudness every 10 ms. Silence = this clip's own room noise (10th-percentile loudness) + 12 dB, clamped -60..-20 dB,
+// so a noisy room still loses its pauses and a quiet speaker isn't cut mid-word.
+let db = [], NOISE = null;
+if (hasAudio) {
+  const pcm = spawnSync("ffmpeg", ["-v", "error", "-i", src, "-vn", "-ac", "1", "-ar", "16000", "-f", "s16le", "-"], { maxBuffer: 4e9 }).stdout || Buffer.alloc(0);
+  const a = new Float32Array(pcm.length >> 1); for (let i = 0; i < a.length; i++) a[i] = pcm.readInt16LE(i * 2) / 32768;
+  db = frameDb(a); NOISE = noiseFloor(db);
+}
+// word ends: a word stamped longer than 0.5 s ends where its sound stops (Whisper/Parakeet put "does." 13 s late), before anything is cut
+let endsFixed = 0;
+if (db.length) for (const w of words) if (w.end - w.start > 0.5) { const e = clampEnd(db, NOISE, w.start, w.end); if (e < w.end - 0.05) { w.end = +e.toFixed(3); endsFixed++; } }
+const isFiller = w => FILLER && FILLER.test(w.text.trim());
+// repeated takes (restarts, the CTA said three times): keep the last complete take of each line
+const spoken = words.filter(w => !isFiller(w)), takes = argv.includes("--keep-takes") ? [] : findTakes(spoken);
+const gone = new Set(takes.flatMap(d => spoken.slice(d.i0, d.i1 + 1)));
+// stutters inside a line ("I I think", "you can you can"): drop the first saying, keep the second
+const kept0 = spoken.filter(w => !gone.has(w)), stutters = argv.includes("--keep-takes") ? [] : findStutters(kept0);
+for (const s of stutters) for (let k = s.i0; k <= s.i1; k++) gone.add(kept0[k]);
+// Remove every quiet run of PAUSE or more (also splits inside a line, leaving PAD of air each side), every filler word and dropped take.
+// A quiet run never eats a kept word: soft words ("like me" trailing off) sit under the silence floor but are in the transcript.
+// Only the heard part of a word is kept safe: stamps run on over the pause after a word or sit in the silence beside it,
+// and protecting the whole stamp left 0.3-0.4 s of dead air in --tight cuts (Jake 10-31: "no dead space, like CutAI").
+const said = words.filter(w => !isFiller(w) && !gone.has(w)), heard = hasAudio ? said.map(w => audible(db, NOISE, w)).filter(Boolean) : [];
+const remove = hasAudio ? spare(quietRuns(db, NOISE, Math.round(PAUSE * 100)).map(([a, b]) => [a + PAD, b - PAD]), heard).filter(([a, b]) => b - a > 0.05) : [];
+for (const w of words) if (isFiller(w)) remove.push([w.start, Math.min(w.end, w.start + 0.6)]);
+// take/stutter edges come from word stamps, which run 0.3-0.4 s off: snap each edge to the quietest frame near it so a
+// cut never lands inside a word (11-01: a restart cut on stamps spliced "compu" + "-ting" into one smeared word)
+const snap = t => hasAudio ? quietest(db, t) : t;
+for (const d of takes) remove.push([snap(spoken[d.i0].start), snap(spoken[d.i1].end)]);
+for (const s of stutters) { const a = snap(kept0[s.i0].start); remove.push([a, Math.max(a, snap(kept0[s.i1 + 1].start) - 0.03)]); }
+remove.sort((x, y) => x[0] - y[0]);
+const cuts = []; let cur = 0;
+for (const [a, b] of remove) { if (a > cur + 0.15) cuts.push({ start: cur, end: Math.min(a, dur) }); cur = Math.max(cur, b); }
+if (dur - cur > 0.15) cuts.push({ start: cur, end: dur });
+// in a talking clip, a kept span with no words in it is a bump, click or breath above the room noise, not speech
+if (said.length) for (let i = cuts.length; i--;) if (!said.some(w => w.start < cuts[i].end && w.end > cuts[i].start)) cuts.splice(i, 1);
+if (!cuts.length) cuts.push({ start: 0, end: dur });   // all silence: keep it all
+// start on the first word and stop just after the last: a walk-in, room noise or a hand reaching for the camera at either end goes
+else if (heard.length) trimEnds(cuts, onset(db, NOISE, heard[0][0]) - PAD, offset(db, NOISE, heard[heard.length - 1][1]) + TAIL, dur);
+
+// Faces (YuNet via track.mjs, 10 samples/s): used for the cut-edge check and --follow-face. Missing model = skip with a note.
+const notes = [], edgeWarnings = []; let F = null;
+if (hasAudio || argv.includes("--follow-face")) {
+  if (!fs.existsSync(modelPath("yunet"))) notes.push('face checks skipped: the face model isn\'t installed (say "fix my studio")');
+  else {
+    step("finding the face (cut edges" + (argv.includes("--follow-face") ? ", follow-face)" : ")"));
+    const tj = path.join(assets, ".track.json"), r = spawnSync(process.execPath, [path.join(path.dirname(fileURLToPath(import.meta.url)), "track.mjs"), src, tj, "--face", "--fps", "10"], { encoding: "utf8" });
+    if (r.status === 0 && fs.existsSync(tj)) F = JSON.parse(fs.readFileSync(tj, "utf8")).frames;
+    else notes.push("face checks skipped: " + ((r.stdout || "").trim().split(/\r?\n/).pop() || "face tracker failed").replace(/^Tell the user: /, ""));
+    fs.rmSync(tj, { force: true });
+  }
+}
+// Look-away at cut edges: no confident face in the first/last 0.1 s -> move the edge inward up to 0.25 s, through quiet only
+// (never into a word), to the nearest sample with a face; if there is none, flag it for Claude.
+if (F && hasAudio && !F.some(f => f.faces.length)) notes.push("edge check skipped: no face in this clip");
+else if (F && hasAudio) {
+  const good = f => f.faces.some(d => d[4] >= 0.75);   // a face turned away scores low or isn't found at all
+  for (const [i, c] of cuts.entries()) for (const s of [true, false]) {
+    const x = s ? c.start : c.end, probe = F.filter(f => Math.abs(f.t - (s ? x + 0.05 : x - 0.05)) <= 0.06);
+    if (!probe.length || probe.some(good)) continue;
+    let j = Math.round(x * 100); const lim = Math.round((s ? x + 0.25 : x - 0.25) * 100);
+    while ((s ? j < lim : j > lim) && !(db[j] > NOISE)) j += s ? 1 : -1;   // stop at the first sound
+    const bound = j / 100 + (s ? -0.02 : 0.02), ok = F.filter(f => good(f) && (s ? f.t > x && f.t <= bound : f.t < x && f.t >= bound));
+    const to = ok.length ? (s ? ok[0] : ok[ok.length - 1]).t : null;
+    if (to != null && (s ? c.end - to : to - c.start) > 0.3) { if (s) c.start = to; else c.end = to; }
+    else edgeWarnings.push({ span: i, edge: s ? "start" : "end", source: +x.toFixed(2), why: probe.some(f => f.faces.length) ? "face turned away" : "no face" });
+  }
+}
+let t = 0; for (const c of cuts) { c.at = t; t += c.end - c.start; }
+for (const w of edgeWarnings) { const c = cuts[w.span]; w.at = +(c.at + (w.edge === "end" ? c.end - c.start : 0)).toFixed(2); }
+const map = (x, side) => {   // source time -> clean time; times inside a removed gap snap to the nearest kept edge
+  for (let i = 0; i < cuts.length; i++) { const c = cuts[i];
+    if (x >= c.start && x <= c.end) return c.at + x - c.start;
+    if (x < c.start) return side === "start" ? c.at : (i ? cuts[i - 1].at + cuts[i - 1].end - cuts[i - 1].start : 0); }
+  return t;
+};
+const retimed = [];
+for (const w of words) {
+  if (isFiller(w) || gone.has(w)) continue;
+  const s = map(w.start, "start"), e = Math.max(map(w.end, "end"), s + 0.06);
+  retimed.push({ id: w.id, text: w.text, start: +s.toFixed(3), end: +Math.min(e, t).toFixed(3) });
+}
+// a kept word whose stamp fell in a cut gap (stamped late, after its sound) shares the word before it, so its caption still shows
+for (let i = 1; i < retimed.length; i++) { const w = retimed[i], p = retimed[i - 1];
+  if (w.end - w.start < 0.1 && p.end - p.start >= 0.16) { w.start = p.end = +((p.start + Math.min(p.end, w.end)) / 2).toFixed(3); w.end = Math.max(w.end, +(w.start + 0.06).toFixed(3)); } }
+// self-check: re-timed words must stay in order and inside the clean length
+for (let i = 0; i < retimed.length; i++) if (retimed[i].start < 0 || retimed[i].end > t + 0.01 || (i && retimed[i].start < retimed[i - 1].start - 0.001)) throw new Error("word re-timing went wrong at " + retimed[i].id);
+fs.writeFileSync(path.join(proj, pre + "words.json"), JSON.stringify(retimed, null, 1));
+fs.writeFileSync(path.join(proj, pre + "cuts.json"), JSON.stringify(cuts.map(({ start, end, at }) => ({ start: +start.toFixed(3), end: +end.toFixed(3), at: +at.toFixed(3) })), null, 1));
+step(`${cuts.length} kept spans, ${(dur - t).toFixed(1)}s of silence, fillers and retakes removed (${dur.toFixed(1)}s -> ${t.toFixed(1)}s, silence under ${NOISE} dB)`);
+if (endsFixed) step(`${endsFixed} word end${endsFixed > 1 ? "s" : ""} pulled back to where the sound stops`);
+for (const d of takes) step(`dropped a retake: "${d.text}"`);
+for (const n of notes) step(n);
+if (edgeWarnings.length) step(`${edgeWarnings.length} cut edge${edgeWarnings.length > 1 ? "s" : ""} without a clear face (prep.json edge_warnings)`);
+
+if (VIDEO) {
+  const [W, H] = ASPECT === "keep" ? [v.width + (v.width % 2), v.height + (v.height % 2)] : SIZES[ASPECT];
+  // --follow-face: crop x follows the face, as keyframes on the clean timeline (1/s, smoothed over 2 s so it glides, never jitters)
+  let cropX = null; const SW = Math.round(v.width * Math.max(W / v.width, H / v.height) / 2) * 2;
+  if (argv.includes("--follow-face") && SW > W + 4) {
+    const F2 = (F || []).filter(f => f.box);   // the face track from the edge check above
+    if (F2.length < 2) step("no steady face found: keeping the centre crop"); else {
+      const k = SW / v.width, keys = [];
+      for (let ct = 0; ct <= t + 0.001; ct += 1) {   // clean time -> faces within 1 s either side (source time mapped onto the clean timeline)
+        const near = F2.filter(f => Math.abs(map(f.t, "start") - ct) <= 1);
+        const cx = near.length ? near.reduce((a, f) => a + f.box[0] + f.box[2] / 2, 0) / near.length : keys.length ? null : F2[0].box[0] + F2[0].box[2] / 2;
+        keys.push([ct, cx == null ? keys[keys.length - 1][1] : Math.max(0, Math.min(SW - W, Math.round(cx * k - W / 2)))]);
+      }
+      // piecewise-linear expression on t: if(lt(t,t1), lerp(x0,x1), if(lt(t,t2), ...))
+      cropX = keys.slice(0, -1).reduceRight((rest, [a, xa], i) => { const [b, xb] = keys[i + 1]; return `if(lt(t,${b}),${xa}+(${xb - xa})*(t-${a})/${(b - a).toFixed(3)},${rest})`; }, String(keys[keys.length - 1][1]));
+      step(`crop follows the face (${keys.length} keyframes)`);
+    }
+  }
+  step(`cutting the clean clip (${W}x${H}, ${FPS === "30" ? 30 : +srcFps.toFixed(3)}fps, colour untouched${HDR ? ", HDR converted to normal range" : ""})`);
+  // HDR -> SDR is a display conversion (so the clip looks the way it did on the phone), not a colour grade
+  const tone = HDR ? "zscale=t=linear:npl=100,format=gbrpf32le,zscale=p=bt709,tonemap=hable:desat=0,zscale=t=bt709:m=bt709:r=tv,format=yuv420p," : "";
+  const fade = 0.012, parts = cuts.map((c, i) =>
+    `[0:v]trim=${c.start.toFixed(3)}:${c.end.toFixed(3)},setpts=PTS-STARTPTS[v${i}];` +
+    (hasAudio ? `[0:a]atrim=${c.start.toFixed(3)}:${c.end.toFixed(3)},asetpts=PTS-STARTPTS,afade=t=in:d=${fade},afade=t=out:st=${Math.max(0, c.end - c.start - fade).toFixed(3)}:d=${fade}[a${i}];` : "")).join("");
+  const fc = parts + cuts.map((_, i) => `[v${i}]` + (hasAudio ? `[a${i}]` : "")).join("") + `concat=n=${cuts.length}:v=1:a=${hasAudio ? 1 : 0}[cv]${hasAudio ? "[ca]" : ""};` +
+    (cropX ? `[cv]${tone}fps=${FPS},scale=${SW}:${H},crop=${W}:${H}:x='${cropX}':y=0,setsar=1[ov]` : `[cv]${tone}scale=${W}:${H}:force_original_aspect_ratio=increase,crop=${W}:${H},fps=${FPS},setsar=1[ov]`);   // fill the frame: reframe, never grade
+  const fcFile = path.join(assets, ".cut-filter.txt"); fs.writeFileSync(fcFile, fc);
+  execFileSync("ffmpeg", ["-v", "error", "-y", "-i", src, "-filter_complex_script", fcFile, "-map", "[ov]", ...(hasAudio ? ["-map", "[ca]", "-c:a", "aac", "-b:a", "192k", "-ar", "48000"] : []),
+    "-c:v", "libx264", "-crf", "10", "-preset", "veryfast", "-pix_fmt", "yuv420p", "-movflags", "+faststart", path.join(assets, pre + "clean.mp4")]);
+  fs.rmSync(fcFile, { force: true });
+}
+
+// dead air, in this clip and in the clean cut: talking starts (lead), the end after the last word (tail), longest pause, pauses of 0.3 s+.
+// The word check runs prep on the finished video too, so this is also the check that the edit itself has none.
+let da = null, daClean = null;
+if (heard.length) {
+  const s0 = onset(db, NOISE, heard[0][0]), s1 = offset(db, NOISE, heard[heard.length - 1][1]);
+  da = deadAir(db, NOISE, s0, s1, dur);
+  daClean = deadAir(Float32Array.from(cuts.flatMap(c => Array.from(db.slice(Math.round(c.start * 100), Math.round(c.end * 100))))), NOISE, map(s0, "start"), map(s1, "end"), t);
+  const say = d => `talking starts at ${d.lead} s and stops ${d.tail} s before the end, longest pause ${d.longest} s` + (d.pauses.length ? ` (${d.pauses.length} of 0.3 s or more)` : "");
+  step(`dead air in this video: ${say(da)}` + (VIDEO ? `. Clean cut: ${say(daClean)}` : ""));
+}
+const summary = { clip: path.basename(clip), source: { seconds: +dur.toFixed(2), width: v.width, height: v.height, hdr: HDR, sound: hasAudio, deadAir: da },
+  clean: { seconds: +t.toFixed(2), fps: FPS === "30" ? 30 : +srcFps.toFixed(3), fpsArg: FPS, spans: cuts.length, removedSeconds: +(dur - t).toFixed(2), file: VIDEO ? `assets/${pre}clean.mp4` : null, aspect: ASPECT, silenceDb: hasAudio ? NOISE : null, wordEndsFixed: endsFixed, deadAir: daClean },
+  words: retimed.length, says: retimed.slice(0, 40).map(w => w.text).join(" "),
+  takes_dropped: takes.map(({ text, from, to }) => ({ text, from, to })),   // source seconds; say it in one line ("cut 2 retakes of ...")
+  stutters_dropped: stutters.map(({ text, from }) => ({ text, from })),
+  edge_warnings: edgeWarnings, notes };   // edge_warnings: span (cuts.json index), edge, at (clean s), source (s), why
+fs.writeFileSync(path.join(proj, pre + "prep.json"), JSON.stringify(summary, null, 1));
+step(hasAudio ? `ready. Opening line: "${summary.says.slice(0, 120)}"` : "ready (no speech).");
+
+// ---- pure helpers (checked by --selftest) ----
+// 16 kHz mono samples -> loudness in dB every 10 ms, over a 30 ms window
+function frameDb(a) {
+  const n = Math.floor(a.length / 160), sq = new Float64Array(a.length + 1), out = new Float32Array(n);
+  for (let i = 0; i < a.length; i++) sq[i + 1] = sq[i] + a[i] * a[i];
+  for (let i = 0; i < n; i++) { const lo = Math.max(0, i * 160 - 160), hi = Math.min(a.length, i * 160 + 320); out[i] = 10 * Math.log10((sq[hi] - sq[lo]) / Math.max(1, hi - lo) + 1e-18); }
+  return out;
+}
+// the room's own noise (10th-percentile loudness) + 12 dB, clamped -60..-20
+function noiseFloor(db) { const s = Float32Array.from(db).sort(); return Math.max(-60, Math.min(-20, Math.round(s[Math.floor((s.length - 1) * 0.1)] + 12))); }
+// runs of at least minF quiet frames -> [[startSec, endSec]]
+// cut intervals minus protected ones (each cut can split around a word); both lists [start, end] in seconds
+function spare(cuts, keep) {
+  const out = [];
+  for (const [a, b] of cuts) {
+    let parts = [[a, b]];
+    // only words mostly inside the cut: stamps that just bleed into a pause (Whisper runs ends on) can still be trimmed
+    for (const [s, e] of keep) parts = parts.flatMap(([x, y]) => Math.min(e, y) - Math.max(s, x) <= 0.5 * (e - s) ? [[x, y]] : [[x, s - 0.03], [e + 0.03, y]].filter(([p, q]) => q > p));
+    out.push(...parts);
+  }
+  return out;
+}
+function quietRuns(db, thr, minF) {
+  const out = []; let q0 = -1;
+  for (let i = 0; i <= db.length; i++) { const quiet = i < db.length && db[i] <= thr;
+    if (quiet && q0 < 0) q0 = i; else if (!quiet && q0 >= 0) { if (i - q0 >= minF) out.push([q0 / 100, i / 100]); q0 = -1; } }
+  return out;
+}
+// a word's heard part: its stamp narrowed to the frames over the floor (-30 ms / +50 ms). Nothing over the floor:
+// a soft word when it rises within 6 dB of the floor (kept whole), else the stamp sits in silence (null).
+function audible(db, thr, w) {
+  const a = Math.max(0, Math.floor(w.start * 100)), b = Math.min(db.length, Math.ceil(w.end * 100)), span = t => { let i0 = -1, i1 = -1;
+    for (let i = a; i < b; i++) if (db[i] > t) { if (i0 < 0) i0 = i; i1 = i; }
+    return i0 >= 0 ? [+Math.max(w.start, i0 / 100 - 0.03).toFixed(3), +Math.min(w.end, i1 / 100 + 0.05).toFixed(3)] : null; };
+  return span(thr) || span(thr - 6); // a soft word keeps only its soft frames, not the quiet rest of its stamp
+}
+// where the sound around t really starts (walking back) or stops (walking forward), up to 0.3 s
+// the quietest 10 ms frame within 0.35 s before / 0.15 s after t (stamps start late more often than early); ties go nearest t
+function quietest(db, t) {
+  const c = Math.round(t * 100), a = Math.max(0, c - 35), b = Math.min(db.length - 1, c + 15); let best = Math.min(Math.max(c, 0), db.length - 1);
+  for (let i = a; i <= b; i++) if (db[i] < db[best] - 0.5 || (Math.abs(db[i] - db[best]) <= 0.5 && Math.abs(i - c) < Math.abs(best - c))) best = i;
+  return best / 100;
+}
+function onset(db, thr, t) { let i = Math.round(t * 100); const lim = Math.max(0, i - 30); while (i > lim && db[i - 1] > thr) i--; return i / 100; }
+function offset(db, thr, t) { let i = Math.round(t * 100); const lim = Math.min(db.length, i + 30); while (i < lim && db[i] > thr) i++; return i / 100; }
+// first kept span starts at a, last one ends at b (when that leaves at least 0.1 s of it). The end can also grow back to b:
+// the pause cut stops PAD after the last sound, which ended clips with no air at all (bench 09: "it." cut to 0 s).
+function trimEnds(cuts, a, b, dur = Infinity) {
+  const f = cuts[0], l = cuts[cuts.length - 1];
+  if (a > f.start && a < f.end - 0.1) f.start = +a.toFixed(3);
+  if (b > l.start + 0.1) l.end = +Math.min(b, dur).toFixed(3);
+}
+// talking from `first` to `last` (s) in a timeline of `dur` s: lead, tail, longest quiet run between, and the 0.3 s+ ones [at, length]
+function deadAir(db, thr, first, last, dur) {
+  const runs = quietRuns(db, thr, 10).filter(([a, b]) => a >= first - 0.01 && b <= last + 0.01);
+  return { lead: +first.toFixed(2), tail: +Math.max(0, dur - last).toFixed(2), longest: +Math.max(0, ...runs.map(([a, b]) => b - a)).toFixed(2),
+    pauses: runs.filter(([a, b]) => b - a >= 0.3).map(([a, b]) => [+a.toFixed(2), +(b - a).toFixed(2)]) };
+}
+// walk from just before the word's start (stamps can begin after the sound); once it has been heard, 250 ms under the
+// floor ends it. Not heard within 0.5 s = the stamp sits in silence: keep 0.3 s of it. Never lengthens a word.
+function clampEnd(db, thr, start, end) {
+  let i = Math.max(0, Math.round(start * 100) - 15), last = -1, quiet = 0; const stop = Math.min(db.length, Math.ceil(end * 100));
+  for (; i < stop && quiet < 25 && (last >= 0 || i < start * 100 + 50); i++) if (db[i] > thr) { last = i; quiet = 0; } else if (last >= 0) quiet++;
+  if (last < 0) return i < stop ? Math.min(end, start + 0.3) : end;
+  return quiet < 25 ? end : Math.max(start + 0.06, Math.min(end, last / 100 + 0.05));
+}
+// Lines = sentences (or a 0.5 s gap). Two lines are takes of one line when 75%+ of the shorter one's words come back
+// in order in the other, and either they are about as long (60%+) or the shorter one was cut off (a restart).
+// A shorter earlier line that is the start (or exact tail) of a later one is a restart, whatever punctuation closes it; near-identical long lines (8+ shared words, 85%+) are takes even when they end differently.
+// Takes chain within 6 lines / 45 s; each group keeps its last complete take (ends on . ! ?). Returns the dropped lines.
+function findTakes(words) {
+  const tok = s => s.toLowerCase().replace(/[^\p{L}\p{N}']/gu, ""), done = s => /[.!?]["')\]]*$/.test(s.trim());
+  const lines = []; let i0 = 0;
+  words.forEach((w, i) => { const nx = words[i + 1]; if (!nx || done(w.text) || nx.start - w.end >= 0.5) { lines.push({ i0, i1: i, done: done(w.text), toks: words.slice(i0, i + 1).map(x => tok(x.text)).filter(Boolean) }); i0 = i + 1; } });
+  const lcs = (a, b) => { let p = new Array(b.length + 1).fill(0); for (const x of a) { const c = [0]; b.forEach((y, j) => c.push(x === y ? p[j] + 1 : Math.max(p[j + 1], c[j]))); p = c; } return p[b.length]; };
+  // a restart: the earlier, shorter line is the start (or the tail) of the later one, whatever punctuation the transcriber put at the cut-off
+  const restart = (a, b) => { const s = a.toks, l = b.toks; if (s.length < 2 || l.length < s.length + 2) return false;
+    if (s.length >= 4 && s.join(" ") === l.slice(-s.length).join(" ")) return true;
+    return s[0] === l[0] && (s.length >= 3 || s.some(x => x.length > 4)) && lcs(s, l.slice(0, s.length)) / s.length >= 0.8; };
+  const same = (a, b) => { const [s, l] = a.toks.length <= b.toks.length ? [a, b] : [b, a]; if (s.toks.length < 3) return false; const m = lcs(s.toks, l.toks); if (m >= 8 && m / s.toks.length >= 0.85) return true; return m / s.toks.length >= 0.75 && (m / l.toks.length >= 0.6 || !s.done) && (!s.done || !l.done || s.toks.slice(-2).join(" ") === l.toks.slice(-2).join(" ")); };   // two finished lines ending differently are a list ("not a career mom. not a stay at home mom."), not takes
+  const root = lines.map((_, i) => i), up = i => root[i] === i ? i : (root[i] = up(root[i]));
+  for (let i = 0; i < lines.length; i++) for (let j = i + 1; j <= i + 6 && j < lines.length && words[lines[j].i0].start - words[lines[i].i1].end <= 45; j++) if (same(lines[i], lines[j]) || restart(lines[i], lines[j])) root[up(j)] = up(i);
+  const groups = {}; lines.forEach((l, i) => (groups[up(i)] ||= []).push(l));
+  const drop = [];
+  for (const g of Object.values(groups)) if (g.length > 1) { const keep = g.filter(l => l.done).pop() || g[g.length - 1]; for (const l of g) if (l !== keep) drop.push(l); }
+  return drop.sort((a, b) => a.i0 - b.i0).map(l => ({ i0: l.i0, i1: l.i1, text: words.slice(l.i0, l.i1 + 1).map(w => w.text).join(" "), from: +words[l.i0].start.toFixed(2), to: +words[l.i1].end.toFixed(2) }));
+}
+// A stutter: 2-4 words said twice in a row, or one short function word doubled ("I I", "the the"). Emphasis doubles
+// ("very very", "no no") are content words and stay. Returns the first saying of each, as indices into words.
+function findStutters(words) {
+  const tok = s => s.toLowerCase().replace(/[^\p{L}\p{N}']/gu, ""), SMALL = /^(i|i'm|a|an|the|to|and|it|it's|we|you|so|but|that|is|in|of|my|this|if|like)$/;
+  const out = []; let i = 0;
+  while (i < words.length) {
+    let hit = 0;
+    for (let n = 4; n >= 1 && !hit; n--) {
+      if (i + 2 * n > words.length) continue;
+      const a = words.slice(i, i + n).map(w => tok(w.text)), b = words.slice(i + n, i + 2 * n).map(w => tok(w.text));
+      if (a.some(x => !x) || a.join(" ") !== b.join(" ") || (n === 1 && !SMALL.test(a[0]))) continue;
+      if (words[i + n].start - words[i + n - 1].end > 1.2) continue;   // a long gap means a new thought, not a stutter
+      if (/[.!?]["')\]]*$/.test(words[i + n - 1].text.trim())) continue;   // a finished sentence said again is a take, not a stutter
+      out.push({ i0: i, i1: i + n - 1, text: words.slice(i, i + n).map(w => w.text).join(" "), from: +words[i].start.toFixed(2) }); hit = n;
+    }
+    // a long restart in one breath: 5-12 words, then the same 3-word opener again with 75%+ of those words back in order
+    // ("so instead of spending all that time editing | so instead of spending all of that time editing manually", 11-01)
+    for (let n = 12; n >= 5 && !hit; n--) {
+      if (i + n + 2 > words.length) continue;
+      const a = words.slice(i, i + n).map(w => tok(w.text)), b = words.slice(i + n, i + 2 * n + 2).map(w => tok(w.text));
+      if (a.some(x => !x) || a[0] !== b[0] || a[1] !== b[1] || a[2] !== b[2] || /[.!?]["')\]]*$/.test(words[i + n - 1].text.trim())) continue;
+      if (words[i + n].start - words[i + n - 1].end > 1.5) continue;
+      let k = 0, same = 0; for (const x of a) { const j = b.indexOf(x, k); if (j >= 0) { same++; k = j + 1; } }
+      if (same < 0.75 * n) continue;
+      out.push({ i0: i, i1: i + n - 1, text: words.slice(i, i + n).map(w => w.text).join(" "), from: +words[i].start.toFixed(2) }); hit = n;
+    }
+    // an aborted start: 2-4 unfinished words, a short pause, then a restart on the same opener ("And more sm | and most importantly")
+    for (let n = 4; n >= 2 && !hit; n--) {
+      if (i + n >= words.length) continue;
+      const gap = words[i + n].start - words[i + n - 1].end, before = i ? words[i].start - words[i - 1].end : 9;
+      if (tok(words[i].text) !== tok(words[i + n].text) || gap < 0.25 || gap > 1.5 || /[.!?,]["')\]]*$/.test(words[i + n - 1].text.trim())) continue;
+      if (i && before < 0.5 && !/[.!?]["')\]]*$/.test(words[i - 1].text.trim())) continue;   // only at the start of a line
+      if (out.length && out[out.length - 1].i1 === i - 1) continue;   // the copy kept after a doubled phrase ("the zooms | the zooms | the little") is the take, not an abort
+      if (words.slice(i + 1, i + n).some((w, k) => w.start - words[i + k].end > 0.5)) continue;   // an abort is said in one breath; a long pause inside means two separate tries
+      out.push({ i0: i, i1: i + n - 1, text: words.slice(i, i + n).map(w => w.text).join(" "), from: +words[i].start.toFixed(2) }); hit = n;
+    }
+    i += hit || 1;
+  }
+  return out;
+}
+function selftest() {
+  const ok = (c, m) => { if (!c) { console.log("FAIL " + m); process.exit(1); } console.log("ok   " + m); };
+  // floor: room noise at -45 dB under speech at -20 -> -33; digital silence clamps to -60
+  ok(noiseFloor([...Array(300).fill(-45), ...Array(700).fill(-20)]) === -33, "adaptive floor = 10th percentile + 12 dB");
+  ok(noiseFloor(Array(100).fill(-120)) === -60, "floor clamps at -60 dB");
+  ok(Math.abs(frameDb(new Float32Array(16000).fill(0.1))[50] + 20) < 0.01, "frameDb: 0.1 amplitude = -20 dB");
+  // a word heard 0.1..0.5 s, then 13 s of room noise: its 13 s end comes back to 0.54 s (last sound + 50 ms); a normal word is left alone
+  const d = [...Array(10).fill(-50), ...Array(40).fill(-15), ...Array(1300).fill(-50)];
+  ok(Math.abs(clampEnd(d, -38, 0.1, 13.4) - 0.54) < 0.001, "late word end clamped to where the sound stops");
+  ok(clampEnd(d, -38, 0.1, 0.4) === 0.4, "normal word end untouched");
+  ok(Math.abs(clampEnd(d, -38, 0.52, 13.4) - 0.58) < 0.001, "stamp starting just after its sound still clamps (to start + 60 ms)");
+  ok(clampEnd([...Array(150).fill(-50), ...Array(20).fill(-15), ...Array(100).fill(-50)], -38, 0.2, 2) === 0.5, "stamp in silence (a bump 1.3 s later) keeps 0.3 s");
+  ok(JSON.stringify(quietRuns(d, -38, 30)) === "[[0.5,13.5]]", "quiet runs of 0.30 s+ found");
+  // the real retake pattern from a build: a restart, then the full line twice; plus lines that only share a few words
+  const W = []; let at = 0; const say = (s, gap = 0.2) => { at += gap; for (const x of s.split(" ")) { W.push({ text: x, start: at, end: at + 0.25 }); at += 0.3; } };
+  say("Next is copying the style of any edit you like.");
+  say("Next video, I'll show you how to copy the style of any video onto my own clips.", 1);
+  say("Next video I'll show you how to copy", 1);
+  say("Next video I'll show you how I copy any edit I like onto my own clips.", 1);
+  say("So just make sure you guys follow.", 1);
+  const tk = findTakes(W);
+  ok(tk.length === 2 && tk[0].text.startsWith("Next video, I'll") && tk[1].text === "Next video I'll show you how to copy", "repeated takes: keeps the last complete one");
+  ok(findTakes(W.slice(0, 10)).length === 0 && findTakes(W.slice(-7)).length === 0, "different lines are not takes");
+  const S = s => s.split(" ").map((x, k) => ({ text: x, start: k * 0.3, end: k * 0.3 + 0.25 }));
+  const st = findStutters(S("I I think you can you can edit it, very very fast."));
+  ok(st.length === 2 && st[0].text === "I" && st[1].text === "you can", "stutters: doubled 'I' and 'you can' dropped once each");
+  ok(findStutters(S("no no that is very very good")).length === 0, "emphasis doubles ('no no', 'very very') stay");
+  // restarts that stop short (bench 07): "I'm thirty-four." x3, a line cut off at "was." then said whole with one word misheard, a CTA said three ways
+  const R = []; at = 0; const sayR = (s, gap = 1) => { at += gap; for (const x of s.split(" ")) { R.push({ text: x, start: at, end: at + 0.25 }); at += 0.3; } };
+  sayR("I'm thirty-four."); sayR("I'm thirty-four, I've got three kids."); sayR("I'm thirty-four, I've got three kids, and we're ready to move to Vietnam.");
+  sayR("And one of the biggest things that made us consider this kind of lifestyle was."); sayR("And one of the biggest things that made us consider this type of lifestyle was making money online.");
+  sayR("So if you want to learn these skills, come in the word wealthy down below and I'll send everything to you."); sayR("So if you want to learn these skills too, come in the word wealthy down below and I'll send you.");
+  sayR("I'll show you where to start."); sayR("So if you want to learn these skills too, come in the word wealthy down below and I'll show you where to start.");
+  const rt = findTakes(R).map(d => d.text);
+  ok(rt.length === 6 && !rt.some(t => /Vietnam|online\.$/.test(t)) && rt.some(t => t === "I'm thirty-four.") && rt.some(t => t === "I'll show you where to start."), "restarts: last complete take of each line kept, cut-offs and rewordings dropped");
+
+  const A = []; at = 0; const sayA = s => { at += 1; for (const x of s.split(" ")) { A.push({ text: x, start: at, end: at + 0.25 }); at += 0.3; } };
+  sayA("I tried again and again and again."); sayA("And again, she tried."); sayA("We need time."); sayA("We need money.");
+  ok(findTakes(A).length === 0, "a deliberate 'again and again' and a list with a repeated opener stay");
+  const FS = [...S("It's my face."), ...S("And more sm and most importantly, it's my story.")]; FS[3].start = 3; FS[3].end = 3.2; for (let k = 3; k < FS.length; k++) { FS[k].start += 3; FS[k].end += 3; }
+  FS[6].start += 0.4; FS[6].end += 0.4; for (let k = 7; k < FS.length; k++) { FS[k].start += 0.4; FS[k].end += 0.4; }
+  { const Z = []; let t = 0; const z = (s, gap) => { t += gap; for (const x of s.split(" ")) { Z.push({ text: x, start: t, end: t + 0.25 }); t += 0.3; } };
+    z("puts the captions on.", 0); z("The zooms", 0.6); z("the zooms", 0.4); z("the little sounds", 0.4);
+    const zs = findStutters(Z); ok(zs.length === 1 && zs[0].i0 === 4, "a doubled list item keeps one copy ('the zooms the zooms the little')");
+    Z.length = 0; t = 0; z("puts the captions on.", 0); z("The zooms", 0); z("the zooms", 4.9); z("the little sounds", 0.7);   // clip E's real timing
+    const ze = findStutters(Z); ok(ze.length === 1 && ze[0].i1 - ze[0].i0 === 1, "a retaken list item after a long pause keeps one copy"); }
+  const LR = findStutters(S("So instead of spending all that time editing so instead of spending all of that time editing manually I can just tell Claude"));
+  ok(LR.length === 1 && LR[0].i0 === 0 && LR[0].i1 === 7, "long restart in one breath: first saying dropped, the full take kept");
+  ok(findStutters(S("So the first thing you do is open Claude so the second thing you do is pick a style")).length === 0 && findStutters(S("and then you open Claude and then you pick a style you like")).length === 0, "parallel lines ('so the first / so the second', 'and then you') are not restarts");
+  const qd = [...Array(100).fill(-20), -50, ...Array(60).fill(-20)];   // the only gap sits at 1.00 s
+  ok(quietest(qd, 1.3) === 1 && quietest(qd, 0.9) === 1, "cut edge snaps to the gap between words, not the word stamp");
+  const fs0 = findStutters(FS);
+  ok(fs0.length === 1 && fs0[0].text === "And more sm", "false start: 'And more sm' dropped, 'and most importantly' kept");
+  const P = []; at = 0; const sayP = s => { at += 0.2; for (const x of s.split(" ")) { P.push({ text: x, start: at, end: at + 0.25 }); at += 0.3; } };
+  sayP("I don't want to be a career mom."); sayP("I don't want to be a stay at home mom.");
+  ok(findTakes(P).length === 0, "parallel lines that end differently are both kept");
+  ok(JSON.stringify(spare([[1, 3]], [[1.5, 2]])) === "[[1,1.47],[2.03,3]]" && spare([[1, 2]], [[0.9, 2.1]]).length === 0, "pause cuts split around words inside them");
+  ok(JSON.stringify(spare([[1, 3]], [[0.2, 1.2]])) === "[[1,3]]", "a word stamp that only bleeds into the pause can still be trimmed");
+  // dead air: heard 0.1-0.4 s, silence, a soft patch 0.8-1.0 s (-41 dB under a -38 floor), silence
+  const h = [...Array(10).fill(-50), ...Array(30).fill(-15), ...Array(40).fill(-50), ...Array(20).fill(-41), ...Array(20).fill(-50)];
+  ok(JSON.stringify(audible(h, -38, { start: 0.1, end: 0.8 })) === "[0.1,0.44]", "a stamp running on over the pause keeps only its heard part");
+  ok(audible(h, -38, { start: 0.45, end: 0.75 }) === null, "a stamp sitting in silence protects nothing");
+  ok(JSON.stringify(audible(h, -38, { start: 0.8, end: 1 })) === "[0.8,1]", "a soft word just under the floor is kept whole");
+  ok(onset(h, -38, 0.2) === 0.1 && offset(h, -38, 0.3) === 0.4, "speech onset and offset found from the sound");
+  const tc = [{ start: 0, end: 2 }, { start: 2.5, end: 5 }]; trimEnds(tc, 0.4, 4.6);
+  ok(tc[0].start === 0.4 && tc[1].end === 4.6, "walk-in and reach-to-stop trimmed off the ends");
+  const tg = [{ start: 0, end: 2 }]; trimEnds(tg, 0, 2.2, 2.1);
+  ok(tg[0].end === 2.1, "a pause cut that ends at the last sound grows back to keep the tail air (up to the clip end)");
+  const da0 = deadAir([...Array(50).fill(-50), ...Array(100).fill(-15), ...Array(40).fill(-50), ...Array(100).fill(-15), ...Array(60).fill(-50)], -38, 0.5, 2.9, 3.5);
+  ok(da0.lead === 0.5 && da0.tail === 0.6 && da0.longest === 0.4 && da0.pauses.length === 1, "dead air: lead, tail and one 0.4 s pause");
+  console.log("selftest passed");
+}

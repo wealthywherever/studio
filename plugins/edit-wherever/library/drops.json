@@ -1,11 +1,114 @@
 [
   {
+    "version": "0.1.56",
+    "date": "2026-11-02",
+    "title": "A cleaner, faster studio",
+    "items": [
+      "New layout: your tools are grouped by job, with Inbox on its own page and a New video button on every screen.",
+      "Press Ctrl K (or ⌘K) to jump to any page, start a video or find a move. G then a letter jumps too, like G L for the Library.",
+      "Dark mode: pick system, light or dark at the bottom of the sidebar.",
+      "Fixed: Inbox clips showing huge, and the original-post button in a move."
+    ]
+  },
+  {
     "version": "0.1.55",
     "date": "2026-11-01",
     "title": "Cleaner cuts on restarts",
     "items": [
       "When you restart a long line mid-sentence, the studio now keeps only your second take.",
       "Cuts land in the quiet between words, so no more half-words glued together."
+    ]
+  },
+  {
+    "version": "0.1.54",
+    "date": "2026-11-01",
+    "title": "Style match reads captions and sound effects",
+    "items": [
+      "The style score now checks your on-screen text against the example: how big it is, where it sits, how many words show at once, how often it changes and how long it stays up.",
+      "Sound effects are counted properly now: talking no longer counts as effects, so the score only asks for more effects when the example really has them.",
+      "The example's text and sound targets are saved with the reference, so your video is planned to them from the start."
+    ]
+  },
+  {
+    "version": "0.1.53",
+    "date": "2026-10-31",
+    "title": "Closer style copies",
+    "items": [
+      "Studying a reel now measures its cut rhythm, movement, pops and sound effects, so your edit is built to the same numbers.",
+      "Every copied style gets a style match score, and Claude fixes the weakest part before you see it.",
+      "If a reel can't be downloaded, Claude asks you to save it instead of guessing from a short preview."
+    ]
+  },
+  {
+    "version": "0.1.52",
+    "date": "2026-10-31",
+    "title": "Search fix",
+    "items": [
+      "Library search finds every move, including ones without a preview yet",
+      "Fixed two moves that shared a code with Dan Koe and Alex Hormozi Style, so Scrapbook Souvenir Pop-Ins and Typewriter Card Interludes open correctly"
+    ]
+  },
+  {
+    "version": "0.1.51",
+    "date": "2026-10-31",
+    "title": "Tidier planner",
+    "items": [
+      "Plan my week: the whole week in one row on a big screen",
+      "Plan: video chips drop the repeated Video label",
+      "Editor: the video list fades at the bottom so you can tell it scrolls"
+    ]
+  },
+  {
+    "version": "0.1.50",
+    "date": "2026-10-31",
+    "title": "Cleaner pages",
+    "items": [
+      "Projects: one tidy action row per video (Change it, Review, More)",
+      "Library: search on one row, filters tucked behind Filters, categories in one scrolling row",
+      "Move cards no longer show internal codes",
+      "Make: each shortcut has its own icon",
+      "Home: finished steps fold into one line"
+    ]
+  },
+  {
+    "version": "0.1.49",
+    "date": "2026-10-31",
+    "title": "Saved looks",
+    "items": [
+      "Save your current style as a named look, like Podcast or Vlog (up to 12)",
+      "Pick a look per video in Make this, More options",
+      "Fix: the setup's brand step no longer shows the sound section twice"
+    ]
+  },
+  {
+    "version": "0.1.48",
+    "date": "2026-10-31",
+    "title": "More design control",
+    "items": [
+      "Captions: pick a highlight colour and the box behind your words (none, see-through or solid)",
+      "Hook text with or without a box",
+      "Music mood and volume",
+      "Turn the end card off"
+    ]
+  },
+  {
+    "version": "0.1.47",
+    "date": "2026-10-31",
+    "title": "Full design control",
+    "items": [
+      "Fine-tune under Fonts and Captions: any Google Font, headline weight and letters, caption size, position, letters, words at a time and colour",
+      "New Motion section: pace, zoom punch-ins and transitions",
+      "Upload your logo and pick its corner and size",
+      "Claude follows every setting in each video, and the live preview shows them"
+    ]
+  },
+  {
+    "version": "0.1.46",
+    "date": "2026-10-31",
+    "title": "A new Brand kit",
+    "items": [
+      "Brand kit redesigned: five clear steps, live caption samples in your colours, sound packs you can play in one tap, and your handle and comment word on the preview.",
+      "What Claude remembers is now tidy one-line rows you can edit or forget."
     ]
   },
   {
