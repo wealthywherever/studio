@@ -50,12 +50,10 @@ if ($LASTEXITCODE -eq 0) { Say 6 "Cutout and depth models ready." } else { Say 6
 if (-not (Has yt-dlp)) { if ($haveWinget) { winget install -e --id yt-dlp.yt-dlp --accept-source-agreements --accept-package-agreements --silent | Out-Null; RefreshPath; if (Has yt-dlp) { $Installed = $true } } }   # only a real install needs the restart
 if (Has yt-dlp) { Add-Content $Log "yt-dlp ready" } else { Add-Content $Log "yt-dlp not installed: examples will use the studio's short clips" }
 
-Say 7 "Testing a 2-second render..."
-# the test video stays in .studio, so it never counts as the buyer's first video; deleted first so an old one can't fake a pass
-$t = Join-Path $env:TEMP "ws-setup-test"; $out = Join-Path $Home2 ".studio\setup-test.mp4"
-Remove-Item -Recurse -Force $t, $out -ErrorAction SilentlyContinue
-hyperframes init $t --non-interactive --skip-skills 2>&1 | Add-Content $Log
-Push-Location $t; hyperframes render -o $out 2>&1 | Add-Content $Log; Pop-Location
-if ((Test-Path $out) -and (Get-Item $out).Length -gt 0) { Remove-Item -Force $out; Say 7 "All set. Your studio can render videos." } elseif ($Installed) { Write-Output "RESTART NEEDED: new tools were installed. Quit Claude fully and reopen it, then run setup once more to finish the test."; exit 0 }   # a fresh install usually just needs the restart
-else { Say 7 "Render test did not finish. Reply to your purchase email with the file $Log attached." ; exit 1 }
+Say 7 "Test-making a 5-second video (about a minute)..."
+# smoke.mjs renders in a temp folder it deletes: nothing lands in Inbox or Projects. Its last line is the plain verdict.
+$smoke = node (Join-Path $PSScriptRoot "smoke.mjs") 2>&1; $ok = $LASTEXITCODE -eq 0
+$smoke | Add-Content $Log
+if ($ok) { Say 7 ($smoke | Select-Object -Last 1) } elseif ($Installed) { Write-Output "RESTART NEEDED: new tools were installed. Quit Claude fully and reopen it, then run setup once more to finish the test."; exit 0 }   # a fresh install usually just needs the restart
+else { $smoke | Select-Object -SkipLast 1 | Where-Object { $_ -match '^(FAIL|warn)' } | ForEach-Object { Write-Output "  $_" }; Say 7 "$($smoke | Select-Object -Last 1) If it still fails, reply to your purchase email with the file $Log attached."; exit 1 }
 if ($Installed) { Write-Output "RESTART NEEDED: new tools were installed. Quit Claude fully and reopen it before making a video." }

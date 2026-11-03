@@ -56,9 +56,10 @@ if ! has yt-dlp; then
 fi
 has yt-dlp && echo "yt-dlp ready" >> "$LOG" || echo "yt-dlp not installed: examples will use the studio's short clips" >> "$LOG"
 
-say 7 "Testing a 2-second render..."
-# the test video stays in .studio, so it never counts as the buyer's first video; deleted first so an old one can't fake a pass
-OUT="$HOME2/.studio/setup-test.mp4"; rm -f "$OUT"
-T=$(mktemp -d)/ws-test; hyperframes init "$T" --non-interactive --skip-skills >> "$LOG" 2>&1 && (cd "$T" && hyperframes render -o "$OUT" >> "$LOG" 2>&1)
-[ -s "$OUT" ] && { rm -f "$OUT"; say 7 "All set. Your studio can render videos."; } || { if [ -n "$INSTALLED" ]; then echo "RESTART NEEDED: new tools were installed. Quit Claude fully and reopen it, then run setup once more to finish the test."; exit 0; fi; say 7 "Render test did not finish. Reply to your purchase email with the file $LOG attached."; exit 1; }
+say 7 "Test-making a 5-second video (about a minute)..."
+# smoke.mjs renders in a temp folder it deletes: nothing lands in Inbox or Projects. Its last line is the plain verdict.
+SMOKE=$(node "$(dirname "$0")/smoke.mjs" 2>&1); OK=$?; echo "$SMOKE" >> "$LOG"
+if [ $OK -eq 0 ]; then say 7 "$(echo "$SMOKE" | tail -1)"
+elif [ -n "$INSTALLED" ]; then echo "RESTART NEEDED: new tools were installed. Quit Claude fully and reopen it, then run setup once more to finish the test."; exit 0
+else echo "$SMOKE" | grep -E '^(FAIL|warn)' | sed 's/^/  /'; say 7 "$(echo "$SMOKE" | tail -1) If it still fails, reply to your purchase email with the file $LOG attached."; exit 1; fi
 if [ -n "$INSTALLED" ]; then echo "RESTART NEEDED: new tools were installed. Quit Claude fully and reopen it before making a video."; fi

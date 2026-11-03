@@ -1,5 +1,144 @@
 [
   {
+    "version": "0.1.70",
+    "date": "2026-11-03",
+    "title": "Faster, steadier edits",
+    "items": [
+      "Skin retouch runs several times faster, and every step checks its own file so a broken file never reaches your video",
+      "Your move's series title stays pinned and sized to sit above your head",
+      "Captions read in short phrases, with an outline that stays readable on any shirt",
+      "Zoom alternates on your cuts, and chips are lighter and leave on time",
+      "Text behind you, push-ins and cutouts are more reliable"
+    ]
+  },
+  {
+    "version": "0.1.69",
+    "date": "2026-11-03",
+    "title": "Videos that look designed, not auto-captioned",
+    "items": [
+      "Keyword chips now add context: a route, facts that stack up, a numbered list, a crossed-out phrase",
+      "Your first word is never clipped",
+      "Captions in normal sentence case, and the hook reads as one line",
+      "A big Comment card with your keyword in a contrasting colour",
+      "Text behind you stays readable, and the push-in works with every move"
+    ]
+  },
+  {
+    "version": "0.1.68",
+    "date": "2026-11-03",
+    "title": "Captions you can read on any phone",
+    "items": [
+      "Captions start with your very first word and are never smaller than 80 px",
+      "Keyword chips appear on your numbers, places and key words when you like graphics",
+      "Your title is on screen from the first frame",
+      "A gentle push-in when you sit small in a wide room",
+      "Words never run off the edge of the frame",
+      "Background blur leaves your face exactly as it was"
+    ]
+  },
+  {
+    "version": "0.1.67",
+    "date": "2026-11-03",
+    "title": "Sharper timing and cleaner cutouts",
+    "items": [
+      "The Comment card now starts the moment you say the word, and the video ends half a second after your last word",
+      "Keyword chips leave when their sentence ends",
+      "Sound effects never cover a spoken word: if one does, the mix fixes itself",
+      "Background blur no longer leaves a glow around your head",
+      "Cutouts behind text have a crisp edge with no fringe or flicker"
+    ]
+  },
+  {
+    "version": "0.1.66",
+    "date": "2026-11-03",
+    "title": "Videos that look right without fixing",
+    "items": [
+      "Captions and titles place themselves on the plainest part of the frame",
+      "Your footage is checked against the original so its colours never drift",
+      "Captions use your script's words, even when the transcriber mishears",
+      "The call to action holds after your last word, clear of everything else"
+    ]
+  },
+  {
+    "version": "0.1.65",
+    "date": "2026-11-03",
+    "title": "Readable captions, cleaner cuts, faster checks",
+    "items": [
+      "Captions are big, bold and placed where they read on a phone",
+      "Private whiteboards get a soft blur behind you, never a blocky mosaic",
+      "Spoken cuts keep every word ending and trim pauses under 0.3 s",
+      "Quality checks re-run only what failed, in seconds",
+      "Text behind you stays readable"
+    ]
+  },
+  {
+    "version": "0.1.64",
+    "date": "2026-11-03",
+    "title": "Sharper edits, faster finish",
+    "items": [
+      "Spoken cuts keep the ad-libs that carry your story",
+      "Captions get checked against your real footage so they always read",
+      "Your call to action gets its own big card for at least 1.5 seconds",
+      "One finish step renders, mixes and checks in one go",
+      "Talking-head cleanup runs up to twice as fast"
+    ]
+  },
+  {
+    "version": "0.1.63",
+    "date": "2026-11-03",
+    "title": "Start a project, saved moments and script history",
+    "items": [
+      "Start a project: pick your clips, script, goal and the styles or moments to copy, in one form",
+      "Mark a moment while watching any Library video, then borrow just that moment",
+      "Edit or undo your notes on a video",
+      "Edit your script wording; earlier versions are kept so you can go back"
+    ]
+  },
+  {
+    "version": "0.1.62",
+    "date": "2026-11-03",
+    "title": "Fixes from a full test edit",
+    "items": [
+      "Your saved preferences no longer change what a style is meant to be",
+      "The sound credits file is always written next to your finished video"
+    ]
+  },
+  {
+    "version": "0.1.61",
+    "date": "2026-11-03",
+    "title": "Review before you render",
+    "items": [
+      "Notes on the video: pause on any moment, say what to change, send all your notes in one go",
+      "Storyboard: check every scene before the full render",
+      "Your spoken cut: Claude keeps your best take of each line and cuts the retakes, you approve the words first",
+      "Versions: every change is a new version, pick your final or go back",
+      "Sound and rights: see where every sound came from, copy credits when needed",
+      "Borrow one moment from a reel you love",
+      "Setup now makes a 5-second test video to prove your computer is ready",
+      "Updates keep any file you changed"
+    ]
+  },
+  {
+    "version": "0.1.60",
+    "date": "2026-11-02",
+    "title": "Your Creative Director",
+    "items": [
+      "New: Your Creative Director. Answer 7 questions once, then plan your next videos with hooks, captions and a shot list, all in your own style.",
+      "Plan the shoot: one short filming session for all your planned videos.",
+      "Your stats now teach your Creative Director what works for you.",
+      "Cleaner screen demos: the cursor appears only for each click, then leaves."
+    ]
+  },
+  {
+    "version": "0.1.59",
+    "date": "2026-11-02",
+    "title": "Updated terms",
+    "items": [
+      "Terms: your edits and the styles Edit Wherever learns now help build a shared template library for every user. Never your videos, face, voice or words.",
+      "Sharper text reading when matching an example's style."
+    ]
+  },
+  {
     "version": "0.1.58",
     "date": "2026-11-02",
     "title": "Watch your planned videos",

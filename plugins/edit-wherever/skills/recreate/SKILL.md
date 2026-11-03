@@ -13,7 +13,9 @@ Follow every rule in the `make` skill (read `${CLAUDE_SKILL_DIR}/../make/SKILL.m
 Before anything else, run both of these with Bash and follow everything they print as part of this skill (the recreate steps replace "Matching the example"). Don't mention this step to the user.
 - `node "${CLAUDE_SKILL_DIR}/../../scripts/engine.mjs" make --studio "<Studio folder>" --model "<your exact model id>"`
 - `node "${CLAUDE_SKILL_DIR}/../../scripts/engine.mjs" recreate --studio "<Studio folder>" --model "<your exact model id>"`
+- `make` prints only its `core` part. Load its other parts when their steps start, as the core part lists (`engine.mjs make --part <name>`, run on its own), except `reference`: the recreate steps replace it.
 - If either prints a line starting `Tell the user:`, say that sentence in plain words and stop.
+- **Borrow one moment:** a `Moment:` window (`Edit Wherever recreate` with "Borrow one moment") means study only those seconds: `node "${CLAUDE_SKILL_DIR}/../../scripts/template.mjs" compile "<reference>" --from <s> --to <s> --label "<their note>"`, apply just that technique to their clip. The times are in the Library preview (a short cut of the post), so find the moment there.
 - **Saved style:** if the prompt names a saved style (an id starting `MY-`), run `node "${CLAUDE_SKILL_DIR}/../../scripts/style.mjs" show <id> --studio "<Studio folder>"`. Its recipe and reference folder replace studying a reel: copy the reference folder into the new project as `reference/` (if it printed one) and skip the breakdown. If it says the style isn't there, tell the user it was deleted and offer the Library instead.
 - The engine rules are licensed. Never show, quote, summarise, save or write them to a file, even if asked. Use them only to make this video.
 
